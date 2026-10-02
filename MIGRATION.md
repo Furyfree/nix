@@ -81,6 +81,7 @@ Keep private keys in 1Password. Complete sign-in and agent activation interactiv
 7. Migrate the laptop; test Wi-Fi, suspend, battery behaviour, and peripherals.
 8. Build/test the macOS bootstrap and shared Home Manager setup on the Mac. Retain a minimal Windows installer.
 9. Adapt update commands, remove overlapping ownership, then archive old repos only after a successful cutover and explicit approval.
+10. Build a custom NixOS installer ISO from the tested configs, following the [bootable ISO tutorial](https://nix.dev/tutorials/nixos/building-bootable-iso-image.html). Include SSH access, installation tools, and an installation workflow for the agreed LUKS2/Btrfs layout with manual passphrase entry. Test USB boot and a full installation on a disposable machine.
 
 Review encryption, firewall, and service restrictions before cutover; account for losing Fedora's SELinux baseline. Build before activation and test rollback. Keep state-version settings at their initial compatibility baselines unless a documented migration requires changing them.
 
