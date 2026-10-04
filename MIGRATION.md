@@ -70,10 +70,35 @@ Enable the NixOS GUI/CLI modules and desktop authentication integration. Configu
 
 Keep private keys in 1Password. Complete sign-in and agent activation interactively. Fetch secrets at runtime or keep private files outside the Nix store; remove secret-rendering Chezmoi templates from the migrated configuration.
 
+## Next phase: workstation configuration
+
+Use the existing `nixos-test` flake and integrated Home Manager as the foundation.
+Defer snapshot restoration. Continue with builds and checks of the tools we migrate.
+This plan does not authorize implementation; approve each batch before changing files.
+
+1. Add only the scaffold needed for the first batch. Keep machine settings in `hosts/`, reusable system settings in `profiles/nixos/`, user settings in `profiles/home/`, and editable native configs in `configs/`. Add modules or custom packages when a migrated tool needs them.
+2. Start with the existing Bash/Zsh configuration, prompt, completion, aliases, and required packages. Copy from dotfiles and Nimbus; preserve the original repositories. Keep native files editable through Home Manager links into this checkout. Confirm the login shell before changing it.
+3. Add the Nix shortcuts below. Build and activation must use this repository's explicit flake path and host, regardless of the current directory. Reuse Snapper's pre/post command for activation.
+4. Migrate one tool at a time: shell, Git/SSH, CLI tools, Mise, the chosen editor, terminal, then desktop. Check package names, paths, dependencies, Chezmoi templates, Fedora commands, and update behaviour before copying each configuration. Keep Nix-owned packages separate from Mise-owned runtimes and tools.
+5. Build each batch, install it on `nixos-test`, open a fresh session, and check the tool's actual behaviour. Check editable config links, required commands, completions, and activation errors. Fix failures before starting the next batch; keep existing user files on conflicts.
+6. Keep credentials, history, caches, downloaded plugins, and application state outside the repository. Retire old provisioning only after the replacement works and separate approval.
+
+| Shortcut | Action |
+| --- | --- |
+| `nbuild` | Build the host configuration without activating it |
+| `nswitch` | Apply the host configuration with Snapper pre/post snapshots |
+| `nupdate` | Update this repository's `flake.lock`; build and activate separately |
+| `nsearch` | Search Nixpkgs for a package |
+| `nshell` | Temporarily use a package without adding it to the configuration |
+
+For permanent installation, add the package to its Nix profile, then build and
+activate. Use small shell functions where shortcuts need arguments or several
+commands; keep simple aliases for single commands.
+
 ## Implementation order
 
 1. Confirm inventory, ownership, package gaps, and profile selections.
-2. Create the flake and VM host with integrated Home Manager and a minimal shell. Verify boot, networking, and login.
+2. Use the existing `nixos-test` host and integrated Home Manager. Begin the workstation configuration batches above.
 3. Migrate CLI configs and development tools. Verify direct edits, SSH authentication, signed commits, and project builds.
 4. Add Hyprland/Noctalia and custom packages. Verify portals, screen sharing, audio, Bluetooth, browser integration, and services.
 5. Back up and test restoration; preserve a Fedora recovery route and the separate Windows disk. Approve partitioning, bootloader, and Secure Boot choices before installation.
@@ -91,4 +116,3 @@ Review encryption, firewall, and service restrictions before cutover; account fo
 - Mac architecture, username, and Nix installer.
 - Physical disk layout, bootloader, and Secure Boot.
 - Whether to keep the Windows VM profile.
-- Repo layout: propose `hosts/`, `profiles/{nixos,home}/`, `modules/{nixos,home}/`, `configs/`, and `packages/`; create only needed directories.

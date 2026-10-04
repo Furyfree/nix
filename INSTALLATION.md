@@ -369,22 +369,28 @@ sudo nixos-rebuild build --flake path:/home/user/Projects/nix#nixos-test
 
 ## 13. Activate the repo configuration
 
-Continue only after the build succeeds. Activate with pre/post root snapshots:
+Continue only after the build succeeds. For the first upgrade from 26.05, use
+`--no-reexec` to keep the installed rebuild tool. The newer tool requests
+`systemd-run --output=cat`, which the old systemd does not support.
+
+Activate with pre/post root snapshots:
 
 ```sh
 sudo snapper -c root create \
   --description "nixos-test flake rebuild" \
   --cleanup-algorithm number \
-  --command "nixos-rebuild switch --flake path:/home/user/Projects/nix#nixos-test"
+  --command "nixos-rebuild switch --no-reexec --flake path:/home/user/Projects/nix#nixos-test"
 ```
 
-Use that flake command for later rebuilds. A plain `nixos-rebuild switch` still
-reads the bootstrap configuration in `/etc/nixos`. The explicit `path:` also
-includes new files that Git does not track yet.
+For later rebuilds, omit `--no-reexec` and keep the explicit `--flake` path.
+A plain `nixos-rebuild switch` still reads the bootstrap configuration in
+`/etc/nixos`. The explicit `path:` also includes new files that Git does not
+track yet.
 
 After activation:
 
 ```sh
+nixos-version
 sudo snapper -c root list
 systemctl status home-manager-user.service --no-pager
 systemctl --failed
@@ -392,3 +398,103 @@ systemctl --failed
 
 Reboot, unlock the disk at the machine, reconnect as `user`, and repeat the
 first-boot checks.
+
+## 14. Roll back a generation and return to the flake
+
+List the generations and identify the previous configuration:
+
+```sh
+sudo nix-env --list-generations -p /nix/var/nix/profiles/system
+readlink -f /nix/var/nix/profiles/system-2-link
+```
+
+For this installation, generation 2 contains `26.05.11006.4feb8eb8bf30` with
+Snapper. Generation 3 contains the flake system `26.11.20261001.c59305b`.
+
+Select the previous generation for the next boot:
+
+```sh
+sudo nixos-rebuild boot --rollback --no-reexec
+sudo reboot
+```
+
+Unlock LUKS at the console, reconnect as `user`, and check:
+
+```sh
+nixos-version
+findmnt -no OPTIONS /
+systemctl --failed
+```
+
+We booted into 26.05 with `compress=zstd:3` and no failed units.
+
+Return to the flake with pre/post snapshots:
+
+```sh
+sudo snapper -c root create \
+  --description "Return to nixos-test flake" \
+  --cleanup-algorithm number \
+  --command "nixos-rebuild switch --no-reexec --flake path:/home/user/Projects/nix#nixos-test"
+
+sudo reboot
+```
+
+After unlocking and reconnecting:
+
+```sh
+nixos-version
+systemctl is-active home-manager-user.service
+systemctl --failed
+```
+
+We booted back into 26.11 with Home Manager active and no failed units.
+Generation rollback restores the system configuration; it does not restore
+mutable files from a Btrfs snapshot.
+
+## 15. Deferred snapshot restoration
+
+We prepared a file recovery test:
+
+```sh
+printf 'before restore\n' | sudo tee /etc/btrfs-restore-test
+printf 'before restore\n' > /home/user/btrfs-restore-test
+
+sudo snapper -c root create \
+  --description "Btrfs restore test baseline" \
+  --print-number
+```
+
+Snapper returned snapshot 10. We assigned no cleanup algorithm to this
+snapshot, so automatic cleanup does not remove it.
+
+We changed both files and checked the snapshot:
+
+```sh
+printf 'after restore\n' | sudo tee /etc/btrfs-restore-test
+printf 'after restore\n' > /home/user/btrfs-restore-test
+
+sudo cat /.snapshots/10/snapshot/etc/btrfs-restore-test
+cat /etc/btrfs-restore-test /home/user/btrfs-restore-test
+```
+
+The snapshot contained `before restore`; both current files contained
+`after restore`. We deferred restoration at this point and continued with
+system configuration.
+
+To resume file recovery later, delete only the test file and copy it back:
+
+```sh
+sudo rm /etc/btrfs-restore-test
+sudo cp -a \
+  /.snapshots/10/snapshot/etc/btrfs-restore-test \
+  /etc/btrfs-restore-test
+
+cat /etc/btrfs-restore-test /home/user/btrfs-restore-test
+```
+
+Expect `before restore` for `/etc` and `after restore` for `/home/user`.
+We have not run these recovery commands. Restoring the entire root also
+remains deferred: boot the installer USB as a recovery system, preserve the
+current `root`, create a writable copy of the chosen snapshot named `root`,
+and update the boot menu from the restored installation before rebooting.
+The USB recovery process does not require reinstalling or formatting.
