@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "tinymistPath": "",
+  "logLevel": "warn",
+  "projectRootStrategy": "vault",
+  "customProjectRoot": "",
+  "previewRefresh": "onType",
+  "previewTheme": "follow-obsidian",
+  "previewSyncEnabled": true,
+  "previewPartialRendering": true,
+  "previewFollowsActiveDocument": true,
+  "showDiagnostics": true,
+  "formatterEnabled": true,
+  "systemFonts": true,
+  "exportFolder": "",
+  "exportOverwrite": true
+}

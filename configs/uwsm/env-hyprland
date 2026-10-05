@@ -1,0 +1,53 @@
+# Hyprland session settings, loaded by UWSM before the compositor starts.
+# Prefer native Wayland, with X11 available as a fallback.
+export GDK_BACKEND='wayland,x11,*'
+export QT_QPA_PLATFORM='wayland;xcb'
+
+# Older Electron apps need this hint; newer versions use XDG_SESSION_TYPE.
+# Apps that explicitly select X11 still need their own launch override.
+export ELECTRON_OZONE_PLATFORM_HINT=auto
+
+# GTK compose/dead keys, including applications activated through D-Bus.
+export GTK_IM_MODULE=simple
+
+# qt6ct also accepts qt5ct, allowing both Qt generations to load their plugin.
+export QT_QPA_PLATFORMTHEME=qt5ct
+
+# Use the Bibata theme with a consistent cursor size.
+export XCURSOR_THEME=Bibata-Modern-Ice
+export XCURSOR_SIZE=24
+export HYPRCURSOR_THEME=Bibata-Modern-Ice
+export HYPRCURSOR_SIZE=24
+
+# Hyprland already supplies session identity; retain these only as reference.
+# export XDG_SESSION_TYPE="wayland"
+# export XDG_CURRENT_DESKTOP="Hyprland"
+# export XDG_SESSION_DESKTOP="Hyprland"
+
+# Older or app-specific Wayland overrides.
+# export MOZ_ENABLE_WAYLAND="1"
+# export OZONE_PLATFORM="wayland"
+
+# Qt alternatives: use only when deliberately changing theming, scaling, or titlebars.
+# export QT_QPA_PLATFORMTHEME="gtk3"
+# export QT_QPA_PLATFORMTHEME="qt6ct"
+# export QT_AUTO_SCREEN_SCALE_FACTOR="1"
+# export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+
+# Renderer/GPU workarounds: enable individually only for a reproduced hardware issue.
+# export GSK_RENDERER="gl"
+# export AQ_NO_MODIFIERS="1"
+# export LIBVA_DRIVER_NAME="nvidia"
+# export NVD_BACKEND="direct" # Omarchy uses "egl" on some older NVIDIA hardware.
+# export __GLX_VENDOR_LIBRARY_NAME="nvidia"
+# export __GL_GSYNC_ALLOWED="0"
+# export __GL_VRR_ALLOWED="0"
+
+# Custom compose sequences, only if this file has been created.
+# export XCOMPOSEFILE="$HOME/.XCompose"
+
+# Reference-specific integration; these belong to Omarchy/Ryoku, not Noctalia.
+# export OMARCHY_PATH="$HOME/.local/share/omarchy"
+# export QML_IMPORT_PATH="$HOME/.local/lib/qt6/qml"
+# export QML2_IMPORT_PATH="$HOME/.local/lib/qt6/qml"
+# export RYOKU_POLKIT_AGENT="1"

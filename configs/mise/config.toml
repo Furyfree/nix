@@ -1,0 +1,50 @@
+[tools]
+# Current LTS families; resolve the latest patch within each family.
+dotnet = "10"
+go = "latest"
+java = "corretto-25"
+node = "lts"
+rust = "stable"
+uv = "latest"
+
+# Agent CLIs
+"npm:@openai/codex" = "latest"
+"npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = ["@anthropic-ai/claude-code"] }
+antigravity-cli = "latest"
+"npm:@xai-official/grok" = "latest"
+"npm:@opencode/cli" = { version = "latest", allow_builds = ["@opencode/cli"], allow_low_downloads = true }
+pi = "latest"
+herdr = "latest"
+
+# ACP adapters for Obsidian's Agent Client; OpenCode and Grok speak ACP natively.
+"npm:@agentclientprotocol/claude-agent-acp" = "latest"
+"npm:@agentclientprotocol/codex-acp" = "latest"
+"npm:pi-acp" = "latest"
+
+# Agentic helpers
+"npm:@llamaindex/liteparse" = "latest"
+
+# Language helpers
+"npm:markdownlint-cli" = "latest"
+"go:golang.org/x/tools/gopls" = "latest"
+staticcheck = "latest"
+golangci-lint = "latest"
+ruff = "latest"
+stylua = "latest"
+
+# Shell and configuration helpers
+shellcheck = "latest"
+shfmt = "latest"
+taplo = "latest"
+actionlint = "latest"
+delta = "latest"
+# Deja autosuggestions; enable together with [plugins.deja] in sheldon/plugins.toml.
+# "github:Giammarco-Ferranti/deja" = "latest"
+
+[settings]
+# The tool ownership rule: Mise updates itself; system packages stay outside Mise.
+auto_update = true
+system_deps = "warn"
+
+# Activate an existing uv environment without creating one on directory entry.
+python.uv_venv_auto = "source"

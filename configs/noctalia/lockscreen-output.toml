@@ -1,0 +1,86 @@
+[lockscreen_widgets.widget."lockscreen-login-box@@OUTPUT@"]
+type = "login_box"
+output = "@OUTPUT@"
+cx = 960.0
+cy = 745.0
+box_width = 400.0
+box_height = 70.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."lockscreen-login-box@@OUTPUT@".settings]
+layout = "compact"
+background_color = "surface_variant"
+background_opacity = 0.0
+background_radius = 12.0
+input_opacity = 0.55
+input_radius = 12.0
+center_password_text = true
+show_caps_lock = true
+show_keyboard_layout = false
+show_login_button = false
+show_media = false
+show_session_buttons = false
+show_unlock_hint = false
+show_weather = false
+
+[lockscreen_widgets.widget."minimal-date-@OUTPUT@"]
+type = "clock"
+output = "@OUTPUT@"
+cx = 960.0
+cy = 240.0
+box_width = 440.0
+box_height = 38.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-date-@OUTPUT@".settings]
+clock_style = "digital"
+format = "{:%A, %d %B}"
+font_family = "Inter"
+color = "#F5F5F7"
+background = false
+background_padding = 0.0
+center_text = true
+shadow = true
+
+[lockscreen_widgets.widget."minimal-clock-@OUTPUT@"]
+type = "clock"
+output = "@OUTPUT@"
+cx = 960.0
+cy = 330.0
+box_width = 460.0
+box_height = 140.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-clock-@OUTPUT@".settings]
+clock_style = "digital"
+format = "{:%H:%M}"
+font_family = "Inter"
+color = "#F5F5F7"
+background = false
+background_padding = 0.0
+center_text = true
+shadow = true
+
+[lockscreen_widgets.widget."minimal-avatar-@OUTPUT@"]
+type = "sticker"
+output = "@OUTPUT@"
+cx = 960.0
+cy = 654.0
+box_width = 72.0
+box_height = 72.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-avatar-@OUTPUT@".settings]
+image_path = "@HOME@/.config/noctalia/assets/profile-picture-circle.svg"
+opacity = 1.0
+background = false
+background_padding = 0.0
+

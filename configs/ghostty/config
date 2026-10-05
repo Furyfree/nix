@@ -1,0 +1,31 @@
+font-family = JetBrainsMono Nerd Font Mono
+font-size = 9
+theme = noctalia
+window-theme = ghostty
+window-padding-x = 14
+window-padding-y = 14
+# Match Noctalia's translucent backgrounds; text remains fully opaque.
+background-opacity = 0.80
+background-opacity-cells = true
+background-blur = true
+resize-overlay = never
+confirm-close-surface = false
+
+cursor-style = block
+cursor-style-blink = false
+cursor-click-to-move = false
+# Keep the block cursor and SSH compatibility, without remote terminfo installs.
+shell-integration-features = no-cursor,ssh-env,no-ssh-terminfo
+mouse-scroll-multiplier = 4
+
+# Reuse open windows' process, then exit when the last window closes.
+gtk-single-instance = true
+quit-after-last-window-closed = true
+gtk-toolbar-style = flat
+# Copy selections to PRIMARY; middle-click pastes PRIMARY, not the regular clipboard.
+copy-on-select = true
+# Hyprland take Ghostty's default Super+Ctrl+Shift+arrows split resize.
+keybind = ctrl+alt+shift+arrow_up=resize_split:up,10
+keybind = ctrl+alt+shift+arrow_down=resize_split:down,10
+keybind = ctrl+alt+shift+arrow_left=resize_split:left,10
+keybind = ctrl+alt+shift+arrow_right=resize_split:right,10

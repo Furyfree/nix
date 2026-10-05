@@ -1,0 +1,11 @@
+{
+  "readableLineLength": false,
+  "showInlineTitle": false,
+  "spellcheck": true,
+  "promptDelete": false,
+  "newFileLocation": "current",
+  "userIgnoreFilters": [
+    "archive/"
+  ],
+  "showLineNumber": true
+}

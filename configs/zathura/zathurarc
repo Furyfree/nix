@@ -1,0 +1,45 @@
+# Reading and navigation
+set adjust-open "best-fit"
+set scroll-page-aware true
+set selection-clipboard "clipboard"
+set selection-notification false
+set window-title-basename true
+set statusbar-basename true
+set font "sans-serif 10"
+set guioptions "s"
+
+# Keep original document colors until recolor is toggled.
+set recolor false
+set recolor-keephue true
+set recolor-lightcolor "#111318"
+set recolor-darkcolor "#f2f4f8"
+
+# Niriland's charcoal/blue palette, extended to menus and the document index.
+set default-bg "#111318"
+set default-fg "#e7eaf0"
+set statusbar-bg "#181b21"
+set statusbar-fg "#d8dee9"
+set inputbar-bg "#181b21"
+set inputbar-fg "#e7eaf0"
+set completion-bg "#181b21"
+set completion-fg "#d8dee9"
+set completion-group-bg "#111318"
+set completion-group-fg "#8fb3ff"
+set completion-highlight-bg "#2d5f8b"
+set completion-highlight-fg "#f6f8fb"
+set index-bg "#111318"
+set index-fg "#d8dee9"
+set index-active-bg "#2d5f8b"
+set index-active-fg "#f6f8fb"
+set notification-bg "#181b21"
+set notification-fg "#e7eaf0"
+set highlight-color "rgba(143,179,255,0.35)"
+set highlight-active-color "rgba(255,196,87,0.55)"
+
+# Keep native Ctrl-R recolor, R reload, and Ctrl-O/Ctrl-I jump navigation.
+map <F4> recolor
+map <F6> toggle_page_mode
+map b toggle_statusbar
+
+# Noctalia owns this optional generated palette; defaults above work before it exists.
+include noctaliarc

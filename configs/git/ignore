@@ -1,0 +1,4 @@
+# OS metadata only; project and editor rules belong in each repository.
+.DS_Store
+Thumbs.db
+[Dd]esktop.ini
