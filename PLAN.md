@@ -31,10 +31,15 @@ hosts/
   macos/
     home.nix
 components/
+  shell.nix
   cli.nix
   development.nix
   editors.nix
   hyprland-noctalia.nix
+  apps.nix
+  appearance.nix
+  networking.nix
+  services.nix
   gaming.nix
   virtualization.nix
 configs/
@@ -73,14 +78,78 @@ monitor layouts or Voxtype's model. For example, add Gimp to the desktop host
 if only the desktop needs it; leave shared package groups in `components/`.
 Both hosts will inherit the shared setup through ordinary Nix imports.
 
-`system.nix` will select CLI, development, editor, Hyprland/Noctalia, gaming and
-virtualization components. A component can contain packages, related system
-settings or both. Hosts can import extra components directly. Keep user config
-destinations in `home.nix`, with machine-specific differences in each host.
+`system.nix` will select the shared components as we migrate their tools.
+A component can contain packages, related system settings or both. Hosts can
+import extra components directly. Keep user config destinations in `home.nix`,
+with machine-specific differences in each host.
+
+| Component | Responsibility |
+| --- | --- |
+| `shell.nix` | Bash, Zsh, ble.sh, Starship, Sheldon, shell integrations and Nix shortcuts |
+| `cli.nix` | Command-line utilities, file management and compression |
+| `development.nix` | Mise, build tools, agent tools and development helpers |
+| `editors.nix` | Neovim, Zed and VSCodium |
+| `hyprland-noctalia.nix` | Compositor, desktop shell, greeter, portals, plugins, screenshots and Voxtype |
+| `apps.nix` | Ghostty, browser, communication, password manager, documents and media apps |
+| `appearance.nix` | Fonts, GTK/Qt themes, icons and cursors |
+| `networking.nix` | Tailscale, VPN tools and DTU networking |
+| `services.nix` | Audio, Bluetooth, printing/scanning, firmware updates, shared power management and Snapper |
+| `gaming.nix` | Steam, launchers, Wine/Proton, GameMode and overlays |
+| `virtualization.nix` | QEMU/KVM, Windows guest support and Docker |
+
+Keep GPU drivers, monitor settings and laptop-specific behaviour in the host
+configuration. Split Docker or app groups when a host needs to select them
+separately. Follow the boot and migration order below, then migrate one tool
+at a time within each component.
 
 Use `nixos-test` to try the shared setup before relying on it on either
 workstation. Keep its working bootstrap until the shared files contain usable
 Nix modules. Comment-only placeholders must remain outside active imports.
+
+## Boot and migration order
+
+Keep nixos-unstable pinned through `flake.lock`. Put shared boot settings in
+`system.nix` and hardware, disk identifiers and swap sizes in each host.
+Approve each batch before implementing it.
+
+For desktop and laptop installations, create one 4 GiB FAT32 EFI System
+Partition mounted at `/boot`. Store Limine, kernels and initrds there. Use the
+remaining disk space for LUKS-encrypted Btrfs. Keep the test machine's existing
+1 GiB EFI partition until reinstalling it.
+
+1. Configure basic boot on `nixos-test`: replace systemd-boot with Limine,
+   keep manual LUKS unlocking, and enable Plymouth for the unlock prompt.
+   Set `console.keyMap = "dk";` with `# console.keyMap = "us";` as the
+   alternative. Build, reboot and check unlocking. Defer appearance.
+2. Add a Btrfs swap file in the existing `/var/swap` subvolume, inside LUKS.
+   Configure the resume device and swap-file offset. Use the host sizes below;
+   confirm the test machine's RAM before choosing its size. Test hibernation
+   and resume with ordinary applications running.
+3. Arrange the Limine menu: current NixOS generation first, other operating
+   systems when present, older generations in a submenu, then firmware access.
+   Check upstream support for this layout and the firmware shortcut before
+   proposing custom code.
+4. Enable Secure Boot after normal boot and hibernation work. Configure boot-file
+   verification and signing, enrol keys and enable Secure Boot in firmware.
+   Check the selected kernel's lockdown configuration and repeat boot and
+   hibernation checks before relying on both together.
+5. Retain the Btrfs subvolumes and Snapper policy. Keep NixOS generations for
+   configuration rollback. Defer whole-root snapshot restoration testing.
+
+| Host | RAM | SSD | Swap |
+| --- | --- | --- | --- |
+| Desktop | 32 GiB | 2 TB | 48 GiB |
+| Laptop | 64 GiB | 1 TB | 96 GiB |
+
+Swap serves ordinary memory pressure and hibernation. Reserve 1.5 times RAM
+to leave room for both uses; this is a sizing choice, not a kernel requirement.
+Keep appearance work for Limine and Plymouth deferred.
+
+After boot and storage, configure Hyprland and Noctalia Shell, automatic login
+as `user`, Noctalia Greeter after logout, and session locking before suspend or
+hibernation. Then migrate the shell and Nix command aliases, CLI tools, and
+development tools, editors and applications one by one. Build and check each
+change before moving on.
 
 ## Config selection and destinations
 

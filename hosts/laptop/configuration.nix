@@ -3,3 +3,10 @@
 # Import ./hardware-configuration.nix for this machine's hardware and disks.
 # Set the hostname and add laptop-specific packages or services here.
 # Example: enable fingerprint support here if the laptop needs it.
+{ ... }:
+
+{
+  imports = [
+    (import ../../components/swap.nix { sizeGiB = 96; })
+  ];
+}

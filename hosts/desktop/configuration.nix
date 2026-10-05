@@ -3,3 +3,10 @@
 # Import ./hardware-configuration.nix for this machine's hardware and disks.
 # Set the hostname and add desktop-specific packages or services here.
 # Example: add Gimp here if only the desktop needs it.
+{ ... }:
+
+{
+  imports = [
+    (import ../../components/swap.nix { sizeGiB = 48; })
+  ];
+}
