@@ -1,0 +1,2 @@
+# Reserve this folder for intentional SSH client settings.
+# Keep private keys, known hosts and authentication state outside this folder.

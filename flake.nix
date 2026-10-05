@@ -17,7 +17,7 @@
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.users.user = ./profiles/home/common.nix;
+          home-manager.users.user = ./hosts/nixos-test/home.nix;
         }
       ];
     };

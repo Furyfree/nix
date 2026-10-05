@@ -1,0 +1,2 @@
+# Reserve this folder for selected Grok CLI user settings.
+# ai-workflow owns agent instructions and skills; keep authentication state local.

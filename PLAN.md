@@ -1,190 +1,172 @@
 # Nix setup plan
 
-Use this repository for NixOS systems and shared user configuration. Keep native
-Windows and macOS setup in their own repositories. This is the target design;
-implementation requires approval for each batch.
+Build one shared NixOS workstation setup for user's desktop and laptop. Use the
+same default packages, services, configs and preferences, with any deliberate
+differences in each host. Keep macOS and WSL as planned extensions with
+comment-only placeholders for now.
 
-## Ownership
-
-| Environment or repository | Responsibility |
-| --- | --- |
-| NixOS desktop and laptop | System packages, boot, disks, drivers, networking, services and sessions |
-| Integrated Home Manager | Linux user configuration, selected user packages and user services |
-| NixOS WSL | Minimal Linux environment, integrated Home Manager and editor server support |
-| `win-setup` | Native Windows apps, system settings, BitLocker, WSL installation and native app setup |
-| Swift `mac-setup` | Native macOS apps and system settings |
-| Standalone Home Manager on macOS | Selected dotfiles and user packages through the existing Nix installation |
-| Project flakes | Each project's development tools, including homelab |
-| `wow-ui` | Cross-platform WoW settings, keybindings and addon-list handling; WowUp installs addons |
-| `ai-workflow` | Agent instructions and skills |
-
-Give each package, service and configuration destination one owner. Keep accounts,
-private keys, authentication state, caches, history and downloaded app data local.
-Use 1Password and native application storage for credentials.
-
-## Repository layout
-
-Keep the existing `hosts/` and `profiles/` structure. Add files when their
-configuration is needed; the tree below shows the intended placement.
+## Structure
 
 ```text
 flake.nix
 flake.lock
-PLAN.md
-README.md
-INSTALLATION.md
-MIGRATION.md
+system.nix
+home.nix
 hosts/
   nixos-test/
     configuration.nix
     hardware-configuration.nix
+    home.nix
   desktop/
     configuration.nix
     hardware-configuration.nix
+    home.nix
   laptop/
     configuration.nix
     hardware-configuration.nix
+    home.nix
   wsl/
     configuration.nix
-home/
-  nixos-test.nix
-  desktop.nix
-  laptop.nix
-  wsl.nix
-  macos.nix
-profiles/
-  nixos/
-    common.nix
-    hyprland-noctalia.nix
-    gaming.nix
-    virtualization.nix
-  home/
-    common.nix
-    linux.nix
-    macos.nix
-    shell.nix
-    git.nix
-    zed.nix
-    vscodium.nix
-    nvim.nix
-    hyprland-noctalia.nix
-    windows-dotfiles.nix
+    home.nix
+  macos/
+    home.nix
+components/
+  cli.nix
+  development.nix
+  editors.nix
+  hyprland-noctalia.nix
+  gaming.nix
+  virtualization.nix
 configs/
-  shell/
   zed/
-  vscodium/
-  nvim/
-  hypr/
-  windows/
+  ghostty/
+  obsidian/
+  ...
 ```
 
-- `flake.nix`: inputs and explicit NixOS and Home Manager outputs.
-- `hosts/`: machine identity, hardware and selected system profiles.
-- `home/`: Home Manager entry points selecting configuration for each machine.
-- `profiles/nixos/`: shared system configuration and optional features.
-- `profiles/home/`: shared user configuration and application-specific modules.
-- `configs/`: native application files, shared where their contents match.
+| Part | Responsibility |
+| --- | --- |
+| `configs/` | Native application files, added once and shared where suitable |
+| `components/` | Related Linux packages and required system features |
+| `system.nix` | Select components and define shared Linux system settings |
+| `home.nix` | Select shared Linux configs and map each source file to its destination through Home Manager |
+| `hosts/<machine>/` | Select shared defaults or components, define hardware and add machine-specific packages or preferences |
+| `flake.nix` | Pin inputs and expose configurations for the selected hosts |
 
-Use explicit imports. Keep common profiles small enough for WSL and macOS where
-applicable. Select desktop and gaming features in the hosts that need them.
-Keep hardware settings and disk UUIDs with their machine.
+Use ordinary Nix modules and explicit imports. Reuse upstream NixOS and Home
+Manager options. Add a custom package only for a concrete packaging requirement.
 
-Add `pkgs/` for a concrete custom package. Add `modules/` when a reusable custom
-option is needed. Start with ordinary Nix modules and upstream options.
+## Mirrored Linux workstations
 
-`README.md` holds usage, `PLAN.md` holds the target design, and `INSTALLATION.md`
-holds installation instructions. Keep migration work in `MIGRATION.md`.
+Both desktop and laptop import root `system.nix` and `home.nix` for their
+shared defaults. Add shared software to `system.nix` and config mappings to
+`home.nix` once.
 
-## Flake outputs and inputs
+Keep hostname and extra packages or services in each host's `configuration.nix`.
+Keep generated hardware, disks and encryption in `hardware-configuration.nix`.
+Use the host's `home.nix` for different preferences or config mappings, such as
+monitor layouts or Voxtype's model. For example, add Gimp to the desktop host
+if only the desktop needs it; leave shared package groups in `components/`.
+Both hosts inherit the shared setup through ordinary Nix imports.
 
-Expose `nixosConfigurations.nixos-test`, then add `desktop`, `laptop` and `wsl`
-as those hosts become usable. Build their Home Manager configurations through
-the NixOS module.
+`system.nix` selects CLI, development, editor, Hyprland/Noctalia, gaming and
+virtualization components. A component can contain packages, related system
+settings or both. Hosts can import extra components directly. Keep user config
+destinations in `home.nix`, with machine-specific differences in each host.
 
-Expose a standalone `homeConfigurations."<mac-user>@<mac-host>"` for macOS.
-Set its actual architecture, username and home directory before enabling it.
-Use Home Manager with the Nix installation already needed for project flakes.
-Swift `mac-setup` retains ownership of the rest of the Mac.
+Use `nixos-test` to try the shared setup before relying on it on either
+workstation. Keep its working bootstrap until the shared files contain usable
+Nix modules. Comment-only placeholders must remain outside active imports.
 
-Keep the existing `nixos-unstable` and matching Home Manager inputs pinned through
-`flake.lock`. Add NixOS-WSL when implementing the WSL host. Add other inputs for
-specific requirements after approval. Review lock updates, build, then activate.
-Keep state-version settings at their initial compatibility baselines.
+## Config selection and destinations
 
-## Packages and configuration
+Keep application files in `configs/`. They contain the application's settings.
+`home.nix` selects those files and declares their destinations:
 
-Use Nixpkgs and upstream modules for Linux packages and services where suitable.
-Preserve required patches and build features from COPR when an upstream package
-cannot meet the requirement, including the librepods audio fix and Voxtype
-acceleration. Keep related Hyprland plugin and compositor versions compatible.
+```text
+configs/zed/settings.json -> ~/.config/zed/settings.json
+configs/zed/keymap.json   -> ~/.config/zed/keymap.json
+configs/ghostty/config   -> ~/.config/ghostty/config
+```
 
-Choose Nix or Mise as the owner of each tool. Keep project-specific tools in
-project flakes or existing project tooling. Native setup tools retain ownership
-of native Windows and macOS application installation and updates.
+Use Home Manager checkout links for files intended for direct editing. Supply
+the absolute checkout path per machine. Generate files for real platform
+differences, and preserve selected local values when a config needs merging,
+including Zed's model and agent preferences.
 
-Keep Lua, JSON and TOML configuration in native files where practical. Use Home
-Manager checkout links for files intended for direct editing, with absolute
-checkout paths supplied per machine. Generate configuration for real platform
-differences. Keep mutable local preferences separate or preserve the selected
-values during merges, including Zed's local model and agent settings.
+Include Obsidian's per-machine preferences and selected plugin settings. The
+vault repository retains its content, plugins and plugin lists. Leave vis,
+Flatpak configuration, wallpapers, Niri and DMS out of the current scaffold.
 
-Nix generations restore packages and generated configuration. Use Git to restore
-editable checkout contents and separate backups for mutable application data.
-Root snapshots do not cover sibling home subvolumes or Windows files.
+Keep credentials, private keys, accounts, history, caches, downloads and runtime
+databases outside the repo. ai-workflow owns agent instructions and skills;
+this repo owns selected agent application settings.
 
-## WSL and Windows editors
+## Package ownership and updates
 
-Use the maintained NixOS-WSL project. Include the Linux user, shell, Git, basic
-tools, Home Manager and the editor server support needed by actual projects.
-Select desktop services and physical disk configuration only on Linux hosts
-that use them.
+NixOS owns Linux system packages, drivers, networking, services and sessions.
+Integrated Home Manager owns user configuration and selected user services.
+Choose one installer and updater for each package; avoid overlap between Nix
+and Mise. Each project's flake retains its project-specific development tools.
 
-Recommend native Windows Zed and VSCodium, installed by `win-setup`, connected
-to projects inside NixOS WSL. Use Zed's built-in WSL connection and VSCodium's
-Open Remote - WSL extension. Configure NixOS compatibility for their Linux
-servers and verify client/server versions. Linux GUI editors through WSLg remain
-an option if the native workflow proves unsuitable.
+Use Nixpkgs packages and upstream modules first. Preserve required COPR patches
+or build features when an upstream package cannot meet the actual requirement.
+Keep Hyprland plugins compatible with the selected compositor version.
 
-The editor UI still uses Windows settings. Home Manager in WSL can supply
-selected Windows dotfiles through an explicit Windows deployment hook:
+Keep the existing nixos-unstable and matching Home Manager inputs pinned through
+`flake.lock`. Review lock updates, build, then activate. Keep state-version
+settings at their initial compatibility baselines.
 
-- PowerShell and Windows Terminal preferences.
-- Zed and VSCodium settings and keybindings.
-- Git, GitHub CLI, Starship and Fastfetch configuration.
-- Wallpapers.
+Nix generations restore declarative packages and configuration. Use Git for
+editable config contents and separate backups for mutable data. Root snapshots
+do not cover sibling home subvolumes or Windows files.
 
-Use actual files at Windows destinations. Obtain the intended Windows user's
-real folders from `win-setup`; do not assume matching Linux and Windows usernames.
-Run user-file deployment as that user, separately from elevated system setup.
-Preview changes, back up existing files, preserve files on failure and report
-conflicts. Repeated application should leave unchanged files alone.
+## Future macOS and WSL
 
-Preserve Terminal's existing profiles and Zed's selected local settings. Keep
-native VSCodium extension installation and wallpaper activation in `win-setup`.
-Windows Neovim, 1Password SSH and Topgrade configuration remain deferred.
+Keep their host files as placeholders. Add their flake outputs and required
+inputs when implementing those platforms. Select suitable files from `configs/`
+in each host; WSL can also select the Linux components it needs. Root
+`system.nix` and `home.nix` contain the full Linux workstation defaults.
 
-Keep the deployment hook limited to the selected destinations and required
-merges. Windows copies and mutable merges need their own backup and restoration
-behaviour; a Nix rollback does not undo those writes.
+For macOS, use standalone Home Manager with the Nix installation already
+needed for project flakes. `hosts/macos/home.nix` selects shared configs and
+maps macOS destinations. Swift mac-setup owns native apps and system settings.
+Confirm the Mac's architecture and paths before enabling its output.
 
-## Verification and remaining choices
+For WSL, use NixOS-WSL and integrated Home Manager with a minimal Linux tool
+selection. win-setup owns Windows setup and installation of the WSL distribution.
+Native Windows Zed and VSCodium can connect to Linux projects; configure and
+test their server compatibility when implementing that workflow.
 
-Check Nix syntax and evaluate configuration before building. Test changes on
-`nixos-test` before relying on them on the desktop or laptop. Use isolated checks
-for settings merges, preservation on failure and repeated application. Verify
-editor connections on Windows and standalone Home Manager on the actual Mac.
+Plan selected Windows config copies and merges in `hosts/wsl/home.nix`.
+Use the intended Windows user's actual folders, backups and visible conflict
+handling. Preserve Terminal profiles and selected Zed local settings.
+win-setup retains native extension installation and system changes. Windows
+file writes need their own recovery; Nix rollback does not undo those copies.
 
-Confirm the Mac's architecture, username, hostname and Nix installation details.
-Approve physical disk layout, bootloader and Secure Boot choices before changing
-physical machines. Confirm the CLI editor and optional Windows VM requirements
-when implementing those features.
+wow-ui remains independent for cross-platform WoW settings, keybindings and
+addon-list handling. WowUp installs addons.
+
+## Verification and implementation boundaries
+
+Approve each implementation batch. Check placeholder contents and parse active
+Nix files after scaffold changes. Evaluate and build the test host before
+activation. Test config merges for preservation, failure handling and repeated
+application when implementing them.
+
+Test desktop and laptop hardware behaviour on their actual machines. Approve
+physical disk, bootloader and Secure Boot changes separately. Leave macOS and
+WSL integration checks until those platforms enter implementation.
+
+README.md holds usage, PLAN.md holds the target design, and INSTALLATION.md
+holds installation instructions. Keep migration work in MIGRATION.md.
 
 ## References
 
 - [Mitchell's machine and user separation](https://github.com/mitchellh/nixos-config/blob/main/lib/mksystem.nix)
 - [Misterio's NixOS and standalone Home Manager outputs](https://github.com/Misterio77/nix-starter-configs/blob/main/standard/flake.nix)
-- [EmergentMind's common and optional configuration](https://github.com/EmergentMind/nix-config#structure-quick-reference)
-- [fufexan's system, module and package separation](https://github.com/fufexan/dotfiles/blob/main/flake.nix)
+- [EmergentMind's shared and optional configuration](https://github.com/EmergentMind/nix-config#structure-quick-reference)
+- [fufexan's system and package organisation](https://github.com/fufexan/dotfiles/blob/main/flake.nix)
 - [NixOS-WSL](https://github.com/nix-community/NixOS-WSL)
 - [Zed remote development](https://zed.dev/docs/remote-development)
 - [VSCodium remote extension alternatives](https://github.com/VSCodium/vscodium/blob/master/docs/extensions-compatibility.md#remote-development)

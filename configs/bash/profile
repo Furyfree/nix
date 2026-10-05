@@ -1,0 +1,5 @@
+# Login shells expose user-installed commands to interactive startup.
+case ":$PATH:" in
+  *":$HOME/.local/bin:"*) ;;
+  *) export PATH="$HOME/.local/bin:$PATH" ;;
+esac

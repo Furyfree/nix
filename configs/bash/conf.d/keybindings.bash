@@ -1,0 +1,15 @@
+[[ -t 0 && $TERM != dumb ]] || return 0
+
+bind 'set bell-style none'
+bind '"\e[H": beginning-of-line'
+bind '"\e[F": end-of-line'
+bind '"\eOH": beginning-of-line'
+bind '"\eOF": end-of-line'
+bind '"\e[1~": beginning-of-line'
+bind '"\e[4~": end-of-line'
+bind '"\e[3~": delete-char'
+bind '"\e[1;5D": backward-word'
+bind '"\e[1;5C": forward-word'
+bind '"\e[3;5~": kill-word'
+bind '"\C-w": backward-kill-word'
+bind '"\e\C-?": backward-kill-word'
