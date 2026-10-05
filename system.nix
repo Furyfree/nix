@@ -1,6 +1,5 @@
-# Shared NixOS defaults for the Linux workstations.
+# Shared NixOS settings, added one component at a time.
 { ... }:
 
 {
-  imports = [ ./components/cli.nix ];
 }

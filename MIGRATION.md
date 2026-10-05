@@ -76,7 +76,7 @@ Use the existing `nixos-test` flake and integrated Home Manager as the foundatio
 Defer snapshot restoration. Continue with builds and checks of the tools we migrate.
 This plan does not authorize implementation; approve each batch before changing files.
 
-1. Add only the scaffold needed for the first batch. Keep machine settings in `hosts/`, reusable system settings in `profiles/nixos/`, user settings in `profiles/home/`, and editable native configs in `configs/`. Add modules or custom packages when a migrated tool needs them.
+1. Use the scaffold in PLAN.md: machine settings in `hosts/`, shared system settings in `system.nix`, shared user settings in `home.nix`, package and service groups in `components/`, and editable native configs in `configs/`. Fill it one tool at a time; add custom packages when a migrated tool needs them.
 2. Start with the existing Bash/Zsh configuration, prompt, completion, aliases, and required packages. Copy from dotfiles and Nimbus; preserve the original repositories. Keep native files editable through Home Manager links into this checkout. Confirm the login shell before changing it.
 3. Add the Nix shortcuts below. Build and activation must use this repository's explicit flake path and host, regardless of the current directory. Reuse Snapper's pre/post command for activation.
 4. Migrate one tool at a time: shell, Git/SSH, CLI tools, Mise, the chosen editor, terminal, then desktop. Check package names, paths, dependencies, Chezmoi templates, Fedora commands, and update behaviour before copying each configuration. Keep Nix-owned packages separate from Mise-owned runtimes and tools.

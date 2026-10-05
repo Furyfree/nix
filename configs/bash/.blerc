@@ -1,3 +1,0 @@
-if [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/bash/blerc" ]; then
-  . "${XDG_CONFIG_HOME:-$HOME/.config}/bash/blerc"
-fi

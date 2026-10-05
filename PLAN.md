@@ -56,9 +56,13 @@ configs/
 Use ordinary Nix modules and explicit imports. Reuse upstream NixOS and Home
 Manager options. Add a custom package only for a concrete packaging requirement.
 
+Only `nixos-test` is active. Keep the shared modules and config directories
+empty until migrating each tool. Desktop, laptop, macOS and WSL remain
+placeholders. Migrate, build and check one tool before starting the next.
+
 ## Mirrored Linux workstations
 
-Both desktop and laptop import root `system.nix` and `home.nix` for their
+Both desktop and laptop will import root `system.nix` and `home.nix` for their
 shared defaults. Add shared software to `system.nix` and config mappings to
 `home.nix` once.
 
@@ -67,9 +71,9 @@ Keep generated hardware, disks and encryption in `hardware-configuration.nix`.
 Use the host's `home.nix` for different preferences or config mappings, such as
 monitor layouts or Voxtype's model. For example, add Gimp to the desktop host
 if only the desktop needs it; leave shared package groups in `components/`.
-Both hosts inherit the shared setup through ordinary Nix imports.
+Both hosts will inherit the shared setup through ordinary Nix imports.
 
-`system.nix` selects CLI, development, editor, Hyprland/Noctalia, gaming and
+`system.nix` will select CLI, development, editor, Hyprland/Noctalia, gaming and
 virtualization components. A component can contain packages, related system
 settings or both. Hosts can import extra components directly. Keep user config
 destinations in `home.nix`, with machine-specific differences in each host.
@@ -126,7 +130,7 @@ do not cover sibling home subvolumes or Windows files.
 Keep their host files as placeholders. Add their flake outputs and required
 inputs when implementing those platforms. Select suitable files from `configs/`
 in each host; WSL can also select the Linux components it needs. Root
-`system.nix` and `home.nix` contain the full Linux workstation defaults.
+`system.nix` and `home.nix` will contain the shared Linux workstation defaults.
 
 For macOS, use standalone Home Manager with the Nix installation already
 needed for project flakes. `hosts/macos/home.nix` selects shared configs and

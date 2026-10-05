@@ -1,9 +1,0 @@
-# Private host definitions are kept in this local, unmanaged file.
-Include ~/.ssh/config.local
-
-Host github.com
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/github.pub
-    IdentityAgent ~/.1password/agent.sock
-    IdentitiesOnly yes

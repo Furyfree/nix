@@ -1,8 +1,0 @@
-{
-  "collapseChangelog": true,
-  "defaultProjectTrust": "ask",
-  "enableInstallTelemetry": false,
-  "fullscreenCopyOnSelect": true,
-  "quietStartup": true,
-  "tuiMode": "fullscreen"
-}

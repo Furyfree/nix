@@ -357,7 +357,7 @@ From the repo on your own computer, copy the configuration to the test machine:
 ```sh
 cd ~/Projects/nix
 ssh user@192.0.2.10 'mkdir -p /home/user/Projects/nix'
-scp -r flake.nix flake.lock hosts profiles user@192.0.2.10:/home/user/Projects/nix/
+scp -r flake.nix flake.lock system.nix home.nix hosts components configs user@192.0.2.10:/home/user/Projects/nix/
 ```
 
 In the SSH session on the test machine, build without activating:

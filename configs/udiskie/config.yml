@@ -1,6 +1,0 @@
-program_options:
-  automount: true
-  notify: true
-  tray: auto # Hide the tray icon when no devices can be acted on.
-  menu: flat
-  file_manager: xdg-open

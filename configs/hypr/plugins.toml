@@ -1,4 +1,0 @@
-# Desired plugins; install separately with HyprPM.
-# HyprPM owns installation and generated state; dotfile apply never runs it.
-schema = 1
-enabled = ["scrolloverview"]

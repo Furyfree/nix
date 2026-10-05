@@ -1,8 +1,0 @@
-[
-  {
-    "context": "Workspace",
-    "bindings": {
-      "ctrl-alt-shift-j": "terminal_panel::Toggle"
-    }
-  }
-]
