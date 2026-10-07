@@ -7,3 +7,10 @@ result-*
 
 # Ignore NixOS interactive test driver history
 **/.nixos-test-history
+
+# Python development environments and caches
+.venv/
+.ruff_cache/
+.pytest_cache/
+__pycache__/
+*.py[cod]

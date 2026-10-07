@@ -7,6 +7,7 @@
 
 {
   imports = [
+    ../../components/filesystems.nix
     (import ../../components/swap.nix { sizeGiB = 48; })
   ];
 }

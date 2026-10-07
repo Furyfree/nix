@@ -3,6 +3,18 @@
 NixOS and integrated Home Manager for workstations. Only `nixos-test`
 is active; finish boot and the installer ISO before migrating userland.
 
+## Develop
+
+```sh
+nix --extra-experimental-features 'nix-command flakes' develop path:.
+uv sync --locked
+just check
+```
+
+Run `just` to list commands, `just wizard` for the plan-only installer, and
+`just format` to format Python and Nix files. Development tools and the local
+`.venv` stay out of the ISO; it includes the configuration source and installer runtime.
+
 ## Check and build
 
 ```sh

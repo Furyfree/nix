@@ -10,13 +10,8 @@
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  users.users.user = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" ];
-    openssh.authorizedKeys.keys = [
-      
-    ];
-  };
+  time.timeZone = "Europe/Copenhagen";
+  i18n.defaultLocale = "en_DK.UTF-8";
 
   services.openssh = {
     enable = true;
