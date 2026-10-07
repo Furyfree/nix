@@ -9,7 +9,7 @@
     };
   };
 
-  outputs = { nixpkgs, home-manager, ... }: {
+  outputs = { self, nixpkgs, home-manager, ... }: {
     nixosConfigurations.nixos-test = nixpkgs.lib.nixosSystem {
       modules = [
         ./hosts/nixos-test/configuration.nix
@@ -20,6 +20,11 @@
           home-manager.users.user = ./hosts/nixos-test/home.nix;
         }
       ];
+    };
+
+    nixosConfigurations.installer = nixpkgs.lib.nixosSystem {
+      specialArgs = { inherit self; };
+      modules = [ ./hosts/installer/configuration.nix ];
     };
   };
 }
