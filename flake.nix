@@ -32,6 +32,7 @@
             nixfmt
             statix
             deadnix
+            caligula
             util-linux
             openssh
           ];
@@ -45,7 +46,8 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
           }
-        ];
+        ]
+        ++ nixpkgs.lib.optional (builtins.pathExists ./hosts/nixos-test/installation.nix) ./hosts/nixos-test/installation.nix;
       };
 
       nixosConfigurations.installer = nixpkgs.lib.nixosSystem {

@@ -31,6 +31,20 @@ build-iso:
     nix --extra-experimental-features 'nix-command flakes' build --no-write-lock-file --out-link result path:.#nixosConfigurations.installer.config.system.build.isoImage
     @find result/iso -maxdepth 1 -type f -name '*.iso' -print
 
+# Flash the built ISO; Caligula asks which drive to erase and confirms it
+burn:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    shopt -s nullglob
+    images=(result/iso/*.iso)
+    if (( ${#images[@]} != 1 )) || [[ ! -f "${images[0]}" ]]; then
+        printf 'Expected one ISO under result/iso/. Run just build-iso first.\n' >&2
+        exit 1
+    fi
+    image=$(realpath -- "${images[0]}")
+    caligula=$(command -v caligula)
+    exec "$caligula" burn --interactive always "$image"
+
 # Delete the linked ISO build; keep other builds and saved generations
 clean-iso:
     #!/usr/bin/env bash
@@ -66,6 +80,6 @@ clean-iso:
 gc:
     nix-collect-garbage
 
-# Open the plan-only installer
+# Preview the shared installer wizard without making changes
 wizard:
-    uv run --locked python scripts/install.py
+    uv run --locked python scripts/install.py --dry-run

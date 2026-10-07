@@ -1,4 +1,4 @@
-# Home Manager configuration for user on the NixOS test machine.
+# Home Manager configuration for the user on the NixOS test machine.
 { ... }:
 
 {

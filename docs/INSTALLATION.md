@@ -1,7 +1,9 @@
 # NixOS installation
 
 Install a disposable test machine with encrypted Btrfs and manual passphrase
-entry at boot. This machine has no TPM. Follow the
+entry at boot. This machine has no TPM. The username `user`, address
+`192.0.2.10` and repository disk UUIDs are examples; replace them before running
+commands. Follow the
 [NixOS manual installation process](https://nixos.org/manual/nixos/stable/#sec-installation-manual).
 
 ## 1. Boot the installer
@@ -340,8 +342,9 @@ snapshots.
 ## 12. Build the repo configuration
 
 The flake pins `nixos-unstable` and integrated Home Manager in `flake.lock`.
-It keeps both state-version settings at `26.05`. The disk UUIDs and public SSH
-key in `hosts/nixos-test/` belong to this machine.
+It keeps both state-version settings at `26.05`. The hardware file in
+`hosts/nixos-test/` uses example UUIDs. Replace it with the generated file for
+the target machine and supply your own public SSH key before activation.
 
 From the repo on your own computer, generate or verify the input lock and check
 the flake without building the system:
