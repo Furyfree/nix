@@ -1,5 +1,6 @@
 {
   self,
+  config,
   lib,
   pkgs,
   modulesPath,
@@ -16,6 +17,16 @@ let
       (lib.makeBinPath [
         pkgs.util-linux
         pkgs.openssh
+        pkgs.parted
+        pkgs.cryptsetup
+        pkgs.dosfstools
+        pkgs.btrfs-progs
+        pkgs.systemd
+        config.nix.package
+        pkgs.git
+        config.system.build.nixos-generate-config
+        config.system.build.nixos-install
+        pkgs.nixos-enter
       ])
     ];
   } ../../scripts/install.py;
@@ -32,16 +43,20 @@ in
   ];
 
   environment.systemPackages = [ setup ];
+  systemd.services."getty@tty1" = {
+    overrideStrategy = "asDropin";
+    serviceConfig.ExecStart = [
+      ""
+      "${lib.getExe' pkgs.util-linux "agetty"} --login-program ${config.services.getty.loginProgram} --issue-file /etc/issue:/etc/issue.d:/run/issue:/run/issue.d --autologin root --noclear --keep-baud %I 115200,38400,9600 $TERM"
+    ];
+  };
   programs.bash.loginShellInit = ''
     if [[ $- == *i* && -z "''${SSH_CONNECTION:-}" ]] &&
-       [[ "$(tty)" == /dev/tty1 && "$(id -un)" == nixos ]]; then
+       [[ "$(tty)" == /dev/tty1 && "$(id -un)" == root ]]; then
       ${setup}/bin/nixos-setup || true
     fi
   '';
 
-  # TODO: The install stage must save the chosen user, wheel/networkmanager groups,
-  # public key and Home Manager mapping in the target host config. Set passwords
-  # inside the target with native tools; never put them in the repo or Nix store.
   # Live ISO SSH access is separate: add a key to the temporary nixos account locally
   # after boot. Without an authorized key, remote SSH access is unavailable.
 

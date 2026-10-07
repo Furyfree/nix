@@ -49,7 +49,8 @@ and native NixOS image builders; `nixos-generators` is deprecated. Keep the live
 installer separate from workstation settings; it need not boot through Limine.
 
 - Build one ISO with a host menu for `nixos-test`, desktop and laptop.
-- Use Bash and standard NixOS tools, without Disko or another installer framework.
+- Use Python and Questionary with native NixOS tools, without Disko or another
+  installer framework.
 - Ask for the disk and mode: erase the whole disk or use unallocated space.
   Preserve mode must stop if space is insufficient; do not shrink or format
   existing partitions. Review disk/partition changes and confirm before writing.
@@ -62,9 +63,34 @@ installer separate from workstation settings; it need not boot through Limine.
   partitions, data and boot files, insufficient space, interrupted/repeated runs
   and boot repair before touching physical disks.
 
+Review `scripts/install.py` and `tests/test_installer.py` for a split by job:
+
+- Planning and disk discovery.
+- Wizard prompts and review.
+- Storage preparation, safety checks and cleanup.
+- Configuration cloning, generation and evaluation.
+- Native installation and verification.
+
+Keep `scripts/install.py` as a thin launcher. Split tests along the same
+boundaries and update ISO packaging to include all modules. Preserve behavior,
+disk guards, read-only previews and native password entry; add no framework or
+dependencies. Propose the exact files and wait for approval before code changes.
+Verify with the existing tests, type checks, flake evaluation and packaged wizard.
+
+Before the full installation test:
+
+1. Commit and push the installer changes to GitHub's `main`.
+2. Make the repository public.
+3. Build the ISO with `just build-iso`.
+4. Test `nixos-test` erase installation and boot in a disposable UEFI VM.
+   Attach throwaway virtual disks, not host disks.
+
+ISO builds work while the repo is private. Installation needs public access
+because the installer clones GitHub's latest `main`, keeping its lock file.
+
 ## Userland after boot
 
-1. Configure Hyprland/UWSM and Noctalia: auto-login as `user`, greeter after logout,
+1. Configure Hyprland/UWSM and Noctalia: auto-login as the chosen user, greeter after logout,
    and session locking before suspend or hibernation.
 2. Migrate shell, Git/SSH, CLI tools, Mise, editors and apps one tool at a time.
    Confirm the login shell and CLI editor before migration. Build and check each
