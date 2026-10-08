@@ -1,6 +1,7 @@
 """NixOS installation wizard with a read-only dry-run."""
 
 import argparse
+import fcntl
 import json
 import os
 import re
@@ -9,9 +10,9 @@ import subprocess
 import sys
 from collections.abc import Callable, Generator, Iterator
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, TemporaryFile
 from typing import Any
 
 import questionary
@@ -78,6 +79,7 @@ class PreparedStorage:
     luks_device: str
     resume_device: str
     resume_offset: int
+    password_fd: int = -1
 
 
 def device_tree(device: dict[str, Any]) -> Iterator[dict[str, Any]]:
@@ -249,21 +251,11 @@ def ask(question: questionary.Question) -> Any:
     return answer
 
 
-def collect_plan() -> Plan:
-    host = ask(
-        questionary.select(
-            "Target host",
-            choices=[
-                "desktop",
-                "laptop",
-                "nixos-test",
-            ],
-        )
-    )
-    disks = discover_disks()
+def choose_disk() -> Disk:
+    disks = tuple(d for d in discover_disks() if not d.mounted and not d.busy)
     if not disks:
         raise ValueError("No writable disks found.")
-    disk = ask(
+    return ask(
         questionary.select(
             "Target disk",
             choices=[
@@ -275,13 +267,10 @@ def collect_plan() -> Plan:
             ],
         )
     )
-    mode = ask(
-        questionary.select(
-            "Storage mode",
-            choices=["erase", "preserve"],
-        )
-    )
-    storage = plan_storage(disk, mode)
+
+
+def collect_plan() -> Plan:
+    storage = plan_storage(choose_disk(), "erase")
 
     def validate_username(text: str) -> str | bool:
         return username_error(text) or True
@@ -289,98 +278,246 @@ def collect_plan() -> Plan:
     username = ask(
         questionary.text("Installed username", validate=validate_username)
     )
-    while True:
-        ssh_key = ask(questionary.text("SSH public key (optional)"))
-        try:
-            fingerprint = key_fingerprint(ssh_key)
-            break
-        except ValueError as error:
-            print(error)
     ram = detect_ram()
     suggestion = suggested_swap(ram)
-    print(f"\nDetected usable RAM: {ram / GIB:.1f} GiB")
-    print(f"Suggested swap: {suggestion} GiB")
-    print(f"Candidate NixOS space: {storage.capacity / GIB:.1f} GiB")
-    if mode == "preserve":
-        print("Estimate is an upper bound: EFI allocation is unresolved.")
+    plan = Plan("nixos-test", username, "", "none", storage, ram, suggestion)
     if swap_error(str(suggestion), storage.capacity):
-        print("Suggested swap will not fit. Choose a smaller size or cancel.")
-    else:
-        fraction = suggestion * GIB / storage.capacity
-        remaining = storage.capacity / GIB - suggestion
-        print(f"Suggestion uses {fraction:.1%}, leaving {remaining:.1f} GiB.")
+        print(f"Suggested swap ({suggestion} GiB) will not fit.")
+        plan = change_setting(plan, "Swap size")
+    return plan
+
+
+def change_setting(plan: Plan, setting: str) -> Plan:
+    if setting == "SSH public key":
+        while True:
+            key = ask(questionary.text(setting, default=plan.ssh_key))
+            try:
+                return replace(
+                    plan, ssh_key=key, fingerprint=key_fingerprint(key)
+                )
+            except ValueError as error:
+                print(error)
+    if setting == "Username":
+
+        def validate_username(text: str) -> str | bool:
+            return username_error(text) or True
+
+        name = ask(
+            questionary.text(
+                setting,
+                default=plan.username,
+                validate=validate_username,
+            )
+        )
+        return replace(plan, username=name)
+    if setting == "Disk":
+        plan = replace(plan, storage=plan_storage(choose_disk(), "erase"))
+        if not swap_error(str(plan.swap_gib), plan.storage.capacity):
+            return plan
 
     def validate_swap(text: str) -> str | bool:
-        return swap_error(text, storage.capacity) or True
+        return swap_error(text, plan.storage.capacity) or True
 
     swap = ask(
         questionary.text(
             "Swap size in whole GiB",
-            default=str(suggestion),
+            default=str(plan.swap_gib),
             validate=validate_swap,
         )
     )
-    return Plan(host, username, ssh_key, fingerprint, storage, ram, int(swap))
+    return replace(plan, swap_gib=int(swap))
 
 
 def show_plan(plan: Plan) -> None:
     storage = plan.storage
-    print("\n--- Installation preview ---")
+    print("\n--- Installation review ---")
     print(f"Host: {plan.host}\nUser: {plan.username}")
     print(f"SSH key: {plan.fingerprint}")
-    print(f"Disk: {storage.disk.path} ({storage.disk.size / GIB:.1f} GiB)")
+    print(
+        f"Disk: {storage.disk.path} ({storage.disk.size / GIB:.1f} GiB)"
+        f" — {storage.disk.model}"
+    )
     if storage.disk.identity[1]:
         print(f"Disk serial: {storage.disk.identity[1]}")
     if storage.disk.identity[2]:
         print(f"Disk WWN: {storage.disk.identity[2]}")
     print(f"Mode: {storage.mode}")
-    if storage.mode == "erase":
-        print("Would replace the disk layout: 4 GiB FAT32 EFI at /boot,")
-        print("then LUKS2-encrypted Btrfs.")
-    else:
-        print(f"Aligned free extent: [{storage.start}, {storage.end}) bytes.")
-        print(
-            "Existing partitions stay untouched. EFI handling is UNRESOLVED."
-        )
-    print("Btrfs subvolumes: " + ", ".join(name for name, _ in SUBVOLUMES))
-    print("/nix stays inside root. Windows VM storage is deferred.")
-    print("Swap is encrypted at /var/swap/swapfile.")
+    print("ERASE: all existing data on this disk will be lost.")
+    print("Layout: 4 GiB EFI + LUKS2-encrypted Btrfs.")
+    print(f"RAM: {plan.ram / GIB:.1f} GiB")
     fraction = plan.swap_gib * GIB / storage.capacity
     remaining = storage.capacity / GIB - plan.swap_gib
     print(f"Swap: {plan.swap_gib} GiB ({fraction:.1%} of candidate space)")
     print(f"Space after swap: {remaining:.1f} GiB, before overhead/packages.")
     if plan.swap_gib < suggested_swap(plan.ram):
         print("WARNING: Swap is below the suggestion; hibernation may fail.")
-    print("UUIDs, passwords and resume offset are set during installation.")
-    print("This preview does not prove that an installation will fit or boot.")
-    if storage.mode == "erase":
-        print("\nDisk preparation stages (not executed in this preview):")
-        print("1. Check disk identity and usage; require typed confirmation.")
-        print("2. Erase old signatures; create GPT and 4 GiB EFI partitions.")
-        print("3. Format EFI; cryptsetup prompts for the LUKS2 passphrase.")
-        print("4. Create Btrfs and the nine subvolumes; mount the layout.")
-        print(
-            f"5. Create {plan.swap_gib} GiB swap; measure its resume offset."
-        )
-    print("\nConfiguration stages (not executed in this preview):")
-    print(f"Clone latest main: {SOURCE_FLAKE}; keep its flake.lock.")
-    print(f"Installed checkout: /home/{plan.username}/Projects/nix")
-    if plan.host != "nixos-test" or storage.mode != "erase":
-        print(
-            "BLOCKED: configuration generation supports nixos-test erase only."
-        )
-    print("Check the checkout and chosen settings before disk erasure.")
     print(
-        f"Generate hosts/{plan.host}/hardware-configuration.nix from mounts."
+        f"Checkout: /home/{plan.username}/Projects/nix"
+        " (latest main, locked inputs)"
     )
-    print(f"Generate hosts/{plan.host}/installation.nix with user/key/swap.")
-    print("Keep configuration.nix and home.nix; measure fresh UUIDs/offset.")
-    print("Evaluate the configuration; passwords stay outside Nix files.")
-    print("\nInstallation stages (not executed in this review):")
-    print("Install the generated flake; nixos-install asks for root password.")
-    print("Set the user password with native passwd; give them the checkout.")
-    print("Check the installed system, EFI files and swap/resume settings.")
-    print("Release mounts/mapping, then offer reboot (default: no).")
+    print("Password: shared by disk encryption, root and your user.")
+
+
+def review_plan(plan: Plan, *, dry_run: bool) -> Plan:
+    while True:
+        show_plan(plan)
+        action = ask(
+            questionary.select(
+                "Review",
+                choices=[
+                    "Finish preview"
+                    if dry_run
+                    else "Continue to installation",
+                    "Change settings",
+                    "Cancel",
+                ],
+            )
+        )
+        if action == "Cancel":
+            raise KeyboardInterrupt
+        if action != "Change settings":
+            return plan
+        setting = ask(
+            questionary.select(
+                "Change settings",
+                choices=[
+                    "Disk",
+                    "Username",
+                    "SSH public key",
+                    "Swap size",
+                    "Back",
+                ],
+            )
+        )
+        if setting != "Back":
+            plan = change_setting(plan, setting)
+
+
+def run_command(command: list[str], **kwargs: Any) -> None:
+    """Keep routine output quiet; show diagnostics if a command fails."""
+    with TemporaryFile() as output:
+        try:
+            subprocess.run(
+                command,
+                check=True,
+                stdout=output,
+                stderr=subprocess.STDOUT,
+                **kwargs,
+            )
+        except BaseException:
+            output.seek(0)
+            print(
+                output.read().decode(errors="replace"), end="", file=sys.stderr
+            )
+            raise
+
+
+def command_output(command: list[str], **kwargs: Any) -> str:
+    with TemporaryFile() as errors:
+        try:
+            return subprocess.check_output(
+                command, text=True, stderr=errors, **kwargs
+            )
+        except BaseException:
+            errors.seek(0)
+            print(
+                errors.read().decode(errors="replace"), end="", file=sys.stderr
+            )
+            raise
+
+
+@contextmanager
+def memory_file() -> Generator[int]:
+    fd = os.memfd_create("nixos-setup", os.MFD_CLOEXEC | os.MFD_ALLOW_SEALING)
+    try:
+        os.fchmod(fd, 0o600)
+        yield fd
+    finally:
+        os.close(fd)
+
+
+def seal_file(fd: int) -> None:
+    fcntl.fcntl(
+        fd,
+        fcntl.F_ADD_SEALS,
+        fcntl.F_SEAL_WRITE
+        | fcntl.F_SEAL_GROW
+        | fcntl.F_SEAL_SHRINK
+        | fcntl.F_SEAL_SEAL,
+    )
+
+
+@contextmanager
+def native_password() -> Generator[int]:
+    """Only native tools read/write password bytes; Python owns the handles."""
+    with memory_file() as password:
+        with memory_file() as confirmation:
+            while True:
+                for fd, prompt in (
+                    (password, "Password for disk, root and user:"),
+                    (confirmation, "Confirm password:"),
+                ):
+                    os.ftruncate(fd, 0)
+                    os.lseek(fd, 0, os.SEEK_SET)
+                    subprocess.run(
+                        [
+                            "systemd-ask-password",
+                            "-n",
+                            "--echo=masked",
+                            "--timeout=180",
+                            prompt,
+                        ],
+                        stdout=fd,
+                        check=True,
+                        timeout=190,
+                    )
+                result = subprocess.run(
+                    [
+                        "cmp",
+                        "--silent",
+                        f"/proc/self/fd/{password}",
+                        f"/proc/self/fd/{confirmation}",
+                    ],
+                    pass_fds=(password, confirmation),
+                    check=False,
+                    timeout=10,
+                )
+                if result.returncode not in (0, 1):
+                    raise subprocess.CalledProcessError(
+                        result.returncode, result.args
+                    )
+                if result.returncode == 0 and os.fstat(password).st_size > 0:
+                    break
+                print("Passwords must be nonempty and match. Try again.")
+        seal_file(password)
+        yield password
+
+
+def set_passwords(plan: Plan, storage: PreparedStorage) -> None:
+    with memory_file() as records:
+        for user in ("root", plan.username):
+            subprocess.run(
+                ["printf", "%s:", user], stdout=records, check=True, timeout=10
+            )
+            subprocess.run(
+                ["cat", f"/proc/self/fd/{storage.password_fd}"],
+                pass_fds=(storage.password_fd,),
+                stdout=records,
+                check=True,
+                timeout=10,
+            )
+            subprocess.run(
+                ["printf", "\\n"], stdout=records, check=True, timeout=10
+            )
+        seal_file(records)
+        os.lseek(records, 0, os.SEEK_SET)
+        run_command(
+            enter_command(
+                storage, "/nix/var/nix/profiles/system/sw/bin/chpasswd"
+            ),
+            stdin=records,
+            timeout=60,
+        )
 
 
 def nix_string(value: str) -> str:
@@ -454,7 +591,7 @@ def evaluate_configuration(
         (builtins.filter (a: !a.assertion) c.assertions);
     }}"""
     result = json.loads(
-        subprocess.check_output(
+        command_output(
             [
                 "nix",
                 "--extra-experimental-features",
@@ -467,7 +604,6 @@ def evaluate_configuration(
                 "--apply",
                 expression,
             ],
-            text=True,
             timeout=300,
         )
     )
@@ -520,7 +656,7 @@ def prepare_checkout(plan: Plan) -> Generator[Path]:
     with TemporaryDirectory(prefix="nixos-setup-") as directory:
         repo = Path(directory) / "nix"
         print(f"Cloning latest main from {SOURCE_FLAKE}...")
-        subprocess.run(
+        run_command(
             [
                 "nix",
                 "--extra-experimental-features",
@@ -531,7 +667,6 @@ def prepare_checkout(plan: Plan) -> Generator[Path]:
                 "--dest",
                 str(repo),
             ],
-            check=True,
             timeout=180,
             env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
         )
@@ -602,7 +737,7 @@ def generate_configuration(
         )
     }
     print("Generating hardware settings from the mounted installation...")
-    subprocess.run(
+    run_command(
         [
             "nixos-generate-config",
             "--root",
@@ -610,7 +745,6 @@ def generate_configuration(
             "--dir",
             str(host),
         ],
-        check=True,
         timeout=120,
     )
     (host / "installation.nix").write_text(settings)
@@ -770,25 +904,23 @@ def partition_devices(storage: StoragePlan) -> tuple[str, str]:
 def prepare_storage(
     plan: Plan,
     *,
+    password_fd: int,
+    confirmation: str,
     before_write: Callable[[], None] | None = None,
 ) -> Generator[PreparedStorage]:
     """Prepare storage; keep it mounted for the caller, then clean up."""
     storage_preflight(plan)
-    confirmation = ask(
-        questionary.text(
-            f"Erase {plan.storage.disk.path}? Type its full device path"
-        )
-    )
     if confirmation != plan.storage.disk.path:
         raise ValueError("Disk confirmation did not match. No changes made.")
-    storage_preflight(plan)
+    if password_fd < 0 or os.fstat(password_fd).st_size == 0:
+        raise ValueError("Missing shared installation password.")
     storage = plan.storage
     mounts: list[Path] = []
     opened = False
     modified = False
 
-    def run(command: list[str]) -> None:
-        subprocess.run(command, check=True)
+    def run(command: list[str], **kwargs: Any) -> None:
+        run_command(command, **kwargs)
 
     def mount(device: str, target: Path, options: str) -> None:
         if target.is_symlink() or os.path.ismount(target):
@@ -798,7 +930,9 @@ def prepare_storage(
         mounts.append(target)
 
     try:
-        print("Preparing GPT and EFI partitions...")
+        # Review and cloning can take time; recheck immediately before erasure.
+        storage_preflight(plan)
+        print("Preparing encrypted storage...")
         modified = True
         if before_write is not None:
             before_write()
@@ -840,9 +974,24 @@ def prepare_storage(
         run(["udevadm", "settle", "--timeout=10"])
         efi, luks = partition_devices(storage)
         run(["mkfs.fat", "-F", "32", "-n", "BOOT", efi])
-        print("Creating LUKS2; cryptsetup will ask for the disk passphrase.")
-        run(["cryptsetup", "luksFormat", "--type", "luks2", luks])
-        run(["cryptsetup", "open", luks, "cryptroot"])
+        key_file = f"/proc/self/fd/{password_fd}"
+        run(
+            [
+                "cryptsetup",
+                "luksFormat",
+                "--type",
+                "luks2",
+                "--batch-mode",
+                "--key-file",
+                key_file,
+                luks,
+            ],
+            pass_fds=(password_fd,),
+        )
+        run(
+            ["cryptsetup", "open", "--key-file", key_file, luks, "cryptroot"],
+            pass_fds=(password_fd,),
+        )
         opened = True
         run(["mkfs.btrfs", "-L", "nixos", MAPPER])
         print("Creating Btrfs subvolumes...")
@@ -891,7 +1040,9 @@ def prepare_storage(
         )
         if offset < 0:
             raise ValueError("Invalid swap resume offset.")
-        yield PreparedStorage(INSTALL_ROOT, efi, luks, MAPPER, offset)
+        yield PreparedStorage(
+            INSTALL_ROOT, efi, luks, MAPPER, offset, password_fd
+        )
     finally:
         failed = sys.exception() is not None
         if failed and modified:
@@ -934,8 +1085,10 @@ def finish_installation(
         raise ValueError("Installation checkout is outside the chosen home.")
     before = (repo / "flake.lock").read_bytes()
     expected = evaluate_configuration(repo, plan, storage.resume_offset)
-    print("Installing NixOS; nixos-install will ask for the root password...")
-    subprocess.run(
+    if storage.password_fd < 0 or os.fstat(storage.password_fd).st_size == 0:
+        raise ValueError("Missing shared installation password.")
+    print("Installing NixOS...")
+    run_command(
         [
             "nixos-install",
             "--root",
@@ -945,16 +1098,15 @@ def finish_installation(
             "--no-channel-copy",
             "--no-write-lock-file",
             "--no-update-lock-file",
+            "--no-root-password",
         ],
-        check=True,
         timeout=3600,
     )
     bin_path = "/nix/var/nix/profiles/system/sw/bin/"
 
     def query(*command: str) -> str:
-        return subprocess.check_output(
+        return command_output(
             enter_command(storage, *command),
-            text=True,
             timeout=60,
             env={**os.environ, "LC_ALL": "C"},
         ).strip()
@@ -964,12 +1116,9 @@ def finish_installation(
         if len(status) < 2 or status[:2] != [user, "P"]:
             raise ValueError(f"Password is not set for {user}.")
 
+    print("Setting account passwords...")
+    set_passwords(plan, storage)
     password_set("root")
-    print(f"Set the password for {plan.username} with native passwd...")
-    subprocess.run(
-        enter_command(storage, bin_path + "passwd", plan.username),
-        check=True,
-    )
     password_set(plan.username)
     uid = int(query(bin_path + "id", "-u", plan.username))
     gid = int(query(bin_path + "id", "-g", plan.username))
@@ -981,9 +1130,8 @@ def finish_installation(
         ["--no-dereference", "--", owner, home, home + "/Projects"],
         ["-R", "--no-dereference", "--", owner, home + "/Projects/nix"],
     ):
-        subprocess.run(
+        run_command(
             enter_command(storage, bin_path + "chown", *arguments),
-            check=True,
             timeout=120,
         )
     print("Checking the installed system and checkout...")
@@ -992,9 +1140,8 @@ def finish_installation(
         raise ValueError(
             "Installed system does not match the generated flake."
         )
-    subprocess.run(
+    run_command(
         enter_command(storage, bin_path + "test", "-x", system + "/init"),
-        check=True,
         timeout=60,
     )
     for path in (
@@ -1065,13 +1212,39 @@ def install(plan: Plan) -> int:
                 "Installation requires an interactive root console."
             )
         storage_preflight(plan)
-        for tool in ("nixos-install", "nixos-enter", "systemctl"):
+        for tool in (
+            "nixos-install",
+            "nixos-enter",
+            "systemctl",
+            "systemd-ask-password",
+            "cmp",
+            "cat",
+            "printf",
+        ):
             if shutil.which(tool) is None:
                 raise ValueError(f"Missing installation tool: {tool}")
-        with prepare_checkout(plan) as checkout:
-            with prepare_storage(plan, before_write=mark_modified) as storage:
-                repo = generate_configuration(plan, storage, checkout)
-                finish_installation(plan, storage, repo)
+        with native_password() as password_fd:
+            plan = review_plan(plan, dry_run=False)
+            storage_preflight(plan)
+            confirmation = ask(
+                questionary.text(
+                    f"Erase {plan.storage.disk.path}?"
+                    " Type its full device path"
+                )
+            )
+            if confirmation != plan.storage.disk.path:
+                raise ValueError(
+                    "Disk confirmation did not match. No changes made."
+                )
+            with prepare_checkout(plan) as checkout:
+                with prepare_storage(
+                    plan,
+                    password_fd=password_fd,
+                    confirmation=confirmation,
+                    before_write=mark_modified,
+                ) as storage:
+                    repo = generate_configuration(plan, storage, checkout)
+                    finish_installation(plan, storage, repo)
     except KeyboardInterrupt, EOFError:
         if modified:
             print(
@@ -1129,16 +1302,9 @@ def main(argv: list[str] | None = None) -> int:
         )
     try:
         plan = collect_plan()
-        show_plan(plan)
         if not args.dry_run:
             return install(plan)
-        if not ask(
-            questionary.confirm(
-                "Finish this preview? No installation will run.",
-                default=False,
-            )
-        ):
-            raise KeyboardInterrupt
+        review_plan(plan, dry_run=True)
     except KeyboardInterrupt, EOFError:
         print("\nPlanning cancelled. No changes made.")
         return 0

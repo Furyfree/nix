@@ -30,13 +30,17 @@ generate hardware settings before deploying it to an existing machine.
 ## Install
 
 Boot the ISO in a disposable UEFI VM. The local console starts
-`nixos-setup` as root. Only `nixos-test` with erase mode is supported. Review the
-plan, then type the selected disk's full path to authorize erasure. Native tools
-prompt for the disk passphrase and root/user passwords. Reboot is optional.
-`nixos-setup --dry-run` and `just wizard` preview without cloning or writing.
+`nixos-setup` as root. Choose a disk and username; use **Change settings** for
+SSH keys or swap size. Only `nixos-test` with erase mode is supported. Enter and
+confirm one password for disk encryption, root and your user, then review the
+settings and type the disk's full path to authorize erasure. Installation runs
+without more setup questions. Native tools handle password text outside Python,
+Git and the Nix store. Reboot is optional.
+`nixos-setup --dry-run` and `just wizard` skip passwords and erase authorization;
+they preview without cloning or writing.
 
 The installer needs internet access and public `main` containing these changes.
-The repo is still private; full installation/boot VM testing is blocked.
+Full installation/boot VM testing is still pending.
 Do not use this installer on a physical disk until that test passes.
 
 ## Installed checkout

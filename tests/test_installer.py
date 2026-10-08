@@ -1,13 +1,19 @@
 """Controlled planner examples; no disks are written or installed."""
 
 import base64
+import fcntl
 import importlib.util
 import io
 import json
+import os
+import pty
+import select
 import shutil
+import signal
 import struct
 import subprocess
 import sys
+import time
 import unittest
 from collections.abc import Generator
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
@@ -625,6 +631,14 @@ class StorageExecutionTests(unittest.TestCase):
     def __init__(self, methodName: str = "runTest") -> None:
         super().__init__(methodName)
         self.target = disk()
+        credentials = installer.memory_file()
+        password_fd = credentials.__enter__()
+        self.addCleanup(credentials.__exit__, None, None, None)
+        os.write(password_fd, b"disposable storage fixture")
+        self.storage_args: dict[str, Any] = {
+            "password_fd": password_fd,
+            "confirmation": self.target.path,
+        }
         self.plan = installer.Plan(
             "nixos-test",
             "river",
@@ -713,10 +727,19 @@ class StorageExecutionTests(unittest.TestCase):
             patch.object(
                 questionary.Question,
                 "unsafe_ask",
-                return_value=self.target.path,
+                side_effect=AssertionError(
+                    "Storage preparation asked a question"
+                ),
             ),
             patch.object(subprocess, "check_output", side_effect=probe),
             patch.object(subprocess, "run", side_effect=run) as execute,
+            patch.object(
+                installer,
+                "native_password",
+                side_effect=AssertionError(
+                    "Storage preparation asked for a password"
+                ),
+            ),
             patch.object(
                 subprocess,
                 "Popen",
@@ -729,7 +752,9 @@ class StorageExecutionTests(unittest.TestCase):
 
     def test_storage_builds_reviewed_layout_and_releases_owned_resources(self):
         with self.environment():
-            with installer.prepare_storage(self.plan) as prepared:
+            with installer.prepare_storage(
+                self.plan, **self.storage_args
+            ) as prepared:
                 self.assertEqual(prepared.root, Path("/mnt"))
                 self.assertEqual(prepared.efi_device, "/dev/fixture-efi")
                 self.assertEqual(prepared.luks_device, "/dev/fixture-system")
@@ -769,16 +794,17 @@ class StorageExecutionTests(unittest.TestCase):
             ["mkfs.fat", "-F", "32", "-n", "BOOT", "/dev/fixture-efi"],
             self.commands,
         )
-        self.assertIn(
-            [
-                "cryptsetup",
-                "luksFormat",
-                "--type",
-                "luks2",
-                "/dev/fixture-system",
-            ],
-            self.commands,
+        encryption = next(
+            c for c in self.commands if c[:2] == ["cryptsetup", "luksFormat"]
         )
+        self.assertIn("--batch-mode", encryption)
+        self.assertEqual(encryption[-1], "/dev/fixture-system")
+        key = encryption[encryption.index("--key-file") + 1]
+        self.assertTrue(key.startswith("/proc/self/fd/"))
+        opening = next(
+            c for c in self.commands if c[:2] == ["cryptsetup", "open"]
+        )
+        self.assertEqual(opening[opening.index("--key-file") + 1], key)
         self.assertIn(
             [
                 "btrfs",
@@ -835,7 +861,9 @@ class StorageExecutionTests(unittest.TestCase):
 
             execute.side_effect = run
             with self.assertRaises(subprocess.CalledProcessError):
-                with installer.prepare_storage(self.plan, before_write=marker):
+                with installer.prepare_storage(
+                    self.plan, **self.storage_args, before_write=marker
+                ):
                     self.fail("Failed wipe should stop preparation")
         marker.assert_called_once_with()
         self.assertIn("disk was modified", self.output.getvalue())
@@ -856,7 +884,7 @@ class StorageExecutionTests(unittest.TestCase):
             48,
         )
         with self.environment():
-            with installer.prepare_storage(self.plan):
+            with installer.prepare_storage(self.plan, **self.storage_args):
                 pass
         self.assertEqual(
             self.commands[0],
@@ -885,7 +913,9 @@ class StorageExecutionTests(unittest.TestCase):
                     ),
                 }[name]
                 with change, self.assertRaises((PermissionError, ValueError)):
-                    with installer.prepare_storage(self.plan):
+                    with installer.prepare_storage(
+                        self.plan, **self.storage_args
+                    ):
                         self.fail("Unsafe storage preparation was allowed")
                 self.assertFalse(self.commands)
 
@@ -915,7 +945,7 @@ class StorageExecutionTests(unittest.TestCase):
         for plan in plans:
             with self.subTest(plan=plan), self.environment():
                 with self.assertRaises(ValueError):
-                    with installer.prepare_storage(plan):
+                    with installer.prepare_storage(plan, **self.storage_args):
                         self.fail("Unsafe storage preparation was allowed")
                 self.assertFalse(self.commands)
 
@@ -933,7 +963,9 @@ class StorageExecutionTests(unittest.TestCase):
             )
             with self.subTest(target=target), self.environment():
                 with self.assertRaisesRegex(ValueError, "identity"):
-                    with installer.prepare_storage(self.plan):
+                    with installer.prepare_storage(
+                        self.plan, **self.storage_args
+                    ):
                         self.fail("Disk without stable identity was accepted")
                 self.assertFalse(self.commands)
 
@@ -947,9 +979,23 @@ class StorageExecutionTests(unittest.TestCase):
                 discover, _ = mocks
                 discover.side_effect = [(self.target,), (changed,)]
                 with self.assertRaisesRegex(ValueError, "changed"):
-                    with installer.prepare_storage(self.plan):
+                    with installer.prepare_storage(
+                        self.plan, **self.storage_args
+                    ):
                         self.fail("Changed disk was accepted")
                 self.assertFalse(self.commands)
+
+    def test_missing_shared_password_stops_before_writes(self):
+        with installer.memory_file() as empty:
+            for fd in [-1, empty]:
+                with self.subTest(fd=fd), self.environment():
+                    arguments = {**self.storage_args, "password_fd": fd}
+                    with self.assertRaisesRegex(ValueError, "password"):
+                        with installer.prepare_storage(self.plan, **arguments):
+                            self.fail(
+                                "Storage preparation accepted no password"
+                            )
+                    self.assertFalse(self.commands)
 
     def test_active_kernel_holders_and_foreign_resources_are_not_touched(self):
         for name in ["holders", "mapper", "mount"]:
@@ -966,7 +1012,9 @@ class StorageExecutionTests(unittest.TestCase):
                     ),
                 }[name]
                 with change, self.assertRaises(ValueError):
-                    with installer.prepare_storage(self.plan):
+                    with installer.prepare_storage(
+                        self.plan, **self.storage_args
+                    ):
                         self.fail("Foreign resource was accepted")
                 self.assertFalse(self.commands)
 
@@ -984,21 +1032,17 @@ class StorageExecutionTests(unittest.TestCase):
             48,
         )
         with self.environment(), self.assertRaisesRegex(ValueError, "belong"):
-            with installer.prepare_storage(self.plan):
+            with installer.prepare_storage(self.plan, **self.storage_args):
                 self.fail("Foreign partition was accepted")
         self.assertFalse(self.commands)
 
-    def test_confirmation_mismatch_and_cancellation_make_no_changes(self):
-        for answer in ["/dev/other", KeyboardInterrupt(), EOFError()]:
+    def test_confirmation_mismatch_makes_no_changes(self):
+        for answer in ["", "/dev/other"]:
             with self.subTest(answer=answer), self.environment():
-                with patch.object(
-                    questionary.Question, "unsafe_ask", side_effect=[answer]
-                ):
-                    with self.assertRaises(
-                        (ValueError, KeyboardInterrupt, EOFError)
-                    ):
-                        with installer.prepare_storage(self.plan):
-                            self.fail("Unconfirmed erasure was allowed")
+                arguments = {**self.storage_args, "confirmation": answer}
+                with self.assertRaisesRegex(ValueError, "confirmation"):
+                    with installer.prepare_storage(self.plan, **arguments):
+                        self.fail("Unconfirmed erasure was allowed")
                 self.assertFalse(self.commands)
                 self.assertNotIn("disk was modified", self.output.getvalue())
 
@@ -1020,7 +1064,9 @@ class StorageExecutionTests(unittest.TestCase):
                 part.update(change)
                 try:
                     with self.assertRaises(ValueError):
-                        with installer.prepare_storage(self.plan):
+                        with installer.prepare_storage(
+                            self.plan, **self.storage_args
+                        ):
                             self.fail("Unexpected partition was accepted")
                     self.assertFalse(
                         any(c[0].startswith("mkfs") for c in self.commands)
@@ -1033,7 +1079,7 @@ class StorageExecutionTests(unittest.TestCase):
         self,
     ):
         with self.environment():
-            with installer.prepare_storage(self.plan):
+            with installer.prepare_storage(self.plan, **self.storage_args):
                 steps = list(self.commands)
         for index, failed_command in enumerate(steps):
             self.commands.clear()
@@ -1057,7 +1103,9 @@ class StorageExecutionTests(unittest.TestCase):
 
                 execute.side_effect = fail_step
                 with self.assertRaises(subprocess.CalledProcessError):
-                    with installer.prepare_storage(self.plan):
+                    with installer.prepare_storage(
+                        self.plan, **self.storage_args
+                    ):
                         self.fail("Failed command did not stop preparation")
                 self.assertEqual(
                     self.commands[: index + 1], steps[: index + 1]
@@ -1090,7 +1138,9 @@ class StorageExecutionTests(unittest.TestCase):
                     ],
                 ):
                     with self.assertRaises(ValueError):
-                        with installer.prepare_storage(self.plan):
+                        with installer.prepare_storage(
+                            self.plan, **self.storage_args
+                        ):
                             self.fail("Invalid resume offset was accepted")
                 self.assertEqual(
                     self.commands[-1], ["cryptsetup", "close", "cryptroot"]
@@ -1107,7 +1157,9 @@ class StorageExecutionTests(unittest.TestCase):
                 side_effect=foreign_mount,
             ):
                 with self.assertRaisesRegex(ValueError, "already in use"):
-                    with installer.prepare_storage(self.plan):
+                    with installer.prepare_storage(
+                        self.plan, **self.storage_args
+                    ):
                         self.fail("Foreign mount was overmounted")
         self.assertNotIn(["umount", "--", "/mnt/home"], self.commands)
         self.assertNotIn(
@@ -1119,7 +1171,9 @@ class StorageExecutionTests(unittest.TestCase):
             self.commands.clear()
             with self.subTest(error=error), self.environment():
                 with self.assertRaises(type(error)):
-                    with installer.prepare_storage(self.plan):
+                    with installer.prepare_storage(
+                        self.plan, **self.storage_args
+                    ):
                         raise error
                 self.assertEqual(
                     self.commands[-1], ["cryptsetup", "close", "cryptroot"]
@@ -1139,14 +1193,14 @@ class StorageExecutionTests(unittest.TestCase):
 
             execute.side_effect = fail_unmount
             with self.assertRaisesRegex(RuntimeError, "cleanup"):
-                with installer.prepare_storage(self.plan):
+                with installer.prepare_storage(self.plan, **self.storage_args):
                     pass
         self.assertNotIn(["cryptsetup", "close", "cryptroot"], self.commands)
         self.assertIn("cleanup failed", self.output.getvalue())
 
     def test_repeating_a_stale_plan_cannot_erase_again(self):
         with self.environment():
-            with installer.prepare_storage(self.plan):
+            with installer.prepare_storage(self.plan, **self.storage_args):
                 pass
         self.commands.clear()
         changed = installer.parse_disks(self.new_devices)[0]
@@ -1154,9 +1208,296 @@ class StorageExecutionTests(unittest.TestCase):
             discover, _ = mocks
             discover.return_value = (changed,)
             with self.assertRaisesRegex(ValueError, "changed"):
-                with installer.prepare_storage(self.plan):
+                with installer.prepare_storage(self.plan, **self.storage_args):
                     self.fail("Stale plan was reused")
         self.assertFalse(self.commands)
+
+
+class CredentialTests(unittest.TestCase):
+    def test_real_native_prompts_confirm_without_echoing_password_text(self):
+        if __name__ != "__main__":
+            # xdist has threads; fork the TTY only in a fresh interpreter.
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    __file__,
+                    self.id().removeprefix(__name__ + "."),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=25,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            return
+        pid, terminal = pty.fork()
+        if pid == 0:
+            try:
+                with installer.native_password() as fd:
+                    matches = os.pread(fd, 100, 0) == b"disposable-tty-fixture"
+                os._exit(0 if matches else 1)
+            except BaseException:
+                os._exit(1)
+        finished = False
+        output = b""
+        prompts = [b"Password for disk, root and user:", b"Confirm password:"]
+        try:
+            deadline = time.monotonic() + 15
+            while time.monotonic() < deadline:
+                child, status = os.waitpid(pid, os.WNOHANG)
+                if child:
+                    finished = True
+                    self.assertEqual(os.waitstatus_to_exitcode(status), 0)
+                    break
+                readable, _, _ = select.select([terminal], [], [], 0.1)
+                if readable:
+                    try:
+                        output += os.read(terminal, 4096)
+                    except OSError:
+                        continue
+                if prompts and prompts[0] in output:
+                    prompts.pop(0)
+                    os.write(terminal, b"disposable-tty-fixture\n")
+            self.assertTrue(finished, "Native password prompt timed out")
+            self.assertFalse(prompts, "Both native prompts must appear")
+            self.assertNotIn(b"disposable-tty-fixture", output)
+        finally:
+            if not finished:
+                os.killpg(pid, signal.SIGKILL)
+                os.waitpid(pid, 0)
+            os.close(terminal)
+
+    def test_native_confirmation_retries_and_closes_secret_handles(self):
+        original_run: Any = subprocess.run
+        handles: list[int] = []
+        answers = iter(
+            [
+                b"",
+                b"",
+                b"first fixture",
+                b"different fixture",
+                b"matched fixture",
+                b"matched fixture",
+            ]
+        )
+
+        def run(command: list[str], **kwargs: Any) -> Any:
+            self.assertNotIn("input", kwargs)
+            self.assertNotIn("capture_output", kwargs)
+            if command[0] == "systemd-ask-password":
+                fd = kwargs["stdout"]
+                handles.append(fd)
+                self.assertEqual(os.fstat(fd).st_mode & 0o777, 0o600)
+                self.assertIn("-n", command)
+                os.write(fd, next(answers))
+                return subprocess.CompletedProcess[bytes](command, 0)
+            result: subprocess.CompletedProcess[bytes] = original_run(
+                command, **kwargs
+            )
+            return result
+
+        with (
+            patch.object(subprocess, "run", side_effect=run),
+            redirect_stdout(io.StringIO()),
+        ):
+            with installer.native_password() as fd:
+                self.assertEqual(os.pread(fd, 100, 0), b"matched fixture")
+                with self.assertRaises(OSError):
+                    os.write(fd, b"cannot overwrite")
+                self.assertTrue(
+                    fcntl.fcntl(fd, fcntl.F_GETFD) & fcntl.FD_CLOEXEC
+                )
+        self.assertEqual(len(handles), 6)
+        for handle in set(handles):
+            with self.assertRaises(OSError):
+                os.fstat(handle)
+
+    @unittest.skipUnless(
+        shutil.which("cryptsetup"), "cryptsetup is not on PATH"
+    )
+    def test_real_cryptsetup_uses_the_shared_fd_without_opening_a_mapper(self):
+        # Both the LUKS image and keys are anonymous memory files, never disks.
+        with (
+            installer.memory_file() as image,
+            installer.memory_file() as password,
+            installer.memory_file() as wrong,
+        ):
+            os.ftruncate(image, 64 * 1024**2)
+            os.write(password, b"disposable crypto fixture")
+            os.write(wrong, b"wrong fixture")
+            installer.seal_file(password)
+            installer.seal_file(wrong)
+            target = f"/proc/self/fd/{image}"
+            installer.run_command(
+                [
+                    "cryptsetup",
+                    "luksFormat",
+                    "--type",
+                    "luks2",
+                    "--batch-mode",
+                    "--pbkdf",
+                    "pbkdf2",
+                    "--pbkdf-force-iterations",
+                    "1000",
+                    "--key-file",
+                    f"/proc/self/fd/{password}",
+                    target,
+                ],
+                pass_fds=(image, password),
+                timeout=30,
+            )
+            for fd, expected in [(password, 0), (wrong, 2)]:
+                result = subprocess.run(
+                    [
+                        "cryptsetup",
+                        "open",
+                        "--test-passphrase",
+                        "--key-file",
+                        f"/proc/self/fd/{fd}",
+                        target,
+                    ],
+                    pass_fds=(image, fd),
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    timeout=10,
+                    check=False,
+                )
+                self.assertEqual(result.returncode, expected)
+
+    def test_native_password_failure_or_cancel_releases_all_handles(self):
+        original_create = os.memfd_create
+        for error in [
+            KeyboardInterrupt(),
+            subprocess.CalledProcessError(1, ["systemd-ask-password"]),
+            subprocess.TimeoutExpired(["systemd-ask-password"], 190),
+        ]:
+            handles: list[int] = []
+
+            def create(
+                *args: Any, handles: list[int] = handles, **kwargs: Any
+            ) -> int:
+                fd = original_create(*args, **kwargs)
+                handles.append(fd)
+                return fd
+
+            with (
+                self.subTest(error=type(error)),
+                patch.object(os, "memfd_create", side_effect=create),
+                patch.object(subprocess, "run", side_effect=error),
+            ):
+                with self.assertRaises(type(error)):
+                    with installer.native_password():
+                        self.fail("Failed password prompt yielded a password")
+            for fd in handles:
+                with self.assertRaises(OSError):
+                    os.fstat(fd)
+
+    def test_native_tools_build_account_input_without_a_python_password_string(
+        self,
+    ):
+        plan = installer.Plan(
+            "nixos-test",
+            "delta_bot",
+            "",
+            "none",
+            installer.plan_storage(disk(), "erase"),
+            32 * GIB,
+            48,
+        )
+        with installer.memory_file() as password:
+            os.write(password, b"fixture: spaces and unicode \xc3\xa6")
+            storage = installer.PreparedStorage(
+                Path("/mnt"), "/efi", "/luks", installer.MAPPER, 1, password
+            )
+            records: list[int] = []
+            original_read = os.read
+            original_pread = os.pread
+            original_open: Any = io.open
+
+            def read(fd: int, size: int) -> bytes:
+                self.assertNotEqual(fd, password, "Python read password bytes")
+                return original_read(fd, size)
+
+            def pread(fd: int, size: int, offset: int) -> bytes:
+                self.assertNotEqual(fd, password, "Python read password bytes")
+                return original_pread(fd, size, offset)
+
+            def open_file(file: Any, *args: Any, **kwargs: Any) -> Any:
+                self.assertFalse(
+                    file == password or str(file).startswith("/proc/self/fd/"),
+                    "Python opened the password for reading",
+                )
+                return original_open(file, *args, **kwargs)
+
+            def consume(command: list[str], **kwargs: Any) -> None:
+                self.assertEqual(
+                    command,
+                    installer.enter_command(
+                        storage, "/nix/var/nix/profiles/system/sw/bin/chpasswd"
+                    ),
+                )
+                fd = kwargs["stdin"]
+                records.append(fd)
+                self.assertEqual(
+                    original_read(fd, 1000),
+                    b"root:fixture: spaces and unicode \xc3\xa6\n"
+                    b"delta_bot:fixture: spaces and unicode \xc3\xa6\n",
+                )
+                with self.assertRaises(OSError):
+                    os.write(fd, b"cannot overwrite")
+
+            with (
+                patch.object(installer, "run_command", side_effect=consume),
+                patch.object(os, "read", side_effect=read),
+                patch.object(os, "pread", side_effect=pread),
+                patch("builtins.open", side_effect=open_file),
+                patch.object(io, "open", side_effect=open_file),
+            ):
+                installer.set_passwords(plan, storage)
+            self.assertEqual(len(records), 1)
+            with self.assertRaises(OSError):
+                os.fstat(records[0])
+            os.fstat(password)
+
+    def test_account_input_is_released_if_native_password_setting_fails(self):
+        plan = installer.Plan(
+            "nixos-test",
+            "river",
+            "",
+            "none",
+            installer.plan_storage(disk(), "erase"),
+            32 * GIB,
+            48,
+        )
+        records: list[int] = []
+        with installer.memory_file() as password:
+            os.write(password, b"fixture")
+            storage = installer.PreparedStorage(
+                Path("/mnt"), "/efi", "/luks", installer.MAPPER, 1, password
+            )
+
+            def fail(command: list[str], **kwargs: Any) -> None:
+                records.append(kwargs["stdin"])
+                raise subprocess.CalledProcessError(1, command)
+
+            with patch.object(installer, "run_command", side_effect=fail):
+                with self.assertRaises(subprocess.CalledProcessError):
+                    installer.set_passwords(plan, storage)
+            with self.assertRaises(OSError):
+                os.fstat(records[0])
+
+    def test_routine_output_is_quiet_but_failed_commands_show_diagnostics(
+        self,
+    ):
+        output = io.StringIO()
+        with redirect_stdout(output), redirect_stderr(output):
+            installer.run_command(["printf", "routine output"])
+            self.assertEqual(output.getvalue(), "")
+            with self.assertRaises(subprocess.CalledProcessError):
+                installer.run_command(
+                    ["ls", "--", "/missing-installer-fixture-path"]
+                )
+        self.assertIn("missing-installer-fixture-path", output.getvalue())
 
 
 @final
@@ -1166,6 +1507,10 @@ class InstallationTests(unittest.TestCase):
         self.directory = TemporaryDirectory(prefix="installer-finish-test-")
         self.addCleanup(self.directory.cleanup)
         self.root = Path(self.directory.name) / "target"
+        credentials = installer.memory_file()
+        self.password_fd = credentials.__enter__()
+        self.addCleanup(credentials.__exit__, None, None, None)
+        os.write(self.password_fd, b"disposable fixture")
         self.plan = installer.Plan(
             "nixos-test",
             "river",
@@ -1181,6 +1526,7 @@ class InstallationTests(unittest.TestCase):
             "/dev/fixture-luks",
             "/dev/mapper/cryptroot",
             24680,
+            self.password_fd,
         )
         self.repo = self.root / "home/river/Projects/nix"
         (self.repo / ".git").mkdir(parents=True)
@@ -1221,15 +1567,9 @@ class InstallationTests(unittest.TestCase):
 
         def run(command: list[str], **kwargs: Any) -> Any:
             self.assertTrue(kwargs["check"])
-            for key in [
-                "input",
-                "stdin",
-                "stdout",
-                "stderr",
-                "capture_output",
-            ]:
+            for key in ["input", "capture_output"]:
                 self.assertNotIn(
-                    key, kwargs, "Password I/O must remain native"
+                    key, kwargs, "Password text must stay outside Python"
                 )
             self.commands.append(command)
             return subprocess.CompletedProcess[str](command, 0)
@@ -1251,12 +1591,25 @@ class InstallationTests(unittest.TestCase):
             self.assertEqual(tool, "readlink")
             return self.installed_system
 
+        def passwords(_plan: Any, storage: Any) -> None:
+            subprocess.run(
+                installer.enter_command(
+                    storage, "/nix/var/nix/profiles/system/sw/bin/chpasswd"
+                ),
+                check=True,
+            )
+
         with (
             redirect_stdout(self.output),
             redirect_stderr(self.output),
             patch.object(Path, "stat", autospec=True, side_effect=stat),
             patch.object(subprocess, "run", side_effect=run) as execute,
             patch.object(subprocess, "check_output", side_effect=probe),
+            patch.object(
+                installer,
+                "set_passwords",
+                side_effect=passwords,
+            ),
             patch.object(
                 installer,
                 "evaluate_configuration",
@@ -1284,13 +1637,11 @@ class InstallationTests(unittest.TestCase):
         self.assertIn("--no-channel-copy", install)
         self.assertIn("--no-write-lock-file", install)
         self.assertIn("--no-update-lock-file", install)
-        self.assertNotIn("--no-root-password", install)
+        self.assertIn("--no-root-password", install)
         self.assertNotIn("--no-bootloader", install)
         self.assertTrue(
             any(
-                Path(c[4]).name == "passwd"
-                and c[-1] == "river"
-                and "--status" not in c
+                Path(c[4]).name == "chpasswd"
                 for c in self.commands
                 if c[0] == "nixos-enter"
             )
@@ -1317,7 +1668,7 @@ class InstallationTests(unittest.TestCase):
             for c in self.commands
             if c[0] == "nixos-install"
             or c[0] == "nixos-enter"
-            and Path(c[4]).name in {"passwd", "chown", "test"}
+            and Path(c[4]).name in {"chpasswd", "chown", "test"}
             and "--status" not in c
         ]
         for failed in steps:
@@ -1393,12 +1744,37 @@ class InstallFlowTests(unittest.TestCase):
         self.error: BaseException | None = None
         self.phase = ""
         self.reboot = False
+        self.confirmation = self.plan.storage.disk.path
+        self.reviewed_plan = self.plan
+        self.password_fd = -1
 
     @contextmanager
     def environment(self) -> Generator[Mock]:
         @contextmanager
+        def password() -> Generator[int]:
+            self.events.append("password")
+            if self.phase == "password" and self.error:
+                raise self.error
+            with installer.memory_file() as fd:
+                os.write(fd, b"disposable flow fixture")
+                self.password_fd = fd
+                try:
+                    yield fd
+                finally:
+                    self.events.append("password-cleanup")
+
+        def review(_plan: Any, *, dry_run: bool) -> Any:
+            self.events.append("review")
+            self.assertFalse(dry_run)
+            self.assertGreater(os.fstat(self.password_fd).st_size, 0)
+            if self.phase == "review" and self.error:
+                raise self.error
+            return self.reviewed_plan
+
+        @contextmanager
         def checkout(_plan: Any) -> Generator[Path]:
             self.events.append("clone")
+            self.assertEqual(_plan, self.reviewed_plan)
             if self.phase == "clone" and self.error:
                 raise self.error
             try:
@@ -1407,9 +1783,20 @@ class InstallFlowTests(unittest.TestCase):
                 self.events.append("clone-cleanup")
 
         @contextmanager
-        def storage(_plan: Any, *, before_write: Any) -> Generator[Any]:
-            self.events.append("confirmation")
-            if self.phase == "confirmation" and self.error:
+        def storage(
+            _plan: Any,
+            *,
+            password_fd: int,
+            confirmation: str,
+            before_write: Any,
+        ) -> Generator[Any]:
+            self.assertEqual(_plan, self.reviewed_plan)
+            self.assertEqual(password_fd, self.password_fd)
+            self.assertEqual(
+                confirmation, self.reviewed_plan.storage.disk.path
+            )
+            self.assertGreater(os.fstat(password_fd).st_size, 0)
+            if self.phase == "storage" and self.error:
                 raise self.error
             before_write()
             self.events.append("write")
@@ -1420,6 +1807,7 @@ class InstallFlowTests(unittest.TestCase):
                     "/luks",
                     "/dev/mapper/cryptroot",
                     24680,
+                    password_fd,
                 )
             finally:
                 self.events.append("storage-cleanup")
@@ -1427,17 +1815,26 @@ class InstallFlowTests(unittest.TestCase):
                     raise self.error
 
         def generate(*_args: Any) -> Path:
+            self.assertEqual(_args[0], self.reviewed_plan)
             self.events.append("generate")
             if self.phase == "generate" and self.error:
                 raise self.error
             return Path("/mnt/home/river/Projects/nix")
 
         def finish(*_args: Any) -> None:
+            self.assertEqual(_args[0], self.reviewed_plan)
             self.events.append("install")
             if self.phase == "install" and self.error:
                 raise self.error
 
-        def prompt(*_args: Any) -> bool:
+        def prompt(*_args: Any) -> str | bool:
+            if "confirmation" not in self.events:
+                self.events.append("confirmation")
+                if self.phase == "confirmation" and self.error:
+                    raise self.error
+                return self.confirmation
+            with self.assertRaises(OSError):
+                os.fstat(self.password_fd)
             self.events.append("reboot-question")
             if self.phase == "reboot" and self.error:
                 raise self.error
@@ -1456,6 +1853,8 @@ class InstallFlowTests(unittest.TestCase):
             patch.object(sys.stdin, "isatty", return_value=True),
             patch.object(installer, "storage_preflight") as preflight,
             patch.object(shutil, "which", return_value="fixture"),
+            patch.object(installer, "native_password", side_effect=password),
+            patch.object(installer, "review_plan", side_effect=review),
             patch.object(installer, "prepare_checkout", side_effect=checkout),
             patch.object(installer, "prepare_storage", side_effect=storage),
             patch.object(
@@ -1488,19 +1887,22 @@ class InstallFlowTests(unittest.TestCase):
                 self.assertEqual(installer.install(self.plan), 0)
                 self.assertIs(confirm.call_args.kwargs["default"], False)
             self.assertEqual(
-                self.events[:7],
+                self.events[:10],
                 [
-                    "clone",
+                    "password",
+                    "review",
                     "confirmation",
+                    "clone",
                     "write",
                     "generate",
                     "install",
                     "storage-cleanup",
                     "clone-cleanup",
+                    "password-cleanup",
                 ],
             )
             self.assertEqual(
-                self.events[7:],
+                self.events[10:],
                 ["reboot-question", "reboot"]
                 if reboot
                 else ["reboot-question"],
@@ -1508,8 +1910,11 @@ class InstallFlowTests(unittest.TestCase):
 
     def test_failure_before_or_after_writes_reports_correct_disk_state(self):
         for phase in [
-            "clone",
+            "password",
+            "review",
             "confirmation",
+            "clone",
+            "storage",
             "generate",
             "install",
             "cleanup",
@@ -1521,7 +1926,13 @@ class InstallFlowTests(unittest.TestCase):
             with self.subTest(phase=phase), self.environment():
                 self.assertEqual(installer.install(self.plan), 1)
             self.assertNotIn("reboot-question", self.events)
-            if phase in {"clone", "confirmation"}:
+            if phase in {
+                "password",
+                "review",
+                "confirmation",
+                "clone",
+                "storage",
+            }:
                 self.assertIn("No disk changes made", self.output.getvalue())
                 self.assertNotIn("write", self.events)
             else:
@@ -1531,10 +1942,19 @@ class InstallFlowTests(unittest.TestCase):
                 self.assertNotIn(
                     "No disk changes made", self.output.getvalue()
                 )
+            if phase != "password":
+                self.assertIn("password-cleanup", self.events)
+                with self.assertRaises(OSError):
+                    os.fstat(self.password_fd)
+            if phase in {"password", "review", "confirmation"}:
+                self.assertNotIn("clone", self.events)
 
     def test_cancellation_and_reboot_cancellation_have_distinct_results(self):
         for phase, expected in [
+            ("password", 0),
+            ("review", 0),
             ("confirmation", 0),
+            ("clone", 0),
             ("install", 1),
             ("reboot", 0),
         ]:
@@ -1545,6 +1965,12 @@ class InstallFlowTests(unittest.TestCase):
             with self.subTest(phase=phase), self.environment():
                 self.assertEqual(installer.install(self.plan), expected)
             self.assertNotIn("reboot", self.events)
+            if phase != "password":
+                with self.assertRaises(OSError):
+                    os.fstat(self.password_fd)
+            if phase in {"password", "review", "confirmation"}:
+                self.assertNotIn("clone", self.events)
+                self.assertNotIn("write", self.events)
             if phase == "install":
                 self.assertIn("disk was modified", self.output.getvalue())
             if phase == "reboot":
@@ -1561,9 +1987,48 @@ class InstallFlowTests(unittest.TestCase):
         self.assertIn("Installation complete", self.output.getvalue())
         self.assertIn("reboot failed", self.output.getvalue())
         self.assertEqual(
-            self.events[-4:],
-            ["storage-cleanup", "clone-cleanup", "reboot-question", "reboot"],
+            self.events[-5:],
+            [
+                "storage-cleanup",
+                "clone-cleanup",
+                "password-cleanup",
+                "reboot-question",
+                "reboot",
+            ],
         )
+
+    def test_review_changes_reach_cloning_storage_and_configuration(self):
+        self.reviewed_plan = replace(
+            self.plan,
+            username="delta_bot",
+            swap_gib=24,
+            storage=installer.plan_storage(
+                disk(name="/dev/fixture1"), "erase"
+            ),
+        )
+        self.confirmation = self.reviewed_plan.storage.disk.path
+        with self.environment():
+            self.assertEqual(installer.install(self.plan), 0)
+        self.assertEqual(self.events.count("password"), 1)
+
+    def test_confirmation_mismatch_never_clones_and_releases_password(self):
+        self.confirmation = "/dev/other"
+        with self.environment():
+            self.assertEqual(installer.install(self.plan), 1)
+        self.assertNotIn("clone", self.events)
+        self.assertNotIn("write", self.events)
+        self.assertIn("No disk changes made", self.output.getvalue())
+        with self.assertRaises(OSError):
+            os.fstat(self.password_fd)
+
+    def test_reviewed_disk_must_pass_preflight_before_authorization(self):
+        with self.environment() as preflight:
+            preflight.side_effect = [None, ValueError("changed during review")]
+            self.assertEqual(installer.install(self.plan), 1)
+        self.assertNotIn("confirmation", self.events)
+        self.assertNotIn("clone", self.events)
+        with self.assertRaises(OSError):
+            os.fstat(self.password_fd)
 
     def test_preflight_failures_stop_before_clone(
         self,
@@ -1633,52 +2098,102 @@ class WizardTests(unittest.TestCase):
             patch("builtins.open", side_effect=read_only_open),
             patch.object(io, "open", side_effect=read_only_open),
             patch.object(questionary, "text", wraps=questionary.text) as texts,
+            patch.object(
+                installer.os,
+                "memfd_create",
+                side_effect=AssertionError(
+                    "Preview created a credential file"
+                ),
+            ),
         ):
             status = installer.main(["--dry-run"] if argv is None else argv)
         return status, output.getvalue(), texts, calls
 
-    def test_preview_keeps_user_choices_and_makes_no_installation_calls(self):
-        status, output, _, calls = self.run_preview(
-            [
-                "laptop",
-                disk(),
-                "erase",
-                "river",
-                "",
-                "20",
-                True,
-            ]
+    def test_preview_uses_defaults_without_asking_for_optional_settings(self):
+        status, output, texts, calls = self.run_preview(
+            [disk(), "river", "Finish preview"]
         )
         self.assertEqual(status, 0)
+        self.assertEqual(texts.call_count, 1)
         for text in [
-            "Host: laptop",
+            "Host: nixos-test",
             "User: river",
-            "Swap: 20 GiB",
-            "hibernation may fail",
+            "Swap: 48 GiB",
+            "ERASE",
             "Preview complete",
             "Nothing saved",
-            "Disk preparation stages",
-            "Create 20 GiB swap",
-            "Configuration stages",
             "latest main",
             "/home/river/Projects/nix",
-            "hosts/laptop/installation.nix",
-            "BLOCKED",
-            "flake.lock",
+            "root and your user",
         ]:
             self.assertIn(text, output)
         self.assertTrue(calls)
+
+    def test_changed_settings_survive_review_and_reach_the_installer(self):
+        answers = [
+            disk(),
+            "river",
+            "Change settings",
+            "Swap size",
+            "20",
+            "Change settings",
+            "Username",
+            "delta_bot",
+            "Continue to installation",
+        ]
+        reviewed: list[Any] = []
+
+        def install(plan: Any) -> int:
+            reviewed.append(installer.review_plan(plan, dry_run=False))
+            return 0
+
+        with patch.object(installer, "install", side_effect=install):
+            status, output, _, _ = self.run_preview(answers, argv=[])
+        self.assertEqual(status, 0)
+        plan = reviewed[0]
+        self.assertEqual((plan.username, plan.swap_gib), ("delta_bot", 20))
+        self.assertIn("hibernation may fail", output)
+        self.assertIn("/home/delta_bot/Projects/nix", output)
+
+    def test_public_key_changes_are_validated_and_retained(self):
+        key = public_key()
+        reviewed: list[Any] = []
+
+        def install(plan: Any) -> int:
+            reviewed.append(installer.review_plan(plan, dry_run=False))
+            return 0
+
+        with patch.object(
+            installer,
+            "key_fingerprint",
+            side_effect=[ValueError("invalid key"), "fixture fingerprint"],
+        ):
+            with patch.object(installer, "install", side_effect=install):
+                status, output, _, _ = self.run_preview(
+                    [
+                        disk(),
+                        "river",
+                        "Change settings",
+                        "SSH public key",
+                        "invalid",
+                        key,
+                        "Continue to installation",
+                    ],
+                    argv=[],
+                )
+        self.assertEqual(status, 0)
+        self.assertIn("invalid key", output)
+        self.assertEqual(reviewed[0].ssh_key, key)
+        self.assertEqual(reviewed[0].fingerprint, "fixture fingerprint")
 
     def test_default_installation_refuses_unsafe_environment_without_writes(
         self,
     ):
         status, output, _, calls = self.run_preview(
-            ["laptop", disk(), "erase", "river", "", "20"],
+            [disk(), "river"],
             argv=[],
         )
         self.assertEqual(status, 1)
-        self.assertIn("Host: laptop", output)
-        self.assertIn("Swap: 20 GiB", output)
         self.assertIn("Installation failed", output)
         self.assertIn("No disk changes made", output)
         self.assertNotIn("Preview complete", output)
@@ -1687,14 +2202,14 @@ class WizardTests(unittest.TestCase):
     def test_default_mode_dispatches_to_install_but_dry_run_does_not(self):
         with patch.object(installer, "install", return_value=0) as install:
             status, _, _, _ = self.run_preview(
-                ["nixos-test", disk(), "erase", "river", "", "48"],
+                [disk(), "river", "Continue to installation"],
                 argv=[],
             )
             self.assertEqual(status, 0)
             self.assertEqual(install.call_args.args[0].username, "river")
             install.reset_mock()
             status, _, _, _ = self.run_preview(
-                ["nixos-test", disk(), "erase", "river", "", "48", True],
+                [disk(), "river", "Finish preview"],
             )
             self.assertEqual(status, 0)
             install.assert_not_called()
@@ -1718,45 +2233,69 @@ class WizardTests(unittest.TestCase):
 
     def test_oversized_suggestion_is_not_silently_capped(self):
         status, output, texts, _ = self.run_preview(
-            [
-                "desktop",
-                disk(size=16 * GIB),
-                "erase",
-                "river",
-                "",
-                "6",
-                True,
-            ],
+            [disk(size=16 * GIB), "river", "6", "Finish preview"],
             metadata={"blockdevices": [device(size=16 * GIB)]},
         )
         self.assertEqual(status, 0)
-        self.assertIn("Suggested swap: 48 GiB", output)
+        self.assertIn("Suggested swap (48 GiB)", output)
         self.assertIn("will not fit", output)
         self.assertEqual(texts.call_args.kwargs["default"], "48")
         self.assertIn("Swap: 6 GiB", output)
 
     def test_cancellation_at_every_prompt_exits_without_completing(self):
-        answers = ["desktop", disk(), "erase", "river", "", "48", True]
-        modes: list[tuple[list[str] | None, list[Any]]] = [
-            (None, answers),
-            ([], answers[:-1]),
+        answers = [
+            disk(),
+            "river",
+            "Change settings",
+            "Swap size",
+            "20",
+            "Change settings",
+            "Username",
+            "delta_bot",
+            "Finish preview",
         ]
-        for argv, prompts in modes:
+        modes: list[list[str] | None] = [None, []]
+        for argv in modes:
+            prompts = answers if argv is None else answers[:2]
             for index in range(len(prompts)):
-                with self.subTest(argv=argv, prompt=index):
-                    status, output, _, _ = self.run_preview(
-                        prompts[:index] + [KeyboardInterrupt()], argv=argv
-                    )
-                    self.assertEqual(status, 0)
-                    self.assertIn("Planning cancelled", output)
-                    self.assertNotIn("Preview complete", output)
-        for final_answer in [False, None, EOFError()]:
-            status, output, _, _ = self.run_preview(
-                answers[:-1] + [final_answer]
+                for error in [KeyboardInterrupt(), EOFError(), None]:
+                    with self.subTest(
+                        argv=argv, prompt=index, error=type(error)
+                    ):
+                        status, output, _, _ = self.run_preview(
+                            prompts[:index] + [error], argv=argv
+                        )
+                        self.assertEqual(status, 0)
+                        self.assertIn("Planning cancelled", output)
+                        self.assertNotIn("Preview complete", output)
+        status, output, _, _ = self.run_preview([disk(), "river", "Cancel"])
+        self.assertEqual(status, 0)
+        self.assertIn("Planning cancelled", output)
+
+    def test_disk_change_requires_a_swap_override_when_it_no_longer_fits(self):
+        small = disk(size=16 * GIB)
+        reviewed: list[Any] = []
+
+        def install(plan: Any) -> int:
+            reviewed.append(installer.review_plan(plan, dry_run=False))
+            return 0
+
+        with patch.object(installer, "install", side_effect=install):
+            status, _, _, _ = self.run_preview(
+                [
+                    disk(),
+                    "river",
+                    "Change settings",
+                    "Disk",
+                    small,
+                    "6",
+                    "Continue to installation",
+                ],
+                argv=[],
             )
-            self.assertEqual(status, 0)
-            self.assertIn("Planning cancelled", output)
-            self.assertNotIn("Preview complete", output)
+        self.assertEqual(status, 0)
+        self.assertEqual(reviewed[0].storage.disk, small)
+        self.assertEqual(reviewed[0].swap_gib, 6)
 
     def test_discovery_errors_stop_before_a_preview(self):
         examples: list[tuple[dict[str, Any] | None, Exception | None]] = [
@@ -1766,7 +2305,7 @@ class WizardTests(unittest.TestCase):
         for metadata, failure in examples:
             with self.subTest(metadata=metadata, failure=failure):
                 status, output, _, _ = self.run_preview(
-                    ["desktop"],
+                    [],
                     metadata,
                     failure,
                 )
