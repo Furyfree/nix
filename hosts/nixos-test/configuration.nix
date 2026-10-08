@@ -17,5 +17,16 @@
       PermitRootLogin = "no";
     };
   };
+  security.sudo.extraRules = [
+    {
+      users = [ "pby" ];
+      commands = [
+        {
+          command = "ALL";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
   system.stateVersion = "26.05";
 }
