@@ -12,13 +12,9 @@ commands. Follow the
 2. Flash the ISO to the USB using `caligula burn [TARGET]`.
 3. Boot from the USB. On this ISO, choose the **second option, not the LTS
    option**: `NixOS 26.05 … Installer (Linux 7.2.8)`.
-4. Connect to the installer over SSH:
+4. Use the local installer console. This project's ISO disables the SSH server.
 
-```sh
-ssh nixos@192.0.2.10
-```
-
-Run the remaining installation commands in this SSH session. Run each command
+Run the remaining installation commands at the console. Run each command
 separately and stop on any error.
 
 ## 2. Identify the target disk
@@ -161,16 +157,15 @@ Check that the hardware configuration contains all mounts and
 `boot.initrd.luks.devices."cryptroot".device`, pointing to partition 2's UUID.
 Keep the generated hardware configuration.
 
-Read the installer's authorized public keys, then edit the system configuration:
+Edit the system configuration:
 
 ```sh
-cat /home/nixos/.ssh/authorized_keys
 sudo nano /mnt/etc/nixos/configuration.nix
 ```
 
-Make the active configuration match the following. Replace the key placeholder
-with the complete public key line; use one quoted line per key if there are
-several. The existing template comments can stay.
+Make the active configuration match the following. For key login, add your
+complete public key lines to `authorizedKeys.keys`; leave it empty for password
+login. The existing template comments can stay.
 
 ```nix
 { config, lib, pkgs, ... }:
@@ -188,15 +183,18 @@ several. The existing template comments can stay.
   users.users.user = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" ];
-    openssh.authorizedKeys.keys = [
-      "PASTE THE COMPLETE PUBLIC KEY LINE HERE"
-    ];
+    openssh.authorizedKeys.keys = [ ];
   };
 
   services.openssh = {
     enable = true;
-    settings.PasswordAuthentication = false;
-    settings.KbdInteractiveAuthentication = false;
+    openFirewall = true;
+    settings = {
+      PasswordAuthentication = true;
+      PubkeyAuthentication = true;
+      KbdInteractiveAuthentication = false;
+      PermitRootLogin = "no";
+    };
   };
 
   fileSystems."/".options = [ "compress=zstd" ];
@@ -226,7 +224,7 @@ Set the root password when prompted. Wait for `installation finished!`.
 
 ## 9. Set the user password and reboot
 
-Set `user`'s password for local login and `sudo`:
+Set `user`'s password for local/SSH login and `sudo`:
 
 ```sh
 sudo /run/current-system/sw/bin/nixos-enter --root /mnt -c 'passwd user'
@@ -248,6 +246,9 @@ From your own computer:
 ```sh
 ssh user@192.0.2.10
 ```
+
+Use the user's password or authorized key, then `sudo` for admin commands.
+Root SSH login is disabled. Keep port 22 off the public internet.
 
 On the installed system:
 
@@ -344,7 +345,7 @@ snapshots.
 The flake pins `nixos-unstable` and integrated Home Manager in `flake.lock`.
 It keeps both state-version settings at `26.05`. The hardware file in
 `hosts/nixos-test/` uses example UUIDs. Replace it with the generated file for
-the target machine and supply your own public SSH key before activation.
+the target machine. Add your public SSH key if you want key login.
 
 From the repo on your own computer, generate or verify the input lock and check
 the flake without building the system:

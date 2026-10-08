@@ -16,6 +16,8 @@ let
       ":"
       (lib.makeBinPath [
         pkgs.util-linux
+        pkgs.coreutils-full
+        pkgs.diffutils
         pkgs.openssh
         pkgs.parted
         pkgs.cryptsetup
@@ -57,14 +59,7 @@ in
     fi
   '';
 
-  # Live ISO SSH access is separate: add a key to the temporary nixos account locally
-  # after boot. Without an authorized key, remote SSH access is unavailable.
-
-  services.openssh.settings = {
-    PasswordAuthentication = false;
-    KbdInteractiveAuthentication = false;
-    PermitRootLogin = "no";
-  };
+  services.openssh.enable = false;
 
   environment.etc."nixos-config".source = lib.cleanSourceWith {
     src = self.outPath;

@@ -55,7 +55,8 @@ installer separate from workstation settings; it need not boot through Limine.
   Preserve mode must stop if space is insufficient; do not shrink or format
   existing partitions. Review disk/partition changes and confirm before writing.
 - Prompt for the encryption passphrase. Require internet for installation; include
-  offline recovery tools, networking/Wi-Fi setup and SSH access in the image.
+  offline recovery tools and networking/Wi-Fi setup. Use the local console;
+  keep the image's SSH server disabled.
 - Bundle the repo and lock file. Generate target hardware settings and UUIDs;
   install an editable checkout rather than reuse the test machine's identifiers.
 - Keep recovery separate from installation; recovery must not trigger formatting.
