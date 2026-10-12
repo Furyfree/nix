@@ -634,6 +634,69 @@ class ConfigurationTests(unittest.TestCase):
             self.assertEqual(result["autoLoginUser"], username)
             self.assertEqual(result["initialSessionUser"], username)
 
+    def test_real_nix_evaluation_selects_an_unambiguous_desktop_account(self):
+        for accounts, explicit, expected in [
+            ([], None, None),
+            (["river"], None, "river"),
+            (["river", "delta_bot"], None, None),
+            (["river", "delta_bot"], "delta_bot", "delta_bot"),
+            (["root", "river"], None, "river"),
+        ]:
+            with self.subTest(accounts=accounts, explicit=explicit):
+                # Existing installs declare accounts without auto-login policy.
+                declarations: list[str] = []
+                for account in accounts:
+                    user = installer.nix_string(account)
+                    normal = "false" if account == "root" else "true"
+                    declarations.extend(
+                        [
+                            f"users.users.{user}.isNormalUser = {normal};",
+                            f"home-manager.users.{user} = import ./home.nix;",
+                        ]
+                    )
+                if explicit is not None:
+                    declarations.append(
+                        "services.displayManager.autoLogin.user = "
+                        f"{installer.nix_string(explicit)};"
+                    )
+                (
+                    self.checkout / "hosts/nixos-test/installation.nix"
+                ).write_text(
+                    "{ ... }: {\n" + "\n".join(declarations) + "\n}\n"
+                )
+                result = json.loads(
+                    installer.command_output(
+                        [
+                            "nix",
+                            "--extra-experimental-features",
+                            "nix-command flakes",
+                            "eval",
+                            "--json",
+                            "--no-write-lock-file",
+                            "--no-update-lock-file",
+                            f"path:{self.checkout}#nixosConfigurations."
+                            "nixos-test.config",
+                            "--apply",
+                            """c: let
+                              a = c.services.displayManager.autoLogin;
+                            in {
+                              enabled = a.enable;
+                              user = a.user;
+                              initial =
+                                c.services.greetd.settings.initial_session
+                                or null;
+                            }""",
+                        ],
+                        timeout=300,
+                    )
+                )
+                self.assertIs(result["enabled"], expected is not None)
+                self.assertEqual(result["user"], expected)
+                if expected is None:
+                    self.assertIsNone(result["initial"])
+                else:
+                    self.assertEqual(result["initial"]["user"], expected)
+
 
 @final
 class StorageExecutionTests(unittest.TestCase):

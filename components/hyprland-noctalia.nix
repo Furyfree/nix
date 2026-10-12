@@ -7,6 +7,17 @@
 
 let
   autoLogin = config.services.displayManager.autoLogin;
+  desktopUsers = lib.filter (name: config.users.users.${name}.isNormalUser) (
+    builtins.attrNames config.home-manager.users
+  );
+  noctaliaSession = pkgs.writeShellScript "noctalia-session" ''
+    if session_id=$(${lib.getExe' pkgs.systemd "loginctl"} show-user "$UID" --property=Display --value) && [[ -n "$session_id" ]]; then
+      export XDG_SESSION_ID="$session_id"
+    else
+      printf '%s\n' 'Noctalia: logind display session unavailable; using the existing session lookup.' >&2
+    fi
+    exec ${lib.getExe config.programs.noctalia.package} "$@"
+  '';
 in
 {
   programs = {
@@ -22,9 +33,15 @@ in
     dconf.enable = true;
   };
 
-  systemd.user.services.noctalia.serviceConfig.WorkingDirectory = "%h";
+  systemd.user.services.noctalia.serviceConfig = {
+    WorkingDirectory = "%h";
+    ExecStart = lib.mkForce noctaliaSession;
+  };
 
   services = {
+    displayManager.autoLogin.user = lib.mkDefault (
+      if builtins.length desktopUsers == 1 then builtins.head desktopUsers else null
+    );
     displayManager.noctalia-greeter = {
       enable = true;
       cursorTheme = {

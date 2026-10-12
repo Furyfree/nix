@@ -556,10 +556,6 @@ def render_installation(plan: Plan, resume_offset: int) -> str:
     openssh.authorizedKeys.keys = {keys};
   }};
   home-manager.users.{user} = import ./home.nix;
-  services.displayManager.autoLogin = {{
-    enable = true;
-    user = {user};
-  }};
 
 {compression}
   boot.resumeDevice = {nix_string(MAPPER)};
