@@ -12,7 +12,7 @@ from collections.abc import Callable, Generator, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, replace
 from pathlib import Path
-from tempfile import TemporaryDirectory, TemporaryFile
+from tempfile import TemporaryDirectory, TemporaryFile, mkdtemp
 from typing import Any
 
 import questionary
@@ -545,7 +545,7 @@ def render_installation(plan: Plan, resume_offset: int) -> str:
     return f"""{{ ... }}:
 
 {{
-  imports = [ (import ../../components/swap.nix {{
+  imports = [ (import ../../../components/swap.nix {{
     sizeGiB = {plan.swap_gib};
   }}) ];
 
@@ -555,13 +555,48 @@ def render_installation(plan: Plan, resume_offset: int) -> str:
     extraGroups = [ "wheel" "networkmanager" ];
     openssh.authorizedKeys.keys = {keys};
   }};
-  home-manager.users.{user} = import ./home.nix;
+  home-manager.users.{user} = import ../home.nix;
 
 {compression}
   boot.resumeDevice = {nix_string(MAPPER)};
   boot.kernelParams = [ "resume_offset={resume_offset}" ];
 }}
 """
+
+
+def preflight_hardware() -> str:
+    """Temporary mounts for pre-erasure checks, not deployment."""
+    mounts = "\n".join(
+        f"  fileSystems.{nix_string(path)} = {{ "
+        f"device = {nix_string(MAPPER)}; "
+        f'fsType = "btrfs"; options = [ "subvol={name}" ]; }};'
+        for name, path in SUBVOLUMES
+    )
+    return f"""{{ ... }}: {{
+  nixpkgs.hostPlatform = "x86_64-linux";
+  boot.initrd.luks.devices.cryptroot.device =
+    "/dev/disk/by-uuid/preflight-only";
+  fileSystems."/boot" = {{
+    device = "/dev/disk/by-uuid/preflight-only"; fsType = "vfat";
+  }};
+{mounts}
+}}
+"""
+
+
+def local_configuration(host: Path) -> Path:
+    local = host / "local"
+    if local.is_symlink() or (local.exists() and not local.is_dir()):
+        raise ValueError(
+            "Local configuration directory must not be a symlink."
+        )
+    for name in ("hardware-configuration.nix", "installation.nix"):
+        path = local / name
+        if path.is_symlink() or (path.exists() and not path.is_file()):
+            raise ValueError(
+                f"Missing or unsafe local configuration file: {path}"
+            )
+    return local
 
 
 def evaluate_configuration(
@@ -690,7 +725,6 @@ def prepare_checkout(plan: Plan) -> Generator[Path]:
             repo / "flake.nix",
             repo / "flake.lock",
             host / "configuration.nix",
-            host / "hardware-configuration.nix",
             host / "home.nix",
             repo / "components" / "swap.nix",
         ):
@@ -698,12 +732,16 @@ def prepare_checkout(plan: Plan) -> Generator[Path]:
                 raise ValueError(
                     f"Missing or unsafe configuration file: {path}"
                 )
-        installation = host / "installation.nix"
-        if installation.is_symlink():
-            raise ValueError("Installation settings must not be a symlink.")
+        local = local_configuration(host)
+        if local.exists():
+            raise ValueError(
+                "Public clone must not contain local machine data."
+            )
+        local.mkdir(mode=0o700)
         lock = (repo / "flake.lock").read_bytes()
-        installation.write_text(provisional)
-        print("Checking chosen settings with the repo's existing hardware...")
+        (local / "hardware-configuration.nix").write_text(preflight_hardware())
+        (local / "installation.nix").write_text(provisional)
+        print("Checking chosen settings with temporary mount fixtures...")
         evaluate_configuration(repo, plan, 0)
         if (repo / "flake.lock").read_bytes() != lock:
             raise ValueError("Configuration evaluation changed flake.lock.")
@@ -715,7 +753,7 @@ def generate_configuration(
     storage: PreparedStorage,
     checkout: Path,
 ) -> Path:
-    """Keep custom config and Git history; replace hardware/install data."""
+    """Keep tracked config; write detected machine data locally."""
     settings = render_installation(plan, storage.resume_offset)
     if (
         not storage.root.is_absolute()
@@ -740,20 +778,29 @@ def generate_configuration(
             checkout / "flake.lock",
             host / "configuration.nix",
             host / "home.nix",
+            *(
+                [host / "hardware-configuration.nix"]
+                if (host / "hardware-configuration.nix").exists()
+                else []
+            ),
         )
     }
+    local = local_configuration(host)
+    local.mkdir(mode=0o700, exist_ok=True)
     print("Generating hardware settings from the mounted installation...")
-    run_command(
+    hardware = command_output(
         [
             "nixos-generate-config",
             "--root",
             str(storage.root),
-            "--dir",
-            str(host),
+            "--show-hardware-config",
         ],
         timeout=120,
     )
-    (host / "installation.nix").write_text(settings)
+    if not hardware.strip():
+        raise ValueError("Hardware detection returned an empty configuration.")
+    (local / "hardware-configuration.nix").write_text(hardware)
+    (local / "installation.nix").write_text(settings)
     result = evaluate_configuration(checkout, plan, storage.resume_offset)
     luks_uuid = subprocess.check_output(
         ["cryptsetup", "luksUUID", storage.luks_device],
@@ -780,6 +827,201 @@ def generate_configuration(
     shutil.copytree(checkout, target, symlinks=True)
     print(f"Configuration ready at {target}; ownership follows installation.")
     return target
+
+
+def machine_settings(repo: Path, host: str) -> dict[str, Any]:
+    """Compare effective machine settings without passwords or private keys."""
+    expression = """c: {
+      system = c.system.build.toplevel.outPath;
+      filesystems = builtins.mapAttrs (_: f: {
+        inherit (f) device fsType options;
+      }) c.fileSystems;
+      luks = builtins.mapAttrs (_: d: d.device) c.boot.initrd.luks.devices;
+      swaps = map (s: {
+        inherit (s) device size priority options
+          discardPolicy randomEncryption;
+      }) c.swapDevices;
+      resume = c.boot.resumeDevice;
+      params = c.boot.kernelParams;
+      users = builtins.mapAttrs (_: u: {
+        inherit (u) isNormalUser uid group home extraGroups;
+        shell = toString u.shell;
+        keys = u.openssh.authorizedKeys.keys;
+      }) c.users.users;
+      homes = builtins.mapAttrs (_: h: h.home.homeDirectory)
+        c.home-manager.users;
+      autologin = c.services.displayManager.autoLogin;
+      failures = map (a: a.message)
+        (builtins.filter (a: !a.assertion) c.assertions);
+    }"""
+    result = json.loads(
+        command_output(
+            [
+                "nix",
+                "--extra-experimental-features",
+                "nix-command flakes",
+                "eval",
+                "--json",
+                "--no-write-lock-file",
+                "--no-update-lock-file",
+                f"path:{repo}#nixosConfigurations.{host}.config",
+                "--apply",
+                expression,
+            ],
+            timeout=300,
+        )
+    )
+    if result["failures"]:
+        raise ValueError("Machine configuration has failed NixOS assertions.")
+    return result
+
+
+def migrate_host_data(repo: Path, host: str, *, dry_run: bool = False) -> None:
+    """Back up, verify and migrate data without activation."""
+    if host != "nixos-test":
+        raise ValueError("Only nixos-test migration is supported.")
+    host_dir = repo / "hosts" / host
+    for directory in (repo, repo / ".git", repo / "hosts", host_dir):
+        if directory.is_symlink() or not directory.is_dir():
+            raise ValueError(
+                "Migration requires a standalone checkout without symlinks."
+            )
+    local = local_configuration(host_dir)
+    if local.exists():
+        raise ValueError(
+            "Local machine data already exists; refusing overwrite."
+        )
+    names = ("hardware-configuration.nix", "installation.nix")
+    originals: dict[str, bytes] = {}
+    for name in names:
+        path = host_dir / name
+        if path.is_symlink() or not path.is_file():
+            raise ValueError(f"Missing or unsafe legacy file: {path}")
+        originals[name] = path.read_bytes()
+    settings = originals["installation.nix"].decode()
+    for old, new in (
+        (
+            "import ../../components/swap.nix",
+            "import ../../../components/swap.nix",
+        ),
+        ("import ./home.nix", "import ../home.nix"),
+    ):
+        if settings.count(old) != 1:
+            raise ValueError(
+                "Unrecognized installation imports; originals kept."
+            )
+        settings = settings.replace(old, new)
+    hardware_path = f"hosts/{host}/hardware-configuration.nix"
+    installation_path = f"hosts/{host}/installation.nix"
+    status = command_output(
+        ["git", "-C", str(repo), "status", "--porcelain", "-z"], timeout=10
+    )
+    if any(
+        entry[3:] not in {hardware_path, installation_path}
+        or entry[:2] not in {" M", "??"}
+        for entry in status.split("\0")
+        if entry
+    ):
+        raise ValueError("Unrelated checkout changes; migration refused.")
+    for name in names:
+        run_command(
+            [
+                "git",
+                "-C",
+                str(repo),
+                "check-ignore",
+                "-q",
+                "--",
+                f"hosts/{host}/local/{name}",
+            ],
+            timeout=10,
+        )
+    tracked = command_output(
+        ["git", "-C", str(repo), "ls-files", "--", f"hosts/{host}/local"],
+        timeout=10,
+    )
+    if tracked:
+        raise ValueError("Local machine data must not be tracked by Git.")
+    before = machine_settings(repo, host)
+    lock = (repo / "flake.lock").read_bytes()
+    if dry_run:
+        print(
+            f"Would back up and migrate {host_dir} into {local}."
+            " No activation."
+        )
+        return
+    state = Path(
+        os.environ.get("XDG_STATE_HOME", str(Path.home() / ".local/state"))
+    )
+    backup_root = state / "nix/host-data-migrations"
+    if not backup_root.is_absolute() or repo in (
+        backup_root,
+        *backup_root.parents,
+    ):
+        raise ValueError("Migration backups must stay outside the checkout.")
+    if any(path.is_symlink() for path in (backup_root, *backup_root.parents)):
+        raise ValueError("Migration backup path must not contain symlinks.")
+    backup_root.mkdir(mode=0o700, parents=True, exist_ok=True)
+    backup = Path(mkdtemp(prefix=f"{host}-", dir=backup_root))
+    for name, data in originals.items():
+        (backup / name).write_bytes(data)
+    print(f"Original machine data backed up at {backup}")
+    local.mkdir(mode=0o700)
+    (local / names[0]).write_bytes(originals[names[0]])
+    (local / names[1]).write_text(settings)
+    if machine_settings(repo, host) != before:
+        raise ValueError(
+            "Machine settings changed; originals and backups kept."
+        )
+    run_command(
+        [
+            "nix",
+            "--extra-experimental-features",
+            "nix-command flakes",
+            "build",
+            "--no-link",
+            "--no-write-lock-file",
+            "--no-update-lock-file",
+            f"path:{repo}#nixosConfigurations.{host}.config.system.build.toplevel",
+        ],
+        timeout=1800,
+    )
+    if (
+        (repo / "flake.lock").read_bytes() != lock
+        or machine_settings(repo, host) != before
+        or any(
+            (host_dir / name).read_bytes() != data
+            for name, data in originals.items()
+        )
+        or (local / names[0]).read_bytes() != originals[names[0]]
+        or (local / names[1]).read_text() != settings
+    ):
+        raise ValueError(
+            "Configuration changed during migration; originals kept."
+        )
+    run_command(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "restore",
+            "--source=HEAD",
+            "--",
+            hardware_path,
+        ],
+        timeout=10,
+    )
+    (host_dir / names[1]).unlink()
+    if command_output(
+        ["git", "-C", str(repo), "status", "--porcelain"], timeout=10
+    ).strip():
+        raise ValueError(
+            "Migration built, but checkout is not clean; backups kept."
+        )
+    print(
+        "Machine data migrated; settings unchanged, build passed."
+        " Checkout clean. No activation."
+    )
 
 
 def storage_preflight(plan: Plan) -> None:
@@ -1298,7 +1540,23 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Run the wizard and preview without making changes.",
     )
+    parser.add_argument(
+        "--migrate-host-data",
+        choices=["nixos-test"],
+        help="Back up and migrate an existing checkout without activation.",
+    )
     args = parser.parse_args(argv)
+    if args.migrate_host_data:
+        try:
+            migrate_host_data(
+                Path(__file__).resolve().parents[1],
+                args.migrate_host_data,
+                dry_run=args.dry_run,
+            )
+        except (OSError, ValueError, subprocess.SubprocessError) as error:
+            print(f"Migration stopped: {error}", file=sys.stderr)
+            return 1
+        return 0
     if args.dry_run:
         print("NixOS setup — dry run. Ctrl+C cancels; no changes are made.")
     else:

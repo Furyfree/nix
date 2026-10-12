@@ -65,8 +65,22 @@ in
     src = self.outPath;
     filter =
       path: type:
+      let
+        relative = lib.removePrefix "${self.outPath}/" path;
+        name = builtins.baseNameOf path;
+        machineData =
+          lib.hasPrefix "hosts/" relative
+          && (
+            (type == "directory" && name == "local")
+            || builtins.elem name [
+              "hardware-configuration.nix"
+              "installation.nix"
+            ]
+          );
+      in
       lib.cleanSourceFilter path type
-      && !(builtins.elem (builtins.baseNameOf path) [
+      && !machineData
+      && !(builtins.elem name [
         ".venv"
         ".ruff_cache"
         ".pytest_cache"

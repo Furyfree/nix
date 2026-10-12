@@ -37,16 +37,16 @@ patches on machines.
   through `system.nix`.
 - `home.nix`, `configs/`: Home Manager integration and links versus native
   application preferences. Keep the checkout at `~/Projects/nix` for these links.
-- `hosts/`: hardware and host-specific exceptions. Installer-generated
-  `installation.nix` supplies machine data; shared policy belongs above it.
+- `hosts/`: tracked host exceptions; ignored `hosts/<host>/local/` holds detected
+  hardware and installation data. Shared policy belongs above it.
 - `scripts/install.py`: wizard, storage operations and configuration generation.
 - `tests/test_installer.py`, `justfile`: installer behavior checks and local gates.
 
 ## Ways to hurt yourself
 
 The installer erases the selected disk. Use disposable targets for installation
-trials and temporary checkouts for tests. Host scaffolds contain example hardware
-settings; do not deploy them as detected machine configuration.
+trials and temporary checkouts for tests. Require detected machine data for host
+builds; pre-install fixtures belong only in temporary checkouts.
 Native desktop tools keep live state outside the checkout. Do not import whole
 application-data directories or overwrite GUI state while migrating preferences.
 

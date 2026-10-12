@@ -1,7 +1,7 @@
 # Nix
 
 NixOS and integrated Home Manager for workstations. Only `nixos-test`
-is active; desktop setup is next.
+is supported; its output requires local machine data.
 
 ## Develop
 
@@ -23,9 +23,9 @@ nix --extra-experimental-features 'nix-command flakes' flake check --no-build --
 nix --extra-experimental-features 'nix-command flakes' build --no-link path:.#nixosConfigurations.nixos-test.config.system.build.toplevel
 ```
 
-Build without activation. Follow the installation guide for deployment,
-Snapper snapshots and rollback. The recorded host uses example disk UUIDs;
-generate hardware settings before deploying it to an existing machine.
+Build without activation. The public checkout exposes the installer and development
+shell; installed host outputs require machine data. Follow the installation guide
+for deployment, Snapper snapshots and rollback.
 
 ## Install
 
@@ -47,13 +47,24 @@ installed repo, rebuilt with new changes and tested generation rollback. See
 ## Installed checkout
 
 Configuration generation clones public `main` into `~/Projects/nix` and keeps
-its lock file. It replaces the selected host's hardware configuration and writes
-`installation.nix` for the chosen user, public SSH key and swap/resume settings.
-It keeps `configuration.nix` and `home.nix`, including custom packages.
+its lock file. It writes detected hardware and `installation.nix` into ignored
+`hosts/nixos-test/local/`. These files supply the chosen user, public SSH key and
+swap/resume settings. Tracked configuration and custom packages stay unchanged.
 The installed user owns the checkout and its parent directories.
 
-After installation, review generated host changes with `git diff` and
-`git status`. Passwords and private keys stay outside the repo.
+Keep machine data local and backed up; keep passwords and private keys outside the
+checkout. Use explicit `path:` flakes so Nix includes the ignored machine files.
+For an existing installation with files in the old host directory, migrate once:
+
+```sh
+nix develop path:. --command python scripts/install.py --migrate-host-data nixos-test --dry-run
+nix develop path:. --command python scripts/install.py --migrate-host-data nixos-test
+```
+
+Migration saves originals under `$XDG_STATE_HOME/nix/host-data-migrations`
+(default `~/.local/state/nix/host-data-migrations`), compares effective settings and
+builds without activation before retiring the old files. On failure, stop and
+inspect the preserved originals and backup; do not retry over partial local data.
 From the installed checkout, build changes without activation:
 
 ```sh

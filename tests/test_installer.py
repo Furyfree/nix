@@ -264,6 +264,11 @@ class ConfigurationTests(unittest.TestCase):
         self.base = Path(self.directory.name)
         self.checkout = self.base / "checkout"
         self.fixture(self.checkout)
+        local = self.checkout / "hosts/nixos-test/local"
+        local.mkdir()
+        (local / "hardware-configuration.nix").write_text(
+            installer.preflight_hardware()
+        )
         self.plan = installer.Plan(
             "nixos-test",
             "river",
@@ -329,16 +334,37 @@ class ConfigurationTests(unittest.TestCase):
     def fixture(self, destination: Path) -> None:
         root = Path(__file__).resolve().parents[1]
         destination.mkdir()
-        for name in ["flake.nix", "flake.lock", "system.nix", "home.nix"]:
+        for name in [
+            "flake.nix",
+            "flake.lock",
+            "system.nix",
+            "home.nix",
+            ".gitignore",
+        ]:
             shutil.copy2(root / name, destination / name)
         shutil.copytree(root / "components", destination / "components")
         shutil.copytree(
             root / "hosts/nixos-test", destination / "hosts/nixos-test"
         )
+        shutil.copytree(
+            root / "hosts/installer", destination / "hosts/installer"
+        )
+        shutil.copytree(root / "scripts", destination / "scripts")
         (destination / ".git").mkdir()
         (destination / ".git/HEAD").write_text("fixture Git metadata\n")
 
     def probe(self, command: list[str], **_kwargs: Any) -> str:
+        if command[0] == "nixos-generate-config":
+            self.assertEqual(
+                command,
+                [
+                    "nixos-generate-config",
+                    "--root",
+                    str(self.storage.root),
+                    "--show-hardware-config",
+                ],
+            )
+            return "fresh hardware\n"
         if command[0] == "nix":
             self.assertIn("--no-update-lock-file", command)
             self.assertIn("--no-write-lock-file", command)
@@ -348,22 +374,6 @@ class ConfigurationTests(unittest.TestCase):
         self.assertEqual(command[:5], ["blkid", "-s", "UUID", "-o", "value"])
         return "fresh-efi\n"
 
-    def generator(self, command: list[str], **_kwargs: Any) -> Any:
-        self.assertEqual(
-            command,
-            [
-                "nixos-generate-config",
-                "--root",
-                str(self.storage.root),
-                "--dir",
-                str(self.checkout / "hosts/nixos-test"),
-            ],
-        )
-        (
-            self.checkout / "hosts/nixos-test/hardware-configuration.nix"
-        ).write_text("fresh hardware\n")
-        return subprocess.CompletedProcess[str](command, 0)
-
     def test_generation_preserves_custom_files_lock_and_git_metadata(self):
         selected = self.checkout / "hosts/nixos-test"
         original = {
@@ -372,11 +382,11 @@ class ConfigurationTests(unittest.TestCase):
                 self.checkout / "flake.lock",
                 selected / "configuration.nix",
                 selected / "home.nix",
+                selected / "hardware-configuration.nix",
                 self.checkout / ".git/HEAD",
             ]
         }
         with (
-            patch.object(subprocess, "run", side_effect=self.generator),
             patch.object(subprocess, "check_output", side_effect=self.probe),
             redirect_stdout(self.output),
         ):
@@ -392,16 +402,165 @@ class ConfigurationTests(unittest.TestCase):
             )
         self.assertEqual(
             (
-                target / "hosts/nixos-test/hardware-configuration.nix"
+                target / "hosts/nixos-test/local/hardware-configuration.nix"
             ).read_text(),
             "fresh hardware\n",
         )
-        module = (target / "hosts/nixos-test/installation.nix").read_text()
+        module = (
+            target / "hosts/nixos-test/local/installation.nix"
+        ).read_text()
         self.assertIn('users.users."river"', module)
         self.assertIn("sizeGiB = 48", module)
         self.assertIn("resume_offset=24680", module)
         self.assertNotIn("password", module.lower())
         self.assertNotIn("PRIVATE KEY", module)
+
+    def test_generation_adds_only_ignored_data_to_a_git_checkout(self):
+        shutil.rmtree(self.checkout / ".git")
+        for command in (["init", "-q"], ["add", "."]):
+            subprocess.run(
+                ["git", "-C", str(self.checkout), *command],
+                check=True,
+                capture_output=True,
+            )
+        before = subprocess.check_output(
+            ["git", "-C", str(self.checkout), "status", "--porcelain"]
+        )
+        with (
+            patch.object(subprocess, "check_output", side_effect=self.probe),
+            redirect_stdout(self.output),
+        ):
+            target = installer.generate_configuration(
+                self.plan, self.storage, self.checkout
+            )
+        after = subprocess.check_output(
+            ["git", "-C", str(target), "status", "--porcelain"]
+        )
+        self.assertEqual(after, before)
+        for name in ("hardware-configuration.nix", "installation.nix"):
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(target),
+                    "check-ignore",
+                    "-q",
+                    f"hosts/nixos-test/local/{name}",
+                ],
+                check=True,
+            )
+
+    def test_generation_refuses_local_symlinks(self):
+        local = self.checkout / "hosts/nixos-test/local"
+        (local / "hardware-configuration.nix").unlink()
+        (local / "hardware-configuration.nix").symlink_to(
+            self.checkout / "home.nix"
+        )
+        with (
+            patch.object(subprocess, "check_output") as probe,
+            self.assertRaisesRegex(ValueError, "unsafe"),
+        ):
+            installer.generate_configuration(
+                self.plan, self.storage, self.checkout
+            )
+        probe.assert_not_called()
+
+    def test_installer_bundle_excludes_machine_records(self):
+        host = self.checkout / "hosts/nixos-test"
+        (host / "installation.nix").write_text("legacy machine record")
+        source = Path(
+            installer.command_output(
+                [
+                    "nix",
+                    "--extra-experimental-features",
+                    "nix-command flakes",
+                    "eval",
+                    "--raw",
+                    "--no-write-lock-file",
+                    f"path:{self.checkout}#nixosConfigurations.installer.config.environment.etc.nixos-config.source",
+                ],
+                timeout=300,
+            ).strip()
+        )
+        self.assertTrue(
+            (source / "hosts/nixos-test/configuration.nix").is_file()
+        )
+        self.assertFalse((source / "hosts/nixos-test/local").exists())
+        self.assertFalse(
+            (source / "hosts/nixos-test/installation.nix").exists()
+        )
+        self.assertFalse(
+            (source / "hosts/nixos-test/hardware-configuration.nix").exists()
+        )
+
+    def test_real_nix_relocation_preserves_the_system_and_builds(self):
+        host = self.checkout / "hosts/nixos-test"
+        local = host / "local"
+        hardware = (local / "hardware-configuration.nix").read_bytes()
+        shutil.rmtree(local)
+        settings = installer.render_installation(self.plan, 24680)
+        legacy = settings.replace(
+            "import ../../../components/swap.nix",
+            "import ../../components/swap.nix",
+        ).replace("import ../home.nix", "import ./home.nix")
+        (host / "hardware-configuration.nix").write_bytes(hardware)
+        (host / "installation.nix").write_text(legacy)
+        before = installer.machine_settings(self.checkout, "nixos-test")
+        local.mkdir()
+        (local / "hardware-configuration.nix").write_bytes(hardware)
+        (local / "installation.nix").write_text(settings)
+        after = installer.machine_settings(self.checkout, "nixos-test")
+        self.assertEqual(after, before)
+        installer.run_command(
+            [
+                "nix",
+                "--extra-experimental-features",
+                "nix-command flakes",
+                "build",
+                "--no-link",
+                "--no-write-lock-file",
+                "--no-update-lock-file",
+                f"path:{self.checkout}#nixosConfigurations.nixos-test.config.system.build.toplevel",
+            ],
+            timeout=600,
+        )
+
+    def test_public_outputs_and_incomplete_local_data(self):
+        local = self.checkout / "hosts/nixos-test/local"
+        shutil.rmtree(local)
+        command = [
+            "nix",
+            "--extra-experimental-features",
+            "nix-command flakes",
+            "eval",
+            "--json",
+            "--no-write-lock-file",
+            f"path:{self.checkout}#nixosConfigurations",
+            "--apply",
+            "builtins.attrNames",
+        ]
+        self.assertEqual(
+            json.loads(installer.command_output(command, timeout=300)),
+            ["installer"],
+        )
+        local.mkdir()
+        (local / "hardware-configuration.nix").write_text(
+            installer.preflight_hardware()
+        )
+        errors = io.StringIO()
+        with (
+            redirect_stderr(errors),
+            self.assertRaises(subprocess.CalledProcessError),
+        ):
+            installer.command_output(
+                [
+                    *command[:-2],
+                    "--apply",
+                    "c: c.nixos-test.config.system.build.toplevel.drvPath",
+                ],
+                timeout=300,
+            )
+        self.assertIn("Incomplete hosts/nixos-test/local", errors.getvalue())
 
     def test_existing_target_and_symlink_ancestor_refuse_generation(self):
         target = self.storage.root / "home/river/Projects/nix"
@@ -430,19 +589,17 @@ class ConfigurationTests(unittest.TestCase):
         for failure in ["generator", "uuid", "efi", "custom"]:
             with self.subTest(failure=failure):
 
-                def run(
-                    command: list[str],
-                    failure: str = failure,
-                    **kwargs: Any,
-                ) -> Any:
-                    if failure == "generator":
-                        raise subprocess.CalledProcessError(1, command)
-                    result = self.generator(command, **kwargs)
-                    if failure == "custom":
-                        (
-                            self.checkout / "hosts/nixos-test/home.nix"
-                        ).write_text("changed")
-                    return result
+                def probe(
+                    command: list[str], failure: str = failure, **kwargs: Any
+                ) -> str:
+                    if command[0] == "nixos-generate-config":
+                        if failure == "generator":
+                            raise subprocess.CalledProcessError(1, command)
+                        if failure == "custom":
+                            (
+                                self.checkout / "hosts/nixos-test/home.nix"
+                            ).write_text("changed")
+                    return self.probe(command, **kwargs)
 
                 if failure == "uuid":
                     self.snapshot["luks"] = "/dev/disk/by-uuid/stale-luks"
@@ -454,9 +611,8 @@ class ConfigurationTests(unittest.TestCase):
                     else "/dev/disk/by-uuid/fresh-efi"
                 )
                 with (
-                    patch.object(subprocess, "run", side_effect=run),
                     patch.object(
-                        subprocess, "check_output", side_effect=self.probe
+                        subprocess, "check_output", side_effect=probe
                     ),
                     redirect_stdout(self.output),
                 ):
@@ -522,7 +678,9 @@ class ConfigurationTests(unittest.TestCase):
                 self.assertIn(
                     "resume_offset=0",
                     (
-                        checkout / "hosts/nixos-test" / "installation.nix"
+                        checkout
+                        / "hosts/nixos-test/local"
+                        / "installation.nix"
                     ).read_text(),
                 )
         self.assertFalse(created[0].parent.exists())
@@ -571,7 +729,10 @@ class ConfigurationTests(unittest.TestCase):
                 if problem == "lock":
                     (path / "flake.lock").unlink()
                 else:
-                    (path / "hosts/nixos-test/installation.nix").symlink_to(
+                    (path / "hosts/nixos-test/local").mkdir()
+                    (
+                        path / "hosts/nixos-test/local/installation.nix"
+                    ).symlink_to(
                         self.checkout / "home.nix",
                     )
                 return subprocess.CompletedProcess[str](command, 0)
@@ -622,9 +783,9 @@ class ConfigurationTests(unittest.TestCase):
             plan = replace(
                 self.plan, username=username, swap_gib=size, ssh_key=key
             )
-            (self.checkout / "hosts/nixos-test/installation.nix").write_text(
-                installer.render_installation(plan, offset)
-            )
+            (
+                self.checkout / "hosts/nixos-test/local/installation.nix"
+            ).write_text(installer.render_installation(plan, offset))
             result = installer.evaluate_configuration(
                 self.checkout, plan, offset
             )
@@ -651,7 +812,7 @@ class ConfigurationTests(unittest.TestCase):
                     declarations.extend(
                         [
                             f"users.users.{user}.isNormalUser = {normal};",
-                            f"home-manager.users.{user} = import ./home.nix;",
+                            f"home-manager.users.{user} = import ../home.nix;",
                         ]
                     )
                 if explicit is not None:
@@ -660,7 +821,7 @@ class ConfigurationTests(unittest.TestCase):
                         f"{installer.nix_string(explicit)};"
                     )
                 (
-                    self.checkout / "hosts/nixos-test/installation.nix"
+                    self.checkout / "hosts/nixos-test/local/installation.nix"
                 ).write_text(
                     "{ ... }: {\n" + "\n".join(declarations) + "\n}\n"
                 )
@@ -696,6 +857,168 @@ class ConfigurationTests(unittest.TestCase):
                     self.assertIsNone(result["initial"])
                 else:
                     self.assertEqual(result["initial"]["user"], expected)
+
+
+@final
+class MigrationTests(unittest.TestCase):
+    def __init__(self, methodName: str = "runTest") -> None:
+        super().__init__(methodName)
+        self.directory = TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        self.base = Path(self.directory.name)
+        self.repo = self.base / "checkout"
+        self.host = self.repo / "hosts/nixos-test"
+        self.host.mkdir(parents=True)
+        (self.repo / ".git").mkdir()
+        (self.repo / "flake.lock").write_text("pinned inputs")
+        self.hardware = b"detected hardware with preserved UUIDs\n"
+        self.installation = (
+            b"{ imports = [ (import ../../components/swap.nix {}) ]; "
+            b"home-manager.users.river = import ./home.nix; }\n"
+        )
+        (self.host / "hardware-configuration.nix").write_bytes(self.hardware)
+        (self.host / "installation.nix").write_bytes(self.installation)
+        self.commands: list[list[str]] = []
+        self.output = io.StringIO()
+
+    def status(self, command: list[str], **_kwargs: Any) -> str:
+        if "ls-files" in command:
+            return ""
+        self.assertIn("status", command)
+        if not (self.host / "installation.nix").exists():
+            return ""
+        return (
+            " M hosts/nixos-test/hardware-configuration.nix\0"
+            "?? hosts/nixos-test/installation.nix\0"
+        )
+
+    def execute(self, command: list[str], **_kwargs: Any) -> None:
+        self.commands.append(command)
+        if "restore" in command:
+            (self.host / "hardware-configuration.nix").write_text(
+                "tracked example"
+            )
+
+    @contextmanager
+    def environment(self) -> Generator[Mock]:
+        with (
+            patch.dict(
+                os.environ, {"XDG_STATE_HOME": str(self.base / "state")}
+            ),
+            patch.object(
+                installer, "machine_settings", return_value={"unchanged": True}
+            ) as settings,
+            patch.object(installer, "command_output", side_effect=self.status),
+            patch.object(installer, "run_command", side_effect=self.execute),
+            redirect_stdout(self.output),
+        ):
+            yield settings
+
+    def test_migration_preserves_data_backups_and_never_activates(self):
+        with self.environment():
+            installer.migrate_host_data(self.repo, "nixos-test")
+        local = self.host / "local"
+        self.assertEqual(
+            (local / "hardware-configuration.nix").read_bytes(), self.hardware
+        )
+        self.assertIn(
+            "import ../../../components/swap.nix",
+            (local / "installation.nix").read_text(),
+        )
+        self.assertIn(
+            "import ../home.nix", (local / "installation.nix").read_text()
+        )
+        backups = list(
+            (self.base / "state/nix/host-data-migrations").iterdir()
+        )
+        self.assertEqual(len(backups), 1)
+        self.assertEqual(
+            (backups[0] / "hardware-configuration.nix").read_bytes(),
+            self.hardware,
+        )
+        self.assertEqual(
+            (backups[0] / "installation.nix").read_bytes(), self.installation
+        )
+        self.assertFalse((self.host / "installation.nix").exists())
+        self.assertTrue(
+            any(
+                c[0] == "nix" and "build" in c and "--no-link" in c
+                for c in self.commands
+            )
+        )
+        self.assertFalse(
+            any(
+                "switch" in c
+                or c[0]
+                in {"systemctl", "nixos-install", "nixos-generate-config"}
+                for c in self.commands
+            )
+        )
+
+    def test_migration_preview_and_conflicts_do_not_write(self):
+        with self.environment():
+            installer.migrate_host_data(self.repo, "nixos-test", dry_run=True)
+        self.assertFalse((self.host / "local").exists())
+        self.assertFalse((self.base / "state").exists())
+        (self.host / "local").mkdir()
+        with (
+            self.environment(),
+            self.assertRaisesRegex(ValueError, "overwrite"),
+        ):
+            installer.migrate_host_data(self.repo, "nixos-test")
+        self.assertEqual(
+            (self.host / "hardware-configuration.nix").read_bytes(),
+            self.hardware,
+        )
+
+    def test_changed_settings_or_build_failure_keeps_originals(self):
+        for failure in ("settings", "build"):
+            with self.subTest(failure=failure), self.environment() as settings:
+                if failure == "settings":
+                    settings.side_effect = [
+                        {"original": True},
+                        {"different": True},
+                    ]
+                else:
+
+                    def run(command: list[str], **kwargs: Any) -> None:
+                        if command[0] == "nix":
+                            raise subprocess.CalledProcessError(1, command)
+                        self.execute(command, **kwargs)
+
+                    with (
+                        patch.object(
+                            installer, "run_command", side_effect=run
+                        ),
+                        self.assertRaises(subprocess.CalledProcessError),
+                    ):
+                        installer.migrate_host_data(self.repo, "nixos-test")
+                if failure == "settings":
+                    with self.assertRaisesRegex(ValueError, "changed"):
+                        installer.migrate_host_data(self.repo, "nixos-test")
+                self.assertEqual(
+                    (self.host / "hardware-configuration.nix").read_bytes(),
+                    self.hardware,
+                )
+                self.assertEqual(
+                    (self.host / "installation.nix").read_bytes(),
+                    self.installation,
+                )
+                shutil.rmtree(self.host / "local")
+        self.assertFalse(any("restore" in c for c in self.commands))
+
+    def test_symlinks_and_unrecognized_imports_are_rejected(self):
+        (self.host / "installation.nix").write_text("custom imports")
+        with (
+            self.environment(),
+            self.assertRaisesRegex(ValueError, "Unrecognized"),
+        ):
+            installer.migrate_host_data(self.repo, "nixos-test")
+        (self.host / "installation.nix").unlink()
+        (self.host / "installation.nix").symlink_to(self.repo / "flake.lock")
+        with self.environment(), self.assertRaisesRegex(ValueError, "unsafe"):
+            installer.migrate_host_data(self.repo, "nixos-test")
+        self.assertFalse((self.host / "local").exists())
 
 
 @final

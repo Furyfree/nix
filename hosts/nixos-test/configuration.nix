@@ -3,7 +3,12 @@
 {
   imports = [
     ../../system.nix
-    ./hardware-configuration.nix
+    (
+      if builtins.pathExists ./local/installation.nix then
+        ./local/hardware-configuration.nix
+      else
+        ./hardware-configuration.nix
+    )
   ];
 
   networking.hostName = "nixos-test";

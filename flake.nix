@@ -16,6 +16,22 @@
       home-manager,
       ...
     }:
+    let
+      host = ./hosts/nixos-test;
+      localHardware = host + "/local/hardware-configuration.nix";
+      localInstallation = host + "/local/installation.nix";
+      hasLocal = builtins.pathExists localHardware || builtins.pathExists localInstallation;
+      # Existing installations use the old paths until their data is migrated.
+      legacyInstallation = host + "/installation.nix";
+      installation =
+        if hasLocal then
+          if builtins.pathExists localHardware && builtins.pathExists localInstallation then
+            localInstallation
+          else
+            throw "Incomplete hosts/nixos-test/local: hardware-configuration.nix and installation.nix are both required."
+        else
+          legacyInstallation;
+    in
     {
       devShells.x86_64-linux.default =
         let
@@ -40,21 +56,24 @@
           ];
         };
 
-      nixosConfigurations.nixos-test = nixpkgs.lib.nixosSystem {
-        modules = [
-          ./hosts/nixos-test/configuration.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-          }
-        ]
-        ++ nixpkgs.lib.optional (builtins.pathExists ./hosts/nixos-test/installation.nix) ./hosts/nixos-test/installation.nix;
-      };
-
-      nixosConfigurations.installer = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit self; };
-        modules = [ ./hosts/installer/configuration.nix ];
+      nixosConfigurations = {
+        installer = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit self; };
+          modules = [ ./hosts/installer/configuration.nix ];
+        };
+      }
+      // nixpkgs.lib.optionalAttrs (hasLocal || builtins.pathExists legacyInstallation) {
+        nixos-test = nixpkgs.lib.nixosSystem {
+          modules = [
+            ./hosts/nixos-test/configuration.nix
+            home-manager.nixosModules.home-manager
+            installation
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+            }
+          ];
+        };
       };
     };
 }
