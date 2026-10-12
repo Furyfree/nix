@@ -29,6 +29,8 @@
             uv
             just
             basedpyright
+            lua5_5
+            hyprland
             nixfmt
             statix
             deadnix

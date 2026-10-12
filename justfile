@@ -2,7 +2,27 @@ default:
     @just --list
 
 # Run local checks without installing or activating a system
-check: lint typecheck test eval
+check: check-lua check-hyprland lint typecheck test eval
+
+# Parse all native Lua configuration without executing it
+check-lua:
+    find configs -type f -name '*.lua' -exec luac -p {} +
+
+# Validate Hyprland settings without starting a desktop or using live state
+check-hyprland:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    config=$(realpath configs/hypr/hyprland.lua)
+    temporary=$(mktemp -d)
+    trap 'rm -rf -- "$temporary"' EXIT
+    export HOME="$temporary"
+    export XDG_CONFIG_HOME="$temporary/config" XDG_STATE_HOME="$temporary/state"
+    export XDG_CACHE_HOME="$temporary/cache" XDG_DATA_HOME="$temporary/data"
+    export XDG_RUNTIME_DIR="$temporary/runtime"
+    mkdir -m 700 "$XDG_RUNTIME_DIR"
+    unset HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY DISPLAY DBUS_SESSION_BUS_ADDRESS
+    unset LUA_PATH LUA_CPATH
+    Hyprland --verify-config --config "$config"
 
 lint:
     uv run --locked ruff check scripts tests

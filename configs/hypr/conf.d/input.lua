@@ -22,7 +22,12 @@ hl.config({
         },
     },
     -- Let launching an already-running app bring its window forward.
-    misc = { focus_on_activate = true },
+    misc = {
+        focus_on_activate = true,
+        -- Wake the screen even if Noctalia restarts while it is off.
+        key_press_enables_dpms = true,
+        mouse_move_enables_dpms = true,
+    },
     cursor = {
         no_warps = false,
         warp_on_change_workspace = 1,
