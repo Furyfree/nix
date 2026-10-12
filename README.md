@@ -57,13 +57,15 @@ checkout. Use explicit `path:` flakes so Nix includes the ignored machine files.
 For an existing installation with files in the old host directory, migrate once:
 
 ```sh
-nix develop path:. --command python scripts/install.py --migrate-host-data nixos-test --dry-run
-nix develop path:. --command python scripts/install.py --migrate-host-data nixos-test
+bash scripts/migrations/host-data.sh --dry-run
+bash scripts/migrations/host-data.sh
 ```
 
 Migration saves originals under `$XDG_STATE_HOME/nix/host-data-migrations`
-(default `~/.local/state/nix/host-data-migrations`), compares effective settings and
-builds without activation before retiring the old files. On failure, stop and
+(default `~/.local/state/nix/host-data-migrations`), checks that both layouts produce
+the same system build, and builds without activation before retiring the old files.
+Run it as the checkout owner; it needs Bash, Git, Nix and standard Linux tools,
+not a Python environment. On failure, stop and
 inspect the preserved originals and backup; do not retry over partial local data.
 From the installed checkout, build changes without activation:
 

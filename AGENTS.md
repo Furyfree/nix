@@ -40,6 +40,7 @@ patches on machines.
 - `hosts/`: tracked host exceptions; ignored `hosts/<host>/local/` holds detected
   hardware and installation data. Shared policy belongs above it.
 - `scripts/install.py`: wizard, storage operations and configuration generation.
+- `scripts/migrations/`: one-time upgrades for existing checkouts, without activation.
 - `tests/test_installer.py`, `justfile`: installer behavior checks and local gates.
 
 ## Ways to hurt yourself

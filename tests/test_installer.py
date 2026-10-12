@@ -505,11 +505,27 @@ class ConfigurationTests(unittest.TestCase):
         ).replace("import ../home.nix", "import ./home.nix")
         (host / "hardware-configuration.nix").write_bytes(hardware)
         (host / "installation.nix").write_text(legacy)
-        before = installer.machine_settings(self.checkout, "nixos-test")
+
+        def system_output() -> str:
+            return installer.command_output(
+                [
+                    "nix",
+                    "--extra-experimental-features",
+                    "nix-command flakes",
+                    "eval",
+                    "--raw",
+                    "--no-write-lock-file",
+                    "--no-update-lock-file",
+                    f"path:{self.checkout}#nixosConfigurations.nixos-test.config.system.build.toplevel.outPath",
+                ],
+                timeout=300,
+            )
+
+        before = system_output()
         local.mkdir()
         (local / "hardware-configuration.nix").write_bytes(hardware)
         (local / "installation.nix").write_text(settings)
-        after = installer.machine_settings(self.checkout, "nixos-test")
+        after = system_output()
         self.assertEqual(after, before)
         installer.run_command(
             [
@@ -878,56 +894,93 @@ class MigrationTests(unittest.TestCase):
         )
         (self.host / "hardware-configuration.nix").write_bytes(self.hardware)
         (self.host / "installation.nix").write_bytes(self.installation)
-        self.commands: list[list[str]] = []
-        self.output = io.StringIO()
+        self.script = self.repo / "scripts/migrations/host-data.sh"
+        self.script.parent.mkdir(parents=True)
+        shutil.copy2(
+            Path(__file__).resolve().parents[1]
+            / "scripts/migrations/host-data.sh",
+            self.script,
+        )
+        self.bin = self.base / "bin"
+        self.bin.mkdir()
+        self.log = self.base / "commands"
+        commands = {
+            "git": """#!/bin/bash
+set -eu
+printf 'git %s\\n' "$*" >> "$TEST_LOG"
+repo=$2
+hardware="$repo/hosts/nixos-test/hardware-configuration.nix"
+case "$3" in
+ rev-parse) printf '%s\\n' "$repo" ;;
+ status)
+   if [[ $(< "$hardware") != example ]]; then
+     printf ' M hosts/nixos-test/hardware-configuration.nix\\n'
+   fi
+   if [[ -f "$repo/hosts/nixos-test/installation.nix" ]]; then
+     printf '?? hosts/nixos-test/installation.nix\\n'
+   fi ;;
+ check-ignore|ls-files) ;;
+ restore)
+   printf 'example' > "$repo/hosts/nixos-test/hardware-configuration.nix"
+   ;;
+ *) exit 90 ;;
+esac
+""",
+            "nix": """#!/bin/bash
+set -eu
+printf 'nix %s\\n' "$*" >> "$TEST_LOG"
+case " $* " in
+ *' eval '*)
+   if [[ ${TEST_FAILURE:-} == settings ]] &&
+      [[ -f "$TEST_REPO/hosts/nixos-test/local/installation.nix" ]]; then
+     printf /nix/store/different-system
+   else
+     printf /nix/store/unchanged-system
+   fi ;;
+ *' build '*)
+   [[ ${TEST_FAILURE:-} != build ]] || exit 42
+   if [[ ${TEST_FAILURE:-} == lock ]]; then
+     printf changed > "$TEST_REPO/flake.lock"
+   fi ;;
+ *) exit 91 ;;
+esac
+""",
+        }
+        bash = shutil.which("bash")
+        assert bash is not None
+        for name, content in commands.items():
+            path = self.bin / name
+            path.write_text(content.replace("#!/bin/bash", f"#!{bash}", 1))
+            path.chmod(0o755)
 
-    def status(self, command: list[str], **_kwargs: Any) -> str:
-        if "ls-files" in command:
-            return ""
-        self.assertIn("status", command)
-        if not (self.host / "installation.nix").exists():
-            return ""
-        return (
-            " M hosts/nixos-test/hardware-configuration.nix\0"
-            "?? hosts/nixos-test/installation.nix\0"
+    def migrate(
+        self, *args: str, failure: str = ""
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["bash", str(self.script), *args],
+            env={
+                **os.environ,
+                "PATH": f"{self.bin}:{os.environ['PATH']}",
+                "XDG_STATE_HOME": str(self.base / "state"),
+                "TEST_LOG": str(self.log),
+                "TEST_REPO": str(self.repo),
+                "TEST_FAILURE": failure,
+            },
+            text=True,
+            capture_output=True,
+            timeout=30,
         )
 
-    def execute(self, command: list[str], **_kwargs: Any) -> None:
-        self.commands.append(command)
-        if "restore" in command:
-            (self.host / "hardware-configuration.nix").write_text(
-                "tracked example"
-            )
-
-    @contextmanager
-    def environment(self) -> Generator[Mock]:
-        with (
-            patch.dict(
-                os.environ, {"XDG_STATE_HOME": str(self.base / "state")}
-            ),
-            patch.object(
-                installer, "machine_settings", return_value={"unchanged": True}
-            ) as settings,
-            patch.object(installer, "command_output", side_effect=self.status),
-            patch.object(installer, "run_command", side_effect=self.execute),
-            redirect_stdout(self.output),
-        ):
-            yield settings
-
     def test_migration_preserves_data_backups_and_never_activates(self):
-        with self.environment():
-            installer.migrate_host_data(self.repo, "nixos-test")
+        result = self.migrate()
+        self.assertEqual(result.returncode, 0, result.stderr)
         local = self.host / "local"
         self.assertEqual(
             (local / "hardware-configuration.nix").read_bytes(), self.hardware
         )
-        self.assertIn(
-            "import ../../../components/swap.nix",
-            (local / "installation.nix").read_text(),
-        )
-        self.assertIn(
-            "import ../home.nix", (local / "installation.nix").read_text()
-        )
+        migrated = (local / "installation.nix").read_text()
+        self.assertIn("import ../../../components/swap.nix", migrated)
+        self.assertIn("import ../home.nix", migrated)
         backups = list(
             (self.base / "state/nix/host-data-migrations").iterdir()
         )
@@ -940,62 +993,33 @@ class MigrationTests(unittest.TestCase):
             (backups[0] / "installation.nix").read_bytes(), self.installation
         )
         self.assertFalse((self.host / "installation.nix").exists())
-        self.assertTrue(
-            any(
-                c[0] == "nix" and "build" in c and "--no-link" in c
-                for c in self.commands
-            )
+        self.assertEqual(
+            (self.host / "hardware-configuration.nix").read_text(), "example"
         )
-        self.assertFalse(
-            any(
-                "switch" in c
-                or c[0]
-                in {"systemctl", "nixos-install", "nixos-generate-config"}
-                for c in self.commands
-            )
-        )
+        commands = self.log.read_text()
+        self.assertIn("build --no-link", commands)
+        self.assertNotIn("switch", commands)
+        self.assertNotIn("python", commands)
 
     def test_migration_preview_and_conflicts_do_not_write(self):
-        with self.environment():
-            installer.migrate_host_data(self.repo, "nixos-test", dry_run=True)
+        result = self.migrate("--dry-run")
+        self.assertEqual(result.returncode, 0, result.stderr)
         self.assertFalse((self.host / "local").exists())
         self.assertFalse((self.base / "state").exists())
         (self.host / "local").mkdir()
-        with (
-            self.environment(),
-            self.assertRaisesRegex(ValueError, "overwrite"),
-        ):
-            installer.migrate_host_data(self.repo, "nixos-test")
+        result = self.migrate()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("overwrite", result.stderr)
         self.assertEqual(
             (self.host / "hardware-configuration.nix").read_bytes(),
             self.hardware,
         )
 
-    def test_changed_settings_or_build_failure_keeps_originals(self):
-        for failure in ("settings", "build"):
-            with self.subTest(failure=failure), self.environment() as settings:
-                if failure == "settings":
-                    settings.side_effect = [
-                        {"original": True},
-                        {"different": True},
-                    ]
-                else:
-
-                    def run(command: list[str], **kwargs: Any) -> None:
-                        if command[0] == "nix":
-                            raise subprocess.CalledProcessError(1, command)
-                        self.execute(command, **kwargs)
-
-                    with (
-                        patch.object(
-                            installer, "run_command", side_effect=run
-                        ),
-                        self.assertRaises(subprocess.CalledProcessError),
-                    ):
-                        installer.migrate_host_data(self.repo, "nixos-test")
-                if failure == "settings":
-                    with self.assertRaisesRegex(ValueError, "changed"):
-                        installer.migrate_host_data(self.repo, "nixos-test")
+    def test_changed_settings_build_or_lock_keeps_originals(self):
+        for failure in ("settings", "build", "lock"):
+            with self.subTest(failure=failure):
+                result = self.migrate(failure=failure)
+                self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(
                     (self.host / "hardware-configuration.nix").read_bytes(),
                     self.hardware,
@@ -1004,20 +1028,20 @@ class MigrationTests(unittest.TestCase):
                     (self.host / "installation.nix").read_bytes(),
                     self.installation,
                 )
+                self.assertNotIn(" restore ", self.log.read_text())
                 shutil.rmtree(self.host / "local")
-        self.assertFalse(any("restore" in c for c in self.commands))
+                (self.repo / "flake.lock").write_text("pinned inputs")
 
     def test_symlinks_and_unrecognized_imports_are_rejected(self):
         (self.host / "installation.nix").write_text("custom imports")
-        with (
-            self.environment(),
-            self.assertRaisesRegex(ValueError, "Unrecognized"),
-        ):
-            installer.migrate_host_data(self.repo, "nixos-test")
+        result = self.migrate()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Unrecognized", result.stderr)
         (self.host / "installation.nix").unlink()
         (self.host / "installation.nix").symlink_to(self.repo / "flake.lock")
-        with self.environment(), self.assertRaisesRegex(ValueError, "unsafe"):
-            installer.migrate_host_data(self.repo, "nixos-test")
+        result = self.migrate()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("unsafe", result.stderr)
         self.assertFalse((self.host / "local").exists())
 
 
