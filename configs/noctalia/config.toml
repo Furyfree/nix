@@ -163,6 +163,12 @@ locked_timeout = 60
 action = "screen_off"
 enabled = true
 
+[idle.behavior.hibernate]
+timeout = 7200
+action = "command"
+command = "systemctl hibernate"
+enabled = true
+
 # Plugin preferences are retained; activation waits for their integrations.
 [plugins]
 enabled = []
