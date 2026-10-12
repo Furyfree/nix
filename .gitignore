@@ -8,6 +8,9 @@ result-*
 # Ignore NixOS interactive test driver history
 **/.nixos-test-history
 
+# Installer-generated machine data; use path: flakes to include it locally.
+hosts/*/local/
+
 # Python development environments and caches
 .venv/
 .ruff_cache/
