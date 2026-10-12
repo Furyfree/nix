@@ -1,9 +1,10 @@
 { pkgs, ... }:
 
 {
-  # TODO: Add automatic discovery of Windows and other operating systems.
-  # Integrate detected entries before Limine config hashing and signing.
-  boot.loader.limine.enable = true;
+  boot.loader.limine = {
+    enable = true;
+    maxGenerations = 10;
+  };
   boot.loader.efi.canTouchEfiVariables = true;
 
   boot.kernelPackages = pkgs.linuxPackages_latest;

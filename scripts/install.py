@@ -556,6 +556,10 @@ def render_installation(plan: Plan, resume_offset: int) -> str:
     openssh.authorizedKeys.keys = {keys};
   }};
   home-manager.users.{user} = import ./home.nix;
+  services.displayManager.autoLogin = {{
+    enable = true;
+    user = {user};
+  }};
 
 {compression}
   boot.resumeDevice = {nix_string(MAPPER)};
@@ -581,6 +585,9 @@ def evaluate_configuration(
       groups = c.users.users.{user}.extraGroups;
       keys = c.users.users.{user}.openssh.authorizedKeys.keys;
       home = c.home-manager.users.{user}.home.homeDirectory;
+      autoLogin = c.services.displayManager.autoLogin.enable;
+      autoLoginUser = c.services.displayManager.autoLogin.user;
+      initialSessionUser = c.services.greetd.settings.initial_session.user;
       swaps = map (s: {{ inherit (s) device size; }}) c.swapDevices;
       resume = c.boot.resumeDevice;
       params = c.boot.kernelParams;
@@ -618,6 +625,9 @@ def evaluate_configuration(
         or not {"wheel", "networkmanager"} <= set(result["groups"])
         or result["keys"] != ([plan.ssh_key] if plan.ssh_key else [])
         or result["home"] != f"/home/{plan.username}"
+        or result["autoLogin"] is not True
+        or result["autoLoginUser"] != plan.username
+        or result["initialSessionUser"] != plan.username
         or result["swaps"]
         != [
             {

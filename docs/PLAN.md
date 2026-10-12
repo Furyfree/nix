@@ -1,8 +1,9 @@
 # Nix setup plan
 
-Finish boot, storage and the installer ISO before migrating userland. Desktop
-and laptop share workstation defaults, with hardware and preferences per host.
-Use `nixos-test` first; keep Fedora, Nimbus and Chezmoi until replacements work.
+Proceed with [userland setup](#userland-after-boot). See the
+[installation status](../README.md#install). Desktop and laptop share workstation
+defaults, with hardware and preferences per host. Use `nixos-test` first; keep
+Fedora, Nimbus and Chezmoi until replacements work.
 
 ## Shared setup
 
@@ -18,7 +19,6 @@ Use `nixos-test` first; keep Fedora, Nimbus and Chezmoi until replacements work.
 ## Boot and storage
 
 Use UEFI, a 4 GiB FAT32 EFI partition at `/boot`, and LUKS2-encrypted Btrfs.
-Keep the test machine's existing 1 GiB EFI partition until reinstalling it.
 Unlock with a passphrase; the test machine has no TPM. Keep `/nix` inside root,
 the existing sibling subvolumes and Snapper policy. Defer Windows VM storage
 and whole-root snapshot restoration; root snapshots exclude `/boot` and `/home`.
@@ -28,19 +28,25 @@ and whole-root snapshot restoration; root snapshots exclude `/boot` and `/home`.
 | Desktop | NVIDIA/Intel | 32 GiB | 2 TB | 48 GiB |
 | Laptop | AMD | 64 GiB | 1 TB | 96 GiB |
 
-1. Replace systemd-boot with upstream Limine, removing duplicate kernel settings.
-   Enable Plymouth and Danish keyboard input; keep US as a commented alternative.
-2. Create a Btrfs swap file inside LUKS at `/var/swap/swapfile`. Check test-host
-   RAM first; set the resume device and file offset, then test hibernation.
-3. Arrange the menu: current generation, other operating systems when present,
-   older generations in a submenu, then firmware access. Reuse upstream support.
-4. Enable upstream Limine signing and config/kernel/initrd verification. Enrol
-   keys with separate approval; keep private keys outside the repo and ISO.
-5. Check kernel lockdown and Secure Boot/hibernation compatibility before relying
-   on both. Repeat cold boot, reboot, unlock, rollback and resume on each host.
+Keep upstream Limine's generation menu and built-in firmware setup shortcut.
+Defer other-OS discovery until dual boot is needed; use upstream EFI entries
+before adding automatic detection. Recheck cold boot, reboot and unlock after
+bootloader changes.
+
+USB recovery testing is deferred and does not block userland setup. Keep it
+unverified until tested.
+
+Qotom does not support Secure Boot. Defer signing and config/kernel/initrd
+verification setup and testing to a machine that supports it; this does not
+block Qotom work or userland migration. Use upstream Limine support, enrol keys
+with separate approval and keep private keys outside the repo and ISO.
+
+Keep the encrypted swap/resume settings. Hibernation remains untested; defer
+resume testing and compatibility checks with kernel lockdown and Secure Boot
+to the desktop or laptop. Do not block Qotom boot work on resume testing.
 
 Check EFI capacity and generation retention, early storage/display drivers and
-keyboard input. Keep a tested recovery USB; defer boot appearance work.
+keyboard input; defer boot appearance work.
 
 ## Installer ISO
 
@@ -60,9 +66,9 @@ installer separate from workstation settings; it need not boot through Limine.
 - Bundle the repo and lock file. Generate target hardware settings and UUIDs;
   install an editable checkout rather than reuse the test machine's identifiers.
 - Keep recovery separate from installation; recovery must not trigger formatting.
-- Test USB/UEFI boot and both install modes in disposable VMs. Check existing
-  partitions, data and boot files, insufficient space, interrupted/repeated runs
-  and boot repair before touching physical disks.
+- Test future installer changes and preserve mode in disposable UEFI VMs. Check
+  existing partitions, data and boot files, insufficient space,
+  interrupted/repeated runs and boot repair before deploying those changes.
 
 Review `scripts/install.py` and `tests/test_installer.py` for a split by job:
 
@@ -78,16 +84,8 @@ disk guards, read-only previews and native password entry; add no framework or
 dependencies. Propose the exact files and wait for approval before code changes.
 Verify with the existing tests, type checks, flake evaluation and packaged wizard.
 
-Before the full installation test:
-
-1. Commit and push the installer changes to GitHub's `main`.
-2. Make the repository public.
-3. Build the ISO with `just build-iso`.
-4. Test `nixos-test` erase installation and boot in a disposable UEFI VM.
-   Attach throwaway virtual disks, not host disks.
-
-ISO builds work while the repo is private. Installation needs public access
-because the installer clones GitHub's latest `main`, keeping its lock file.
+Build future installer changes with `just build-iso`. Use throwaway virtual
+disks for VM tests, not host disks.
 
 ## Userland after boot
 
