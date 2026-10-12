@@ -236,6 +236,8 @@ position = "bottom_center"
 position_vertical = "bottom_right"
 
 [lockscreen]
+# Avoid preserving a captured desktop mid-animation during sleep.
+transition = []
 blurred_desktop = false
 wallpaper = ""
 blur_intensity = 0.35
