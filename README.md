@@ -54,7 +54,9 @@ The installed user owns the checkout and its parent directories.
 
 Keep machine data local and backed up; keep passwords and private keys outside the
 checkout. Use explicit `path:` flakes so Nix includes the ignored machine files.
-For an existing installation with files in the old host directory, migrate once:
+Old-layout installations must run the migration on revision `13458f10b6bf`
+before updating further. Current configuration requires both files in `local/`;
+old host-directory records are not a fallback. On the compatibility revision:
 
 ```sh
 bash scripts/migrations/host-data.sh --dry-run
@@ -65,8 +67,8 @@ Migration saves originals under `$XDG_STATE_HOME/nix/host-data-migrations`
 (default `~/.local/state/nix/host-data-migrations`), checks that both layouts produce
 the same system build, and builds without activation before retiring the old files.
 Run it as the checkout owner; it needs Bash, Git, Nix and standard Linux tools,
-not a Python environment. On failure, stop and
-inspect the preserved originals and backup; do not retry over partial local data.
+not a Python environment. On failure, stop and inspect the preserved originals
+and backup; do not retry over partial local data. Do not rerun after migration.
 From the installed checkout, build changes without activation:
 
 ```sh

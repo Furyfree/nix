@@ -21,16 +21,11 @@
       localHardware = host + "/local/hardware-configuration.nix";
       localInstallation = host + "/local/installation.nix";
       hasLocal = builtins.pathExists localHardware || builtins.pathExists localInstallation;
-      # Existing installations use the old paths until their data is migrated.
-      legacyInstallation = host + "/installation.nix";
       installation =
-        if hasLocal then
-          if builtins.pathExists localHardware && builtins.pathExists localInstallation then
-            localInstallation
-          else
-            throw "Incomplete hosts/nixos-test/local: hardware-configuration.nix and installation.nix are both required."
+        if builtins.pathExists localHardware && builtins.pathExists localInstallation then
+          localInstallation
         else
-          legacyInstallation;
+          throw "Incomplete hosts/nixos-test/local: hardware-configuration.nix and installation.nix are both required.";
     in
     {
       devShells.x86_64-linux.default =
@@ -62,18 +57,20 @@
           modules = [ ./hosts/installer/configuration.nix ];
         };
       }
-      // nixpkgs.lib.optionalAttrs (hasLocal || builtins.pathExists legacyInstallation) {
-        nixos-test = nixpkgs.lib.nixosSystem {
-          modules = [
-            ./hosts/nixos-test/configuration.nix
-            home-manager.nixosModules.home-manager
-            installation
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-            }
-          ];
-        };
+      // nixpkgs.lib.optionalAttrs hasLocal {
+        nixos-test = builtins.seq installation (
+          nixpkgs.lib.nixosSystem {
+            modules = [
+              ./hosts/nixos-test/configuration.nix
+              home-manager.nixosModules.home-manager
+              installation
+              {
+                home-manager.useGlobalPkgs = true;
+                home-manager.useUserPackages = true;
+              }
+            ];
+          }
+        );
       };
     };
 }

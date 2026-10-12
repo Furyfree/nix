@@ -382,7 +382,6 @@ class ConfigurationTests(unittest.TestCase):
                 self.checkout / "flake.lock",
                 selected / "configuration.nix",
                 selected / "home.nix",
-                selected / "hardware-configuration.nix",
                 self.checkout / ".git/HEAD",
             ]
         }
@@ -493,40 +492,30 @@ class ConfigurationTests(unittest.TestCase):
             (source / "hosts/nixos-test/hardware-configuration.nix").exists()
         )
 
-    def test_real_nix_relocation_preserves_the_system_and_builds(self):
+    def test_real_nix_local_data_builds_and_ignores_legacy_files(self):
         host = self.checkout / "hosts/nixos-test"
-        local = host / "local"
-        hardware = (local / "hardware-configuration.nix").read_bytes()
-        shutil.rmtree(local)
-        settings = installer.render_installation(self.plan, 24680)
-        legacy = settings.replace(
-            "import ../../../components/swap.nix",
-            "import ../../components/swap.nix",
-        ).replace("import ../home.nix", "import ./home.nix")
-        (host / "hardware-configuration.nix").write_bytes(hardware)
-        (host / "installation.nix").write_text(legacy)
-
-        def system_output() -> str:
-            return installer.command_output(
-                [
-                    "nix",
-                    "--extra-experimental-features",
-                    "nix-command flakes",
-                    "eval",
-                    "--raw",
-                    "--no-write-lock-file",
-                    "--no-update-lock-file",
-                    f"path:{self.checkout}#nixosConfigurations.nixos-test.config.system.build.toplevel.outPath",
-                ],
-                timeout=300,
+        (host / "local/installation.nix").write_text(
+            installer.render_installation(self.plan, 24680)
+        )
+        self.assertFalse((host / "hardware-configuration.nix").exists())
+        command = [
+            "nix",
+            "--extra-experimental-features",
+            "nix-command flakes",
+            "eval",
+            "--raw",
+            "--no-write-lock-file",
+            "--no-update-lock-file",
+            f"path:{self.checkout}#nixosConfigurations.nixos-test.config.system.build.toplevel.outPath",
+        ]
+        before = installer.command_output(command, timeout=300)
+        for name in ("hardware-configuration.nix", "installation.nix"):
+            (host / name).write_text(
+                'throw "Legacy data must not be imported"'
             )
-
-        before = system_output()
-        local.mkdir()
-        (local / "hardware-configuration.nix").write_bytes(hardware)
-        (local / "installation.nix").write_text(settings)
-        after = system_output()
-        self.assertEqual(after, before)
+        self.assertEqual(
+            installer.command_output(command, timeout=300), before
+        )
         installer.run_command(
             [
                 "nix",
@@ -559,24 +548,44 @@ class ConfigurationTests(unittest.TestCase):
             json.loads(installer.command_output(command, timeout=300)),
             ["installer"],
         )
-        local.mkdir()
-        (local / "hardware-configuration.nix").write_text(
-            installer.preflight_hardware()
-        )
-        errors = io.StringIO()
-        with (
-            redirect_stderr(errors),
-            self.assertRaises(subprocess.CalledProcessError),
-        ):
-            installer.command_output(
-                [
-                    *command[:-2],
-                    "--apply",
-                    "c: c.nixos-test.config.system.build.toplevel.drvPath",
-                ],
-                timeout=300,
+        host = self.checkout / "hosts/nixos-test"
+        for name in ("hardware-configuration.nix", "installation.nix"):
+            (host / name).write_text(
+                'throw "Legacy data must not be imported"'
             )
-        self.assertIn("Incomplete hosts/nixos-test/local", errors.getvalue())
+        self.assertEqual(
+            json.loads(installer.command_output(command, timeout=300)),
+            ["installer"],
+        )
+        local.mkdir()
+        for name, data in (
+            ("hardware-configuration.nix", installer.preflight_hardware()),
+            (
+                "installation.nix",
+                installer.render_installation(self.plan, 24680),
+            ),
+        ):
+            with self.subTest(missing_other_file=name):
+                path = local / name
+                path.write_text(data)
+                errors = io.StringIO()
+                with (
+                    redirect_stderr(errors),
+                    self.assertRaises(subprocess.CalledProcessError),
+                ):
+                    installer.command_output(
+                        [
+                            *command[:-2],
+                            "--apply",
+                            "c: c.nixos-test.config.system.build."
+                            "toplevel.drvPath",
+                        ],
+                        timeout=300,
+                    )
+                self.assertIn(
+                    "Incomplete hosts/nixos-test/local", errors.getvalue()
+                )
+                path.unlink()
 
     def test_existing_target_and_symlink_ancestor_refuse_generation(self):
         target = self.storage.root / "home/river/Projects/nix"
