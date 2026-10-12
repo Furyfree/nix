@@ -4,8 +4,10 @@
 {
   imports = [
     ./components/boot.nix
+    ./components/editors.nix
     ./components/hyprland-noctalia.nix
     ./components/networking.nix
+    ./components/shell.nix
     ./components/snapper.nix
   ];
 
