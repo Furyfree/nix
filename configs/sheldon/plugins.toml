@@ -1,0 +1,25 @@
+shell = "zsh"
+
+[plugins.zsh-completions]
+github = "zsh-users/zsh-completions"
+
+[plugins.completion-init]
+inline = 'source "$ZDOTDIR/conf.d/completion.zsh" || return'
+
+[plugins.fzf-tab]
+github = "Aloxaf/fzf-tab"
+hooks.pre = '''
+if command -v fzf >/dev/null 2>&1; then
+  zstyle ':completion:*' menu no
+'''
+hooks.post = 'fi'
+
+[plugins.zoxide-init]
+inline = 'source "$ZDOTDIR/conf.d/zoxide.zsh"'
+
+[plugins.zsh-autosuggestions]
+github = "zsh-users/zsh-autosuggestions"
+
+# Highlighting must load after completion and other line-editor plugins.
+[plugins.zsh-syntax-highlighting]
+github = "zsh-users/zsh-syntax-highlighting"

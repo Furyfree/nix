@@ -11,8 +11,15 @@ pure_black_dark = false
 [theme.templates]
 enable_builtin_templates = true
 enable_community_templates = true
-builtin_ids = ["gtk3", "gtk4", "ghostty", "hyprland", "kcolorscheme", "qt"]
+builtin_ids = ["gtk3", "gtk4", "hyprland", "kcolorscheme", "qt"]
 community_ids = ["hyprtoolkit", "papirus-icons"]
+
+# Generate colors and reload without rewriting the linked Ghostty preferences.
+[theme.templates.user.ghostty]
+enabled = true
+input_path = "templates/ghostty/ghostty"
+output_path = "$XDG_CONFIG_HOME/ghostty/themes/noctalia"
+post_hook = "bash '{{ config_dir }}/templates/ghostty/reload.sh'"
 
 [wallpaper]
 directory = "~/Pictures/Wallpapers"
