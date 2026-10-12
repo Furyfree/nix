@@ -1,7 +1,7 @@
 # Nix
 
 NixOS and integrated Home Manager for workstations. Only `nixos-test`
-is active; finish boot and the installer ISO before migrating userland.
+is active; desktop setup is next.
 
 ## Develop
 
@@ -29,7 +29,7 @@ generate hardware settings before deploying it to an existing machine.
 
 ## Install
 
-Boot the ISO in a disposable UEFI VM. The local console starts
+Boot the ISO on a disposable UEFI machine or in a VM. The local console starts
 `nixos-setup` as root. Choose a disk and username; use **Change settings** for
 SSH keys or swap size. Only `nixos-test` with erase mode is supported. Enter and
 confirm one password for disk encryption, root and your user, then review the
@@ -39,9 +39,10 @@ Git and the Nix store. Reboot is optional.
 `nixos-setup --dry-run` and `just wizard` skip passwords and erase authorization;
 they preview without cloning or writing.
 
-The installer needs internet access and public `main` containing these changes.
-Full installation/boot VM testing is still pending.
-Do not use this installer on a physical disk until that test passes.
+The installer needs internet access and public `main`.
+We installed from the ISO on a disposable Qotom machine, then updated the
+installed repo, rebuilt with new changes and tested generation rollback. See
+[boot setup and deferred tests](docs/PLAN.md#boot-and-storage).
 
 ## Installed checkout
 

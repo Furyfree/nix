@@ -1,0 +1,271 @@
+-- Keyboard and mouse bindings for applications, windows, and workspaces.
+local mainMod = "SUPER"
+-- The root config loads this shared module before the bindings.
+local workspaces = assert(package.loaded["./conf.d/workspaces.lua"])
+local window_actions = assert(package.loaded["./conf.d/window-actions.lua"])
+
+-- Keep directional focus and swaps on this monitor; move between monitors explicitly.
+hl.config({ binds = { window_direction_monitor_fallback = false } })
+
+-- 1. Applications and panels
+-- App shortcuts return as the corresponding applications are migrated.
+hl.bind(
+    mainMod .. " + Return",
+    hl.dsp.exec_cmd("uwsm-app -- ghostty +new-window"),
+    { description = "Open Ghostty terminal" }
+)
+hl.bind(
+    mainMod .. " + W",
+    hl.dsp.window.close(),
+    { description = "Close focused window" }
+)
+hl.bind(
+    mainMod .. " + Q",
+    window_actions.toggle_float,
+    { description = "Toggle floating window" }
+)
+hl.bind(
+    mainMod .. " + Space",
+    hl.dsp.exec_cmd("noctalia msg panel-toggle launcher"),
+    { description = "Open Noctalia launcher" }
+)
+hl.bind(
+    mainMod .. " + V",
+    hl.dsp.exec_cmd("noctalia msg panel-toggle clipboard"),
+    { description = "Open clipboard history" }
+)
+local function toggle_overview()
+    if hl.plugin.scrolloverview then
+        hl.plugin.scrolloverview.overview("toggle all")
+    else
+        hl.exec_cmd("notify-send 'Workspace overview unavailable' 'ScrollOverview migration is deferred.'")
+    end
+end
+hl.bind(mainMod .. " + O", toggle_overview, { description = "Toggle workspace overview on all monitors" })
+hl.bind(
+    mainMod .. " + SHIFT + N",
+    hl.dsp.exec_cmd("noctalia msg panel-toggle control-center notifications"),
+    { description = "Open notification centre" }
+)
+hl.bind(
+    mainMod .. " + comma",
+    hl.dsp.exec_cmd("noctalia msg settings-toggle"),
+    { description = "Toggle Noctalia settings" }
+)
+hl.bind(
+    mainMod .. " + SHIFT + W",
+    hl.dsp.exec_cmd("noctalia msg panel-toggle wallpaper"),
+    { description = "Open wallpaper browser" }
+)
+
+-- 3. Layout, column size and fullscreen
+hl.bind(
+    mainMod .. " + ALT + L",
+    assert(package.loaded["./conf.d/workspace-layouts.lua"]).toggle,
+    { description = "Toggle workspace layout: Dwindle / Scrolling" }
+)
+hl.bind(mainMod .. " + R", window_actions.column_width,
+    { description = "Scrolling: cycle column width" })
+hl.bind(mainMod .. " + C", window_actions.center_column,
+    { description = "Scrolling: center column" })
+hl.bind(mainMod .. " + J", window_actions.split,
+    { description = "Dwindle: toggle split orientation" })
+hl.bind(mainMod .. " + F", window_actions.maximize,
+    { description = "Scrolling: half/full width; Dwindle: maximize/restore" })
+hl.bind(mainMod .. " + SHIFT + Return",
+    hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }),
+    { description = "Toggle fullscreen" })
+
+-- Danish Minus/Plus keys; Shift adjusts height. Hold to repeat.
+for _, binding in ipairs({
+    { key = "minus", amount = -50, width = "Narrow window", height = "Shorten window" },
+    { key = "plus", amount = 50, width = "Widen window", height = "Taller window" },
+}) do
+    hl.bind(mainMod .. " + " .. binding.key,
+        function() window_actions.resize("x", binding.amount) end,
+        { description = binding.width, repeating = true })
+    hl.bind(mainMod .. " + SHIFT + " .. binding.key,
+        function() window_actions.resize("y", binding.amount) end,
+        { description = binding.height, repeating = true })
+end
+hl.bind(mainMod .. " + ALT + left", function() window_actions.join("prev") end,
+    { description = "Scrolling: join/separate window toward left" })
+hl.bind(mainMod .. " + ALT + right", function() window_actions.join("next") end,
+    { description = "Scrolling: join/separate window toward right" })
+
+-- 4. Session and screenshots
+hl.bind(
+    mainMod .. " + L",
+    hl.dsp.exec_cmd("noctalia msg session lock"),
+    { description = "Lock session" }
+)
+hl.bind(
+    mainMod .. " + SHIFT + L",
+    hl.dsp.exec_cmd("noctalia msg panel-toggle session"),
+    { description = "Open Noctalia session menu" }
+)
+-- Open the visual window picker; Alt+Tab recalls a workspace.
+-- Noctalia handles Tab/Shift+Tab navigation while its picker is open.
+hl.bind(mainMod .. " + Tab", hl.dsp.exec_cmd("noctalia msg window-switcher"),
+    { description = "Open Noctalia window picker" })
+hl.bind("ALT + Tab", window_actions.previous_workspace,
+    { description = "Return to last workspace on this monitor" })
+hl.bind(
+    mainMod .. " + SHIFT + S",
+    hl.dsp.exec_cmd("noctalia msg screenshot-region"),
+    { description = "Capture screen region" }
+)
+hl.bind(
+    "Print",
+    hl.dsp.exec_cmd("noctalia msg screenshot-region"),
+    { description = "Capture screen region" }
+)
+hl.bind(
+    "SHIFT + Print",
+    hl.dsp.exec_cmd("noctalia msg screenshot-fullscreen"),
+    { description = "Capture current monitor" }
+)
+
+-- 5. Sound and brightness
+for _, binding in ipairs({
+    { key = "XF86AudioRaiseVolume", action = "volume-up", description = "Increase volume" },
+    { key = "XF86AudioLowerVolume", action = "volume-down", description = "Decrease volume" },
+    { key = "XF86MonBrightnessUp", action = "brightness-up", description = "Increase brightness" },
+    { key = "XF86MonBrightnessDown", action = "brightness-down", description = "Decrease brightness" },
+}) do
+    hl.bind(
+        binding.key,
+        hl.dsp.exec_cmd("noctalia msg " .. binding.action),
+        { description = binding.description, locked = true, repeating = true }
+    )
+end
+hl.bind(
+    "XF86AudioMute",
+    hl.dsp.exec_cmd("noctalia msg volume-mute"),
+    { description = "Toggle speaker mute", locked = true }
+)
+hl.bind(
+    "XF86AudioMicMute",
+    hl.dsp.exec_cmd("noctalia msg mic-mute"),
+    { description = "Toggle microphone mute", locked = true }
+)
+for _, binding in ipairs({
+    { key = "XF86AudioPrev", action = "previous", description = "Previous track" },
+    { key = "XF86AudioPlay", action = "toggle", description = "Play/pause" },
+    { key = "XF86AudioNext", action = "next", description = "Next track" },
+}) do
+    hl.bind(
+        binding.key,
+        hl.dsp.exec_cmd("noctalia msg media " .. binding.action),
+        { description = binding.description, locked = true }
+    )
+end
+
+-- NuPhy top row without Fn: F3 is Mission Control, F5 dictation, F6 moon.
+hl.bind("XF86LaunchA", toggle_overview, { description = "NuPhy F3: toggle workspace overview" })
+hl.bind(
+    "XF86VoiceCommand",
+    hl.dsp.exec_cmd("noctalia msg mic-mute"),
+    { description = "NuPhy F5: toggle microphone mute", locked = true }
+)
+hl.bind(
+    "XF86DoNotDisturb",
+    hl.dsp.exec_cmd("noctalia msg notification-dnd-toggle"),
+    { description = "NuPhy F6: toggle Do Not Disturb", locked = true }
+)
+-- 6. Window and monitor navigation
+-- Super+arrows focuses windows; Ctrl focuses monitors and moves the pointer.
+-- Shift swaps windows; Shift+Ctrl moves windows between monitors.
+for _, direction in ipairs({ "left", "right", "up", "down" }) do
+    hl.bind(
+        mainMod .. " + " .. direction,
+        hl.dsp.focus({ direction = direction }),
+        { description = "Focus window " .. direction }
+    )
+    hl.bind(
+        mainMod .. " + CTRL + " .. direction,
+        hl.dsp.focus({ monitor = direction:sub(1, 1) }),
+        { description = "Focus monitor and pointer " .. direction }
+    )
+    hl.bind(
+        mainMod .. " + SHIFT + " .. direction,
+        hl.dsp.window.swap({ direction = direction }),
+        { description = "Swap window on this monitor " .. direction }
+    )
+    hl.bind(
+        mainMod .. " + SHIFT + CTRL + " .. direction,
+        function()
+            workspaces.move_window({ monitor = direction:sub(1, 1) })
+        end,
+        { description = "Move window to monitor " .. direction }
+    )
+end
+
+-- 7. Workspaces
+-- Alt+Up/Down steps through workspaces; Shift carries the focused window.
+for _, direction in ipairs({ { key = "up", step = -1 }, { key = "down", step = 1 } }) do
+    hl.bind(
+        mainMod .. " + ALT + " .. direction.key,
+        function() workspaces.step(direction.step, false) end,
+        { description = "Switch workspace " .. direction.key .. " on this monitor" }
+    )
+    hl.bind(
+        mainMod .. " + SHIFT + ALT + " .. direction.key,
+        function() workspaces.step(direction.step, true) end,
+        { description = "Move window to workspace " .. direction.key .. " and follow" }
+    )
+end
+
+-- All ten slots are addressable, including workspaces not created yet.
+for i = 1, 10 do
+    local key = i % 10
+    hl.bind(
+        mainMod .. " + " .. key,
+        function()
+            hl.dispatch(hl.dsp.focus({ workspace = workspaces.on_current_monitor(i) }))
+        end,
+        { description = "Switch to local workspace " .. i }
+    )
+    hl.bind(
+        mainMod .. " + SHIFT + " .. key,
+        function()
+            workspaces.move_window({ workspace = workspaces.on_current_monitor(i) })
+        end,
+        { description = "Move window to local workspace " .. i }
+    )
+end
+
+-- 8. Mouse controls
+-- Hold Super and drag with the left/right mouse button to move/resize.
+hl.bind(
+    mainMod .. " + mouse:272",
+    hl.dsp.window.drag(),
+    { mouse = true, description = "Move window with mouse" }
+)
+hl.bind(
+    mainMod .. " + mouse:273",
+    hl.dsp.window.resize(),
+    { mouse = true, description = "Resize window with mouse" }
+)
+
+-- Super+wheel steps workspaces; Shift carries the window; Ctrl focuses monitors.
+for _, wheel in ipairs({
+    { key = "mouse_up", name = "up", step = -1, monitor = "left" },
+    { key = "mouse_down", name = "down", step = 1, monitor = "right" },
+}) do
+    hl.bind(
+        mainMod .. " + " .. wheel.key,
+        function() workspaces.step(wheel.step, false) end,
+        { description = "Switch workspace " .. wheel.name .. " on this monitor" }
+    )
+    hl.bind(
+        mainMod .. " + SHIFT + " .. wheel.key,
+        function() workspaces.step(wheel.step, true) end,
+        { description = "Move window to workspace " .. wheel.name .. " and follow" }
+    )
+    hl.bind(
+        mainMod .. " + CTRL + " .. wheel.key,
+        hl.dsp.focus({ monitor = wheel.monitor:sub(1, 1) }),
+        { description = "Focus monitor " .. wheel.monitor }
+    )
+end

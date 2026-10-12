@@ -4,6 +4,7 @@
 {
   imports = [
     ./components/boot.nix
+    ./components/hyprland-noctalia.nix
     ./components/networking.nix
     ./components/snapper.nix
   ];

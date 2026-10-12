@@ -1,0 +1,13 @@
+# Prefer native Wayland, with X11 as a fallback.
+export GDK_BACKEND='wayland,x11,*'
+export QT_QPA_PLATFORM='wayland;xcb'
+export ELECTRON_OZONE_PLATFORM_HINT=auto
+export GTK_IM_MODULE=simple
+
+# qt6ct also accepts qt5ct, allowing both Qt generations to load their plugin.
+export QT_QPA_PLATFORMTHEME=qt5ct
+
+export XCURSOR_THEME=Bibata-Modern-Ice
+export XCURSOR_SIZE=24
+export HYPRCURSOR_THEME=Bibata-Modern-Ice
+export HYPRCURSOR_SIZE=24

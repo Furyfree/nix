@@ -1,0 +1,312 @@
+# GUI overrides take precedence. Colors, credentials and downloaded state stay local.
+[theme]
+source = "wallpaper"
+wallpaper_scheme = "soft"
+builtin = "Noctalia"
+community_palette = "Oxocarbon"
+mode = "dark"
+shell_mode = "follow"
+pure_black_dark = false
+
+[theme.templates]
+enable_builtin_templates = true
+enable_community_templates = true
+builtin_ids = ["gtk3", "gtk4", "ghostty", "hyprland", "kcolorscheme", "qt"]
+community_ids = ["hyprtoolkit", "papirus-icons"]
+
+[wallpaper]
+directory = "~/Pictures/Wallpapers"
+
+[bar.default]
+start = ["workspaces"]
+center = ["clock", "date", "weather", "notifications"]
+end = ["battery", "tray", "volume", "control-center"]
+background_opacity = 0.80
+widget_spacing = 10
+font_family = "JetBrainsMono Nerd Font Propo"
+
+[widget.clock]
+format = "{:%H:%M:%S}"
+
+[widget.workspaces]
+label_source = "name"
+show_all_outputs = false
+hide_when_empty = false
+
+# [widget.ai-usage]
+# type = "felipeartur/ai-usagebar:bar"
+# provider_limit = 2
+# show_name = true
+
+# [widget.tailnet]
+# type = "rylos/tailnet:bar"
+
+# [widget.timer]
+# type = "noctalia/timer:bar"
+# show_idle_on_horizontal = false
+
+[widget.notifications]
+hide_when_no_unread = true
+
+[widget.weather]
+show_condition = false
+
+# [widget.recorder]
+# type = "noctalia/screen_recorder:recorder"
+
+# [widget.airpods]
+# type = "harveywuk/airpods:airpods"
+
+# [widget.drives]
+# type = "aristides/udiskie:status"
+
+[widget.tray]
+detached_panel = true
+drawer = true
+hidden = ["Librepods"]
+
+[widget.volume]
+show_label = false
+
+[widget.bluetooth]
+hide_when_adapter_off = true
+
+[widget.network]
+show_label = false
+
+[shell]
+button_borders = false
+card_borders = false
+clipboard_auto_paste = "off"
+font_family = "Inter"
+input_borders = false
+launch_apps_as_systemd_services = false
+launch_apps_custom_command = "uwsm-app -- $CMD"
+polkit_agent = true
+popup_borders = false
+screen_time_enabled = true
+settings_window_translucent = true
+
+[shell.greeter_sync]
+auto_sync = true
+
+[shell.screenshot]
+directory = "~/Pictures/Screenshots"
+save_to_file = true
+
+[[shell.session.actions]]
+action = "lock"
+countdown_seconds = 0
+enabled = true
+shortcut = "l"
+variant = "default"
+
+[[shell.session.actions]]
+action = "logout"
+command = "uwsm stop"
+countdown_seconds = 5
+enabled = true
+shortcut = "x"
+variant = "default"
+
+[[shell.session.actions]]
+action = "lock_and_suspend"
+countdown_seconds = 0
+enabled = true
+shortcut = "s"
+variant = "default"
+
+[[shell.session.actions]]
+action = "reboot"
+countdown_seconds = 5
+enabled = true
+shortcut = "r"
+variant = "default"
+
+[[shell.session.actions]]
+action = "shutdown"
+countdown_seconds = 5
+enabled = true
+shortcut = "p"
+variant = "destructive"
+
+[shell.launcher]
+auto_paste = "off"
+categories = false
+
+[shell.panel]
+control_center_placement = "floating"
+open_near_click_clipboard = true
+open_near_click_control_center = true
+open_near_click_launcher = true
+open_near_click_wallpaper = true
+polkit_position = "auto"
+session_placement = "floating"
+session_position = "center"
+transparency_mode = "glass"
+wallpaper_placement = "floating"
+
+[shell.window_switcher]
+mru = true
+
+[idle]
+pre_action_fade_seconds = 5.0
+
+[idle.behavior.lock]
+timeout = 300
+action = "lock"
+enabled = true
+
+[idle.behavior.screen-off]
+timeout = 360
+locked_timeout = 60
+action = "screen_off"
+enabled = true
+
+# Plugin preferences are retained; activation waits for their integrations.
+[plugins]
+enabled = []
+
+# [plugin_settings."umedbazarov/crashes"]
+# terminal_cmd = "ghostty --class=com.mitchellh.ghostty.presentation -e"
+# agent_cmd = "codex"
+# agent_order = "codex, claude, grok, opencode"
+# panel_open_near_click = true
+
+# [plugin_settings."8bury/mini-docker"]
+# manager_position = "auto"
+
+# [plugin_settings."aristides/udiskie"]
+# manager_open_near_click = true
+
+# [plugin_settings."felipeartur/ai-usagebar"]
+# panel_open_near_click = true
+# panel_placement = "floating"
+
+# [plugin_settings."harveywuk/airpods"]
+# panel_placement = "floating"
+# panel_position = "auto"
+
+# [plugin_settings."noctalia/notes"]
+# panel_position = "top_right"
+
+# [plugin_settings."noctalia/timer"]
+# panel_placement = "floating"
+
+# [plugin_settings."profidev/hypr-screen-mirror"]
+# panel_open_near_click = true
+# panel_position = "auto"
+
+# [plugin_settings."rylos/tailnet"]
+# panel_placement = "floating"
+
+# [plugin_settings."tphilippot/git_companion"]
+# main_placement = "floating"
+
+# [plugin_settings."noctalia/screen_recorder"]
+# directory = "~/Videos/Recordings"
+
+# [plugin_settings."kenn/keybind-cheatsheet"]
+# hyprland_lua_config = "~/.config/hypr/conf.d/keybinds.lua"
+# hyprland_parser = "lua"
+
+[brightness]
+sync_all_monitors = true
+
+[control_center.calendar]
+show_week_numbers = true
+
+[location]
+auto_locate = true
+
+[nightlight]
+enabled = true
+
+[dock]
+background_opacity = 0.80
+active_opacity = 1.0
+inactive_opacity = 0.98
+
+[notification]
+background_opacity = 0.80
+
+[osd]
+background_opacity = 0.80
+position = "bottom_center"
+position_vertical = "bottom_right"
+
+[lockscreen]
+blurred_desktop = false
+wallpaper = ""
+blur_intensity = 0.35
+tint_intensity = 0.2
+
+[lockscreen_widgets]
+enabled = true
+schema_version = 2
+widget_order = ["minimal-date-", "minimal-clock-", "minimal-avatar-"]
+
+[lockscreen_widgets.grid]
+cell_size = 16
+major_interval = 4
+visible = false
+
+[lockscreen_widgets.widget."minimal-date-"]
+type = "clock"
+output = ""
+cx = 960.0
+cy = 240.0
+box_width = 440.0
+box_height = 38.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-date-".settings]
+clock_style = "digital"
+format = "{:%A, %d %B}"
+font_family = "Inter"
+color = "#F5F5F7"
+background = false
+background_padding = 0.0
+center_text = true
+shadow = true
+
+[lockscreen_widgets.widget."minimal-clock-"]
+type = "clock"
+output = ""
+cx = 960.0
+cy = 330.0
+box_width = 460.0
+box_height = 140.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-clock-".settings]
+clock_style = "digital"
+format = "{:%H:%M}"
+font_family = "Inter"
+color = "#F5F5F7"
+background = false
+background_padding = 0.0
+center_text = true
+shadow = true
+
+[lockscreen_widgets.widget."minimal-avatar-"]
+type = "sticker"
+output = ""
+cx = 960.0
+cy = 654.0
+box_width = 72.0
+box_height = 72.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-avatar-".settings]
+# Noctalia's service runs from the user's home; sticker paths do not expand ~.
+image_path = ".config/noctalia/assets/profile-picture-circle.svg"
+opacity = 1.0
+background = false
+background_padding = 0.0

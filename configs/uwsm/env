@@ -1,0 +1,18 @@
+# Retain inherited paths; greetd does not load a shell profile.
+PATH=${PATH:-/run/wrappers/bin:/run/current-system/sw/bin}
+
+uwsm_mise_data=${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}
+for uwsm_directory in \
+    /run/current-system/sw/bin \
+    /run/wrappers/bin \
+    "/etc/profiles/per-user/$USER/bin" \
+    "$HOME/.nix-profile/bin" \
+    "$uwsm_mise_data/shims" \
+    "$HOME/.local/bin"; do
+    case ":$PATH:" in
+        *":$uwsm_directory:"*) ;;
+        *) PATH="$uwsm_directory:$PATH" ;;
+    esac
+done
+export PATH
+unset uwsm_mise_data uwsm_directory

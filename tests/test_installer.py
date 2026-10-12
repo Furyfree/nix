@@ -292,6 +292,9 @@ class ConfigurationTests(unittest.TestCase):
             "groups": ["wheel", "networkmanager"],
             "keys": [],
             "home": "/home/river",
+            "autoLogin": True,
+            "autoLoginUser": "river",
+            "initialSessionUser": "river",
             "swaps": [{"device": "/var/swap/swapfile", "size": 49152}],
             "resume": "/dev/mapper/cryptroot",
             "params": ["resume_offset=24680"],
@@ -472,6 +475,9 @@ class ConfigurationTests(unittest.TestCase):
             ("user", False),
             ("keys", ["unexpected key"]),
             ("home", "/home/wrong"),
+            ("autoLogin", False),
+            ("autoLoginUser", "wrong"),
+            ("initialSessionUser", "wrong"),
             ("swaps", []),
             ("params", ["resume_offset=999"]),
             ("failures", ["a real NixOS assertion failed"]),
@@ -624,6 +630,9 @@ class ConfigurationTests(unittest.TestCase):
             )
             self.assertEqual(result["keys"], [key] if key else [])
             self.assertEqual(result["home"], f"/home/{username}")
+            self.assertIs(result["autoLogin"], True)
+            self.assertEqual(result["autoLoginUser"], username)
+            self.assertEqual(result["initialSessionUser"], username)
 
 
 @final
