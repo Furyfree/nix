@@ -63,14 +63,34 @@
       // {
         "starship.toml".source =
           config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/starship/starship.toml";
+        "gtk-3.0/settings.ini".source =
+          config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/gtk/gtk-3.0/settings.ini";
+        "gtk-4.0/settings.ini".source =
+          config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/gtk/gtk-4.0/settings.ini";
         # Reuse the pinned renderer and reload hook, not the config-rewriting apply hook.
         "noctalia/templates/ghostty".source =
           "${config.programs.noctalia.package}/share/noctalia/assets/templates/ghostty";
-      };
+      }
+      # qtct needs an absolute palette path; Noctalia's Qt template writes the colors.
+      // lib.genAttrs [ "qt5ct" "qt6ct" ] (name: {
+        target = "${name}/${name}.conf";
+        text = ''
+          [Appearance]
+          color_scheme_path=${config.xdg.configHome}/${name}/colors/noctalia.conf
+          custom_palette=true
+          icon_theme=Papirus-Dark
+          style=Fusion
+        '';
+      });
   };
 
   home.file.".zshenv".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/zsh/.zshenv";
 
-  dconf.settings."org/gnome/desktop/interface".gtk-enable-primary-paste = true;
+  dconf.settings."org/gnome/desktop/interface" = {
+    gtk-enable-primary-paste = true;
+    icon-theme = "Papirus-Dark";
+    cursor-theme = "Bibata-Modern-Ice";
+    cursor-size = 24;
+  };
 }
