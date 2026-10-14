@@ -88,6 +88,9 @@ in
     udisks2.enable = true;
   };
   security.rtkit.enable = true;
+  # The keyring module locks a new keyring with the login password, which
+  # auto-login never supplies; keep the keyring's blank password instead.
+  security.pam.services.login.enableGnomeKeyring = lib.mkForce false;
 
   xdg.portal = {
     extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
