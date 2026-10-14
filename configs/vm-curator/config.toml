@@ -1,0 +1,12 @@
+# VM library and editable defaults for newly created guests.
+vm_library_path = "~/vm-space"
+
+# Match the planned desktop VM baseline; each guest can override these values.
+default_memory_mb = 8192
+default_cpu_cores = 4
+default_disk_size_gb = 128
+default_display = "gtk"
+default_enable_kvm = true
+
+confirm_before_launch = true
+# GPU passthrough remains at upstream's disabled defaults until hardware setup.
