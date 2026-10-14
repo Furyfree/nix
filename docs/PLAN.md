@@ -103,19 +103,19 @@ disks for VM tests, not host disks.
 Migrate one batch at a time and check each on `nixos-test` before the next.
 Remaining order:
 
-1. Editors: Zed and VSCodium with its extensions; Neovim after its setup is
-   refined.
-2. Docker, then the Windows VM and vm-curator; printing when a printer can test it.
-3. Real hosts: multiple flake hosts and installer entries, desktop NVIDIA/Intel,
+1. Docker, then the Windows VM and vm-curator; printing when a printer can test it.
+2. Real hosts: multiple flake hosts and installer entries, desktop NVIDIA/Intel,
    laptop AMD and power, keyboards, DTU network, LibrePods, Voxtype and
    compatible Hyprland plugins; then gaming on the desktop.
-4. Sign-in tools last: Git/SSH with 1Password, Git signing and `gh` login, then
+3. Sign-in tools last: Git/SSH with 1Password, Git signing and `gh` login, then
    the AI CLIs, ACP adapters, ai-usagebar, Pi packages and remaining apps.
-5. Install the desktop and laptop, run their hardware tests, then retire Fedora,
+4. Install the desktop and laptop, run their hardware tests, then retire Fedora,
    Nimbus and Chezmoi.
 
 Bring each app's Noctalia plugin, widget and keybind back in the batch that
-installs the app; commented entries in `configs/` mark what waits.
+installs the app; commented entries in `configs/` mark what waits. Noctalia
+renders templates only when the palette changes, so run
+`noctalia msg templates-apply` once after installing an app with a template.
 
 Use Nixpkgs and upstream modules first, with one installer/updater per package.
 NixOS owns Linux system features/apps; Home Manager owns user configuration;
