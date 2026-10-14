@@ -343,6 +343,7 @@ class ConfigurationTests(unittest.TestCase):
         ]:
             shutil.copy2(root / name, destination / name)
         shutil.copytree(root / "components", destination / "components")
+        shutil.copytree(root / "configs", destination / "configs")
         shutil.copytree(
             root / "hosts/nixos-test", destination / "hosts/nixos-test"
         )

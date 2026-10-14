@@ -21,5 +21,6 @@
     mpv
     pinta
     libreoffice
+    vscodium
   ];
 }
