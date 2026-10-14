@@ -44,6 +44,38 @@ croot() {
   builtin cd -- "$root"
 }
 
+nswitch() {
+  emulate -L zsh
+
+  if (( $# != 0 )); then
+    print -u2 -- 'usage: nswitch'
+    return 2
+  fi
+  if ! whence -p nh >/dev/null 2>&1 || ! whence -p snapper >/dev/null 2>&1; then
+    print -u2 -- 'nswitch: nh and snapper are required'
+    return 127
+  fi
+  if [[ -z ${NH_FLAKE-} ]]; then
+    print -u2 -- 'nswitch: NH_FLAKE is not set'
+    return 1
+  fi
+
+  local description pre result=1
+  description="nswitch $(command git -C "${NH_FLAKE#path:}" describe --always --dirty 2>/dev/null)"
+  pre="$(command sudo snapper -c root create --type pre --cleanup-algorithm number --print-number --description "$description")" || return
+
+  {
+    command nh os switch
+    result=$?
+  } always {
+    if ! command sudo snapper -c root create --type post --pre-number "$pre" --cleanup-algorithm number --description "$description"; then
+      print -u2 -- "nswitch: post snapshot failed; pre snapshot is #$pre"
+      (( result )) || result=1
+    fi
+  }
+  return "$result"
+}
+
 copypath() {
   emulate -L zsh
   setopt pipefail
