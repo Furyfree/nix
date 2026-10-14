@@ -31,7 +31,6 @@ community_ids = [
     "papirus-icons",
     "bat",
     "fzf",
-    "herdr",
     "lazygit",
     "yazi",
 ]

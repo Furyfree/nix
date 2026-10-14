@@ -34,6 +34,7 @@ in
     fzf
     zoxide
     git
+    gh
     wl-clipboard
     sheldon
     bat

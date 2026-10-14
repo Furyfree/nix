@@ -35,12 +35,20 @@ in
     gpu-screen-recorder.enable = true;
   };
 
-  systemd.user.services.noctalia.serviceConfig = {
-    WorkingDirectory = "%h";
-    ExecStart = lib.mkForce noctaliaSession;
+  systemd.user.services = {
+    noctalia.serviceConfig = {
+      WorkingDirectory = "%h";
+      ExecStart = lib.mkForce noctaliaSession;
+    };
+    # Start with the session as on Fedora; the recorder plugin checks for the
+    # running process instead of activating it over D-Bus.
+    xdg-desktop-portal.wantedBy = [ "graphical-session.target" ];
   };
 
   services = {
+    # Secret Service for apps; the keyring has a blank password because
+    # auto-login never supplies one.
+    gnome.gnome-keyring.enable = true;
     displayManager.autoLogin.user = lib.mkDefault (
       if builtins.length desktopUsers == 1 then builtins.head desktopUsers else null
     );
@@ -105,6 +113,8 @@ in
     slurp
     socat
     jq
+    # Noctalia template hooks, such as LibreOffice's.
+    python3
     bibata-cursors
     papirus-icon-theme
     adw-gtk3
