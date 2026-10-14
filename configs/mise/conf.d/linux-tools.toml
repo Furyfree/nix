@@ -1,0 +1,15 @@
+# Linux CLI tools. Nix installs Sheldon.
+[tools]
+tinymist = "latest"
+resvg = "latest"
+"github:ifd3f/caligula" = { version = "latest", bin = "caligula" }
+# Returns with the virtualization batch. Upstream publishes Linux x86_64 binaries only.
+# "github:mroboff/vm-curator" = { version = "latest", os = ["linux/x64"], asset_pattern = "vm-curator-*-linux-x86_64.tar.gz" }
+# Returns with the AI tools batch.
+# "cargo:ai-usagebar" = "latest"
+# Upstream publishes bare binaries; no registry entry.
+"github:lightpanda-io/browser" = { version = "latest", bin = "lightpanda" }
+
+[env]
+# Lightpanda sends usage telemetry unless this is set.
+LIGHTPANDA_DISABLE_TELEMETRY = "true"

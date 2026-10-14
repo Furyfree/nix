@@ -4,6 +4,7 @@
 {
   imports = [
     ./components/boot.nix
+    ./components/development.nix
     ./components/editors.nix
     ./components/hyprland-noctalia.nix
     ./components/networking.nix

@@ -56,6 +56,8 @@
           "fastfetch/config.jsonc"
           "zathura/zathurarc"
           "udiskie/config.yml"
+          "mise/config.toml"
+          "mise/conf.d/linux-tools.toml"
         ]
         (name: {
           source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${name}";
