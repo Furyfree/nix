@@ -100,14 +100,22 @@ disks for VM tests, not host disks.
 
 ## Userland after boot
 
-1. Configure Hyprland/UWSM and Noctalia: auto-login as the chosen user, greeter after logout,
-   and session locking before suspend or hibernation.
-2. Migrate shell, Git/SSH, CLI tools, Mise, editors and apps one tool at a time.
-   Confirm the login shell and CLI editor before migration. Build and check each
-   batch on `nixos-test`; preserve existing files on config conflicts.
-3. Add appearance, audio, Bluetooth, printing, networking, gaming and virtualization
-   where used. Preserve LibrePods patches/CLI integration, Voxtype acceleration
-   and compatible Hyprland plugins. Test hardware features on the actual hosts.
+Migrate one batch at a time and check each on `nixos-test` before the next.
+Remaining order:
+
+1. Editors: Zed and VSCodium with its extensions; Neovim after its setup is
+   refined.
+2. Docker, then the Windows VM and vm-curator; printing when a printer can test it.
+3. Real hosts: multiple flake hosts and installer entries, desktop NVIDIA/Intel,
+   laptop AMD and power, keyboards, DTU network, LibrePods, Voxtype and
+   compatible Hyprland plugins; then gaming on the desktop.
+4. Sign-in tools last: Git/SSH with 1Password, Git signing and `gh` login, then
+   the AI CLIs, ACP adapters, ai-usagebar, Pi packages and remaining apps.
+5. Install the desktop and laptop, run their hardware tests, then retire Fedora,
+   Nimbus and Chezmoi.
+
+Bring each app's Noctalia plugin, widget and keybind back in the batch that
+installs the app; commented entries in `configs/` mark what waits.
 
 Use Nixpkgs and upstream modules first, with one installer/updater per package.
 NixOS owns Linux system features/apps; Home Manager owns user configuration;
@@ -142,6 +150,6 @@ ai-workflow owns agent instructions/skills; wow-ui remains independent.
   Terminal profiles/Zed local values in backed-up Windows config copies/merges.
 - Decide EFI handling in preserve mode and recovery with Secure Boot enabled:
   standard ISOs require disabling it, or we need a trusted signed recovery image.
-- Confirm the CLI editor/login shell, optional Windows VM, and Flatpak module.
+- Confirm the optional Windows VM.
 - Approve each implementation batch. Approve physical disk, bootloader activation
   and firmware/key changes separately; retire old provisioning only after tests.
