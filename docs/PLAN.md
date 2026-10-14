@@ -32,9 +32,7 @@ the boot menu from it, then reboot; never format.
 
 Rollback works: `nixos-rebuild boot --rollback`, reboot, then return with
 `nixos-rebuild switch --flake path:<checkout>#<host>`. It restores the system,
-not mutable files. Until `nswitch` exists, activate with Snapper pre/post
-snapshots:
-`snapper -c root create --description "<why>" --cleanup-algorithm number --command "nixos-rebuild switch --flake path:<checkout>#<host>"`.
+not mutable files. Activate with `nswitch` to take Snapper pre/post snapshots.
 
 | Host | Hardware | RAM | SSD | Swap |
 | --- | --- | --- | --- | --- |
@@ -118,9 +116,9 @@ separate update policies. Test downloaded binaries; choose wrappers when needed.
 Keep state versions at their original baselines. Review lock updates, build,
 then activate; Nix rollback does not restore external packages or mutable data.
 
-Add `nbuild` (build), `nswitch` (activate with Snapper pre/post snapshots),
-`nupdate` (update lock only), `nsearch` and `nshell`. Build/activation shortcuts
-must target this repo's explicit flake path and host from any working directory.
+Use nh with `NH_FLAKE` set to the checkout's `path:` flake: `nh os build`,
+`nh search` and `nswitch` (`nh os switch` between Snapper pre/post snapshots).
+Update only the lock with `nix flake update --flake "$NH_FLAKE"`.
 Move dotfiles' Pi-package hook into Home Manager after Mise installs Pi; keep
 `npm:pi-terminal-math` unpinned and Pi settings/local packages writable.
 

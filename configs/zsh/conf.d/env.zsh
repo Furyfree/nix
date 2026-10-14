@@ -18,4 +18,9 @@
   if [[ -z ${PAGER-} ]] && whence -p less >/dev/null 2>&1; then
     export PAGER='less -R'
   fi
+
+  # path: includes the ignored machine data in hosts/<host>/local/.
+  if [[ -d $HOME/Projects/nix ]]; then
+    export NH_FLAKE="path:$HOME/Projects/nix"
+  fi
 }
