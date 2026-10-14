@@ -23,6 +23,19 @@ Unlock with a passphrase; the test machine has no TPM. Keep `/nix` inside root,
 the existing sibling subvolumes and Snapper policy. Defer Windows VM storage
 and whole-root snapshot restoration; root snapshots exclude `/boot` and `/home`.
 
+Snapshot restoration is untested; the ISO reinstall erased the first manual
+install's test snapshot. Test file recovery: change a test file in `/etc` and
+`~`, copy the `/etc` one back from `/.snapshots/<n>/snapshot/`, and expect only
+`/etc` restored. Whole-root recovery: boot the ISO, keep the current `root`
+subvolume, create a writable copy of the chosen snapshot named `root`, update
+the boot menu from it, then reboot; never format.
+
+Rollback works: `nixos-rebuild boot --rollback`, reboot, then return with
+`nixos-rebuild switch --flake path:<checkout>#<host>`. It restores the system,
+not mutable files. Until `nswitch` exists, activate with Snapper pre/post
+snapshots:
+`snapper -c root create --description "<why>" --cleanup-algorithm number --command "nixos-rebuild switch --flake path:<checkout>#<host>"`.
+
 | Host | Hardware | RAM | SSD | Swap |
 | --- | --- | --- | --- | --- |
 | Desktop | NVIDIA/Intel | 32 GiB | 2 TB | 48 GiB |
@@ -41,9 +54,9 @@ verification setup and testing to a machine that supports it; this does not
 block Qotom work or userland migration. Use upstream Limine support, enrol keys
 with separate approval and keep private keys outside the repo and ISO.
 
-Keep the encrypted swap/resume settings. Hibernation remains untested; defer
-resume testing and compatibility checks with kernel lockdown and Secure Boot
-to the desktop or laptop. Do not block Qotom boot work on resume testing.
+Keep the encrypted swap/resume settings. Manual hibernation resumes locked on
+Qotom; Noctalia hibernates after two hours idle. Defer compatibility checks with
+kernel lockdown and Secure Boot to the desktop or laptop.
 
 Check EFI capacity and generation retention, early storage/display drivers and
 keyboard input; defer boot appearance work.
