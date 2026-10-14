@@ -15,6 +15,11 @@ hl.bind(
     { description = "Open Ghostty terminal" }
 )
 hl.bind(
+    mainMod .. " + SHIFT + F",
+    hl.dsp.exec_cmd("uwsm-app -- nautilus"),
+    { description = "Open file manager" }
+)
+hl.bind(
     mainMod .. " + W",
     hl.dsp.window.close(),
     { description = "Close focused window" }
