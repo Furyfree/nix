@@ -88,8 +88,7 @@ hl.bind(
 -- 2. Noctalia tools
 for _, binding in ipairs({
     { key = "G", panel = "tphilippot/git_companion:main", description = "Open Git Companion" },
-    -- Returns with Docker.
-    -- { key = "D", panel = "8bury/mini-docker:manager", description = "Open Docker manager" },
+    { key = "D", panel = "8bury/mini-docker:manager", description = "Open Docker manager" },
     { key = "P", panel = "rxtsel/portctl:panel", description = "Open port manager" },
     { key = "M", panel = "profidev/hypr-screen-mirror:panel", description = "Open screen mirroring" },
     { key = "N", panel = "noctalia/notes:panel", description = "Open notes" },
