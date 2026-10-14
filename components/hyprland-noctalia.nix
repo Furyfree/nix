@@ -31,6 +31,8 @@ in
       recommendedServices.enable = true;
     };
     dconf.enable = true;
+    # Noctalia's screen recorder plugin.
+    gpu-screen-recorder.enable = true;
   };
 
   systemd.user.services.noctalia.serviceConfig = {
@@ -99,6 +101,10 @@ in
     udiskie
     zathura
     libnotify
+    # Noctalia plugin commands: area selection, screen mirror and crash reports.
+    slurp
+    socat
+    jq
     bibata-cursors
     papirus-icon-theme
     adw-gtk3
