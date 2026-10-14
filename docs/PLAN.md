@@ -121,7 +121,8 @@ Use nh with `NH_FLAKE` set to the checkout's `path:` flake: `nh os build`,
 Update only the lock with `nix flake update --flake "$NH_FLAKE"`.
 Nix installs Mise and nix-ld; run `mise install` after a rebuild and
 `mise upgrade` for tool updates. Topgrade is dropped: nh, Mise and Sheldon
-update their own parts.
+update their own parts. No Flatpak while every app is in nixpkgs, including
+Fedora's Pinta, Spotify and Fastmail Flatpaks.
 Move dotfiles' Pi-package hook into Home Manager after Mise installs Pi; keep
 `npm:pi-terminal-math` unpinned and Pi settings/local packages writable.
 
