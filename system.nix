@@ -3,6 +3,7 @@
 
 {
   imports = [
+    ./components/apps.nix
     ./components/boot.nix
     ./components/development.nix
     ./components/editors.nix

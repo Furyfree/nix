@@ -58,6 +58,7 @@
           "udiskie/config.yml"
           "mise/config.toml"
           "mise/conf.d/linux-tools.toml"
+          "mimeapps.list"
         ]
         (name: {
           source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${name}";
@@ -69,6 +70,17 @@
           config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/gtk/gtk-3.0/settings.ini";
         "gtk-4.0/settings.ini".source =
           config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/gtk/gtk-4.0/settings.ini";
+        # File manager sidebar; bookmarks need absolute paths.
+        "gtk-3.0/bookmarks".text =
+          lib.concatMapStrings (path: "file://${config.home.homeDirectory}/${path} ${baseNameOf path}\n")
+            [
+              "Documents"
+              "Downloads"
+              "Projects"
+              "Pictures"
+              "Projects/dtu-bachelor"
+              "Projects/nix"
+            ];
         # Reuse the pinned renderer and reload hook, not the config-rewriting apply hook.
         "noctalia/templates/ghostty".source =
           "${config.programs.noctalia.package}/share/noctalia/assets/templates/ghostty";

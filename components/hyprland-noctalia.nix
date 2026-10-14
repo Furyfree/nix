@@ -113,6 +113,11 @@ in
     slurp
     socat
     jq
+    # Noctalia screenshots, text recognition, QR codes and plugin data.
+    grim
+    (tesseract.override { enableLanguages = [ "eng" ]; })
+    qrencode
+    sqlite
     # Noctalia template hooks, such as LibreOffice's.
     python3
     bibata-cursors
