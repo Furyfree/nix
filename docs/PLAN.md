@@ -119,6 +119,9 @@ then activate; Nix rollback does not restore external packages or mutable data.
 Use nh with `NH_FLAKE` set to the checkout's `path:` flake: `nh os build`,
 `nh search` and `nswitch` (`nh os switch` between Snapper pre/post snapshots).
 Update only the lock with `nix flake update --flake "$NH_FLAKE"`.
+Nix installs Mise and nix-ld; run `mise install` after a rebuild and
+`mise upgrade` for tool updates. Topgrade is dropped: nh, Mise and Sheldon
+update their own parts.
 Move dotfiles' Pi-package hook into Home Manager after Mise installs Pi; keep
 `npm:pi-terminal-math` unpinned and Pi settings/local packages writable.
 
