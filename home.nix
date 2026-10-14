@@ -95,7 +95,25 @@
           icon_theme=Papirus-Dark
           style=Fusion
         '';
-      });
+      })
+      //
+        lib.mapAttrs
+          (_: name: {
+            source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/vscodium/${name}";
+          })
+          {
+            "VSCodium/product.json" = "product.json";
+            "VSCodium/User/settings.json" = "settings.json";
+            "VSCodium/User/keybindings.json" = "keybindings.json";
+          };
+  };
+
+  # Zed rewrites its settings for model choices; merge the repo values into
+  # its own file on activation instead of linking it.
+  programs.zed-editor = {
+    enable = true;
+    userSettings = lib.importJSON ./configs/zed/settings.json;
+    userKeymaps = lib.importJSON ./configs/zed/keymap.json;
   };
 
   home.file.".zshenv".source =

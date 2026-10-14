@@ -1,0 +1,25 @@
+[
+  // Shared with Zed; Danish keyboards make the default ctrl+` a dead key.
+  {
+    "key": "ctrl+alt+shift+j",
+    "command": "workbench.action.terminal.toggleTerminal"
+  },
+  // Match Zed's dock keys: left panel, right sidebar and outline.
+  {
+    "key": "ctrl+b",
+    "command": "workbench.action.toggleAuxiliaryBar"
+  },
+  {
+    "key": "ctrl+alt+b",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  {
+    "key": "ctrl+shift+b",
+    "command": "outline.focus"
+  },
+  {
+    "key": "ctrl+alt+g",
+    "command": "git-graph.view",
+    "when": "!terminalFocus"
+  }
+]

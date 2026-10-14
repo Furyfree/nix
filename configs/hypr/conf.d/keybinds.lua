@@ -20,6 +20,16 @@ hl.bind(
     { description = "Open file manager" }
 )
 hl.bind(
+    mainMod .. " + SHIFT + Z",
+    hl.dsp.exec_cmd("uwsm-app -- zeditor"),
+    { description = "Open Zed" }
+)
+hl.bind(
+    mainMod .. " + SHIFT + V",
+    hl.dsp.exec_cmd("uwsm-app -- codium"),
+    { description = "Open VSCodium" }
+)
+hl.bind(
     mainMod .. " + W",
     hl.dsp.window.close(),
     { description = "Close focused window" }
