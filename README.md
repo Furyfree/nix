@@ -24,8 +24,7 @@ nix --extra-experimental-features 'nix-command flakes' build --no-link path:.#ni
 ```
 
 Build without activation. The public checkout exposes the installer and development
-shell; installed host outputs require machine data. Follow the installation guide
-for deployment, Snapper snapshots and rollback.
+shell; installed host outputs require machine data.
 
 ## Install
 
@@ -79,5 +78,4 @@ nixos-rebuild build --flake path:.#nixos-test
 To activate them, run `nixos-rebuild switch` as root with
 `--flake "path:/home/<user>/Projects/nix#nixos-test"`.
 
-- [Installation and recovery](docs/INSTALLATION.md)
 - [Boot, installer and migration plan](docs/PLAN.md)

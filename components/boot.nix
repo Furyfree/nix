@@ -1,15 +1,17 @@
 { pkgs, ... }:
 
 {
-  boot.loader.limine = {
-    enable = true;
-    maxGenerations = 10;
-  };
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot = {
+    loader.limine = {
+      enable = true;
+      maxGenerations = 10;
+    };
+    loader.efi.canTouchEfiVariables = true;
 
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.initrd.systemd.enable = true;
-  boot.plymouth.enable = true;
+    kernelPackages = pkgs.linuxPackages_latest;
+    initrd.systemd.enable = true;
+    plymouth.enable = true;
+  };
 
   console.keyMap = "dk";
   # console.keyMap = "us";

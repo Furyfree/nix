@@ -1,5 +1,5 @@
 { sizeGiB }:
-{ ... }:
+_:
 
 {
   swapDevices = [
