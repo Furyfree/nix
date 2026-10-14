@@ -202,8 +202,7 @@ command = "systemctl hibernate"
 enabled = true
 
 # Enable the commented plugins when their integrations arrive: ai-usagebar
-# (AI tools), airpods (LibrePods), mini-docker (Docker), tailnet (Tailscale)
-# and lid-guard (laptop).
+# (AI tools), airpods (LibrePods), tailnet (Tailscale) and lid-guard (laptop).
 [plugins]
 enabled = [
     "noctalia/notes",
@@ -215,7 +214,7 @@ enabled = [
     "tphilippot/git_companion",
     "profidev/hypr-screen-mirror",
     "kenn/keybind-cheatsheet",
-    # "8bury/mini-docker",
+    "8bury/mini-docker",
     # "rylos/tailnet",
     "aristides/udiskie",
     "rxtsel/portctl",
@@ -229,8 +228,8 @@ agent_cmd = "codex"
 agent_order = "codex, claude, grok, opencode"
 panel_open_near_click = true
 
-# [plugin_settings."8bury/mini-docker"]
-# manager_position = "auto"
+[plugin_settings."8bury/mini-docker"]
+manager_position = "auto"
 
 [plugin_settings."aristides/udiskie"]
 manager_open_near_click = true

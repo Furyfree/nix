@@ -11,6 +11,7 @@
     ./components/networking.nix
     ./components/shell.nix
     ./components/snapper.nix
+    ./components/virtualization.nix
   ];
 
   nix.settings.experimental-features = [
