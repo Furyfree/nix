@@ -44,6 +44,8 @@ delta = "latest"
 [settings]
 # Nix installs and updates Mise; Mise installs the tools above.
 system_deps = "warn"
+# nix-ld runs the prebuilt release; Mise compiles on NixOS by default.
+node.compile = false
 
 # Activate an existing uv environment without creating one on directory entry.
 python.uv_venv_auto = "source"
