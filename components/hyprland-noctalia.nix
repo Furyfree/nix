@@ -97,6 +97,7 @@ in
   environment.systemPackages = with pkgs; [
     ghostty
     udiskie
+    zathura
     libnotify
     bibata-cursors
     papirus-icon-theme
