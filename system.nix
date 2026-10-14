@@ -12,6 +12,7 @@
     ./components/shell.nix
     ./components/snapper.nix
     ./components/virtualization.nix
+    ./components/windows-vm.nix
   ];
 
   nix.settings.experimental-features = [
