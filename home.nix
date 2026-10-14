@@ -59,6 +59,7 @@
           "mise/config.toml"
           "mise/conf.d/linux-tools.toml"
           "mimeapps.list"
+          "vm-curator/config.toml"
         ]
         (name: {
           source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${name}";

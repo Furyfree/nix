@@ -103,7 +103,7 @@ disks for VM tests, not host disks.
 Migrate one batch at a time and check each on `nixos-test` before the next.
 Remaining order:
 
-1. Docker, then the Windows VM and vm-curator; printing when a printer can test it.
+1. Printing, when a printer can test it.
 2. Real hosts: multiple flake hosts and installer entries, desktop NVIDIA/Intel,
    laptop AMD and power, keyboards, DTU network, LibrePods, Voxtype and
    compatible Hyprland plugins; then gaming on the desktop.
@@ -150,6 +150,7 @@ ai-workflow owns agent instructions/skills; wow-ui remains independent.
   Terminal profiles/Zed local values in backed-up Windows config copies/merges.
 - Decide EFI handling in preserve mode and recovery with Secure Boot enabled:
   standard ISOs require disabling it, or we need a trusted signed recovery image.
-- Confirm the optional Windows VM.
+- Windows VM: build the Docker/KVM guest planned in Nimbus #33 (with FreeRDP),
+  or a vm-curator guest. Neither existed on Fedora.
 - Approve each implementation batch. Approve physical disk, bootloader activation
   and firmware/key changes separately; retire old provisioning only after tests.
