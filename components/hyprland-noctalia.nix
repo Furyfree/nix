@@ -122,5 +122,10 @@ in
   fonts.packages = with pkgs; [
     inter
     nerd-fonts.jetbrains-mono
+    jetbrains-mono
+    noto-fonts
+    noto-fonts-cjk-sans
+    noto-fonts-color-emoji
+    terminus_font
   ];
 }

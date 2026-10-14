@@ -3,6 +3,7 @@
 {
   imports = [
     ../../system.nix
+    ../../components/intel-graphics.nix
     ./local/hardware-configuration.nix
   ];
 
