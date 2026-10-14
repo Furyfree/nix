@@ -11,8 +11,30 @@ pure_black_dark = false
 [theme.templates]
 enable_builtin_templates = true
 enable_community_templates = true
-builtin_ids = ["gtk3", "gtk4", "hyprland", "kcolorscheme", "qt"]
-community_ids = ["hyprtoolkit", "papirus-icons"]
+# Ghostty uses the user template below instead of its config-rewriting builtin.
+builtin_ids = ["btop", "gtk3", "gtk4", "hyprland", "kcolorscheme", "qt"]
+community_ids = [
+    "claude-code",
+    "codex",
+    "opencode",
+    "discord",
+    "libreoffice",
+    "obsidian",
+    "vscode",
+    "zed",
+    "heroiclauncher",
+    "prismlauncher",
+    "steam",
+    "obs",
+    "zathura",
+    "hyprtoolkit",
+    "papirus-icons",
+    "bat",
+    "fzf",
+    "herdr",
+    "lazygit",
+    "yazi",
+]
 
 # Generate colors and reload without rewriting the linked Ghostty preferences.
 [theme.templates.user.ghostty]
@@ -26,8 +48,9 @@ directory = "~/Pictures/Wallpapers"
 
 [bar.default]
 start = ["workspaces"]
-center = ["clock", "date", "weather", "notifications"]
-end = ["battery", "tray", "volume", "control-center"]
+center = ["clock", "date", "weather", "timer", "notifications"]
+# Add ai-usage, tailnet and airpods before battery as their integrations arrive.
+end = ["recorder", "battery", "drives", "tray", "volume", "control-center"]
 background_opacity = 0.80
 widget_spacing = 10
 font_family = "JetBrainsMono Nerd Font Propo"
@@ -40,17 +63,19 @@ label_source = "name"
 show_all_outputs = false
 hide_when_empty = false
 
+# Waits for the AI tools and their sign-ins.
 # [widget.ai-usage]
 # type = "felipeartur/ai-usagebar:bar"
 # provider_limit = 2
 # show_name = true
 
+# Waits for Tailscale.
 # [widget.tailnet]
 # type = "rylos/tailnet:bar"
 
-# [widget.timer]
-# type = "noctalia/timer:bar"
-# show_idle_on_horizontal = false
+[widget.timer]
+type = "noctalia/timer:bar"
+show_idle_on_horizontal = false
 
 [widget.notifications]
 hide_when_no_unread = true
@@ -58,14 +83,15 @@ hide_when_no_unread = true
 [widget.weather]
 show_condition = false
 
-# [widget.recorder]
-# type = "noctalia/screen_recorder:recorder"
+[widget.recorder]
+type = "noctalia/screen_recorder:recorder"
 
+# Waits for LibrePods on the desktop and laptop.
 # [widget.airpods]
 # type = "harveywuk/airpods:airpods"
 
-# [widget.drives]
-# type = "aristides/udiskie:status"
+[widget.drives]
+type = "aristides/udiskie:status"
 
 [widget.tray]
 detached_panel = true
@@ -176,21 +202,39 @@ action = "command"
 command = "systemctl hibernate"
 enabled = true
 
-# Plugin preferences are retained; activation waits for their integrations.
+# Enable the commented plugins when their integrations arrive: ai-usagebar
+# (AI tools), airpods (LibrePods), mini-docker (Docker), tailnet (Tailscale)
+# and lid-guard (laptop).
 [plugins]
-enabled = []
+enabled = [
+    "noctalia/notes",
+    "noctalia/screen_recorder",
+    "noctalia/timer",
+    # "felipeartur/ai-usagebar",
+    # "harveywuk/airpods",
+    "umedbazarov/crashes",
+    "tphilippot/git_companion",
+    "profidev/hypr-screen-mirror",
+    "kenn/keybind-cheatsheet",
+    # "8bury/mini-docker",
+    # "rylos/tailnet",
+    "aristides/udiskie",
+    "rxtsel/portctl",
+    "cleboost/ssh-launcher",
+    # "8bury/lid-guard",
+]
 
-# [plugin_settings."umedbazarov/crashes"]
-# terminal_cmd = "ghostty --class=com.mitchellh.ghostty.presentation -e"
-# agent_cmd = "codex"
-# agent_order = "codex, claude, grok, opencode"
-# panel_open_near_click = true
+[plugin_settings."umedbazarov/crashes"]
+terminal_cmd = "ghostty --class=com.mitchellh.ghostty.presentation -e"
+agent_cmd = "codex"
+agent_order = "codex, claude, grok, opencode"
+panel_open_near_click = true
 
 # [plugin_settings."8bury/mini-docker"]
 # manager_position = "auto"
 
-# [plugin_settings."aristides/udiskie"]
-# manager_open_near_click = true
+[plugin_settings."aristides/udiskie"]
+manager_open_near_click = true
 
 # [plugin_settings."felipeartur/ai-usagebar"]
 # panel_open_near_click = true
@@ -200,28 +244,28 @@ enabled = []
 # panel_placement = "floating"
 # panel_position = "auto"
 
-# [plugin_settings."noctalia/notes"]
-# panel_position = "top_right"
+[plugin_settings."noctalia/notes"]
+panel_position = "top_right"
 
-# [plugin_settings."noctalia/timer"]
-# panel_placement = "floating"
+[plugin_settings."noctalia/timer"]
+panel_placement = "floating"
 
-# [plugin_settings."profidev/hypr-screen-mirror"]
-# panel_open_near_click = true
-# panel_position = "auto"
+[plugin_settings."profidev/hypr-screen-mirror"]
+panel_open_near_click = true
+panel_position = "auto"
 
 # [plugin_settings."rylos/tailnet"]
 # panel_placement = "floating"
 
-# [plugin_settings."tphilippot/git_companion"]
-# main_placement = "floating"
+[plugin_settings."tphilippot/git_companion"]
+main_placement = "floating"
 
-# [plugin_settings."noctalia/screen_recorder"]
-# directory = "~/Videos/Recordings"
+[plugin_settings."noctalia/screen_recorder"]
+directory = "~/Videos/Recordings"
 
-# [plugin_settings."kenn/keybind-cheatsheet"]
-# hyprland_lua_config = "~/.config/hypr/conf.d/keybinds.lua"
-# hyprland_parser = "lua"
+[plugin_settings."kenn/keybind-cheatsheet"]
+hyprland_lua_config = "~/.config/hypr/conf.d/keybinds.lua"
+hyprland_parser = "lua"
 
 [brightness]
 sync_all_monitors = true
