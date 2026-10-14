@@ -64,6 +64,9 @@
           source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${name}";
         })
       // {
+        # The whole folder, so vim.pack writes its lock file into the checkout.
+        "nvim".source =
+          config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/nvim";
         "starship.toml".source =
           config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/starship/starship.toml";
         "gtk-3.0/settings.ini".source =

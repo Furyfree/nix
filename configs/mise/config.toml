@@ -4,7 +4,7 @@ dotnet = "10"
 go = "latest"
 java = "corretto-25"
 node = "lts"
-rust = "stable"
+rust = { version = "stable", components = "rust-analyzer" }
 uv = "latest"
 
 # Agent CLIs return with the AI tools batch, after their sign-ins.
@@ -31,6 +31,9 @@ staticcheck = "latest"
 golangci-lint = "latest"
 ruff = "latest"
 stylua = "latest"
+ty = "latest"
+lua-language-server = "latest"
+"npm:bash-language-server" = "latest"
 
 # Shell and configuration helpers
 shellcheck = "latest"
