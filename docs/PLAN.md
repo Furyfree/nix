@@ -20,8 +20,9 @@ Fedora, Nimbus and Chezmoi until replacements work.
 
 Use UEFI, a 4 GiB FAT32 EFI partition at `/boot`, and LUKS2-encrypted Btrfs.
 Unlock with a passphrase; the test machine has no TPM. Keep `/nix` inside root,
-the existing sibling subvolumes and Snapper policy. Defer Windows VM storage
-and whole-root snapshot restoration; root snapshots exclude `/boot` and `/home`.
+the existing sibling subvolumes and Snapper policy; the `windows` subvolume
+holds the Windows VM. Defer whole-root snapshot restoration; root snapshots
+exclude `/boot` and `/home`.
 
 Snapshot restoration is untested; the ISO reinstall erased the first manual
 install's test snapshot. Test file recovery: change a test file in `/etc` and
@@ -150,7 +151,7 @@ ai-workflow owns agent instructions/skills; wow-ui remains independent.
   Terminal profiles/Zed local values in backed-up Windows config copies/merges.
 - Decide EFI handling in preserve mode and recovery with Secure Boot enabled:
   standard ISOs require disabling it, or we need a trusted signed recovery image.
-- Windows VM: build the Docker/KVM guest planned in Nimbus #33 (with FreeRDP),
-  or a vm-curator guest. Neither existed on Fedora.
+- Windows VM: confirm whether Dockur's or the custom ISO's unattended setup
+  creates the account, then keep `credentials.env` matching it.
 - Approve each implementation batch. Approve physical disk, bootloader activation
   and firmware/key changes separately; retire old provisioning only after tests.
