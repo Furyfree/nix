@@ -57,6 +57,36 @@ hl.bind(
     hl.dsp.exec_cmd("noctalia msg panel-toggle wallpaper"),
     { description = "Open wallpaper browser" }
 )
+hl.bind(
+    mainMod .. " + CTRL + C",
+    hl.dsp.exec_cmd("noctalia msg panel-toggle umedbazarov/crashes:panel"),
+    { description = "Open crash history and diagnostics" }
+)
+hl.bind(
+    mainMod .. " + Escape",
+    hl.dsp.exec_cmd(
+        "noctalia msg panel-toggle kenn/keybind-cheatsheet:cheatsheet"
+    ),
+    { description = "Open keybind cheatsheet" }
+)
+
+-- 2. Noctalia tools
+for _, binding in ipairs({
+    { key = "G", panel = "tphilippot/git_companion:main", description = "Open Git Companion" },
+    -- Returns with Docker.
+    -- { key = "D", panel = "8bury/mini-docker:manager", description = "Open Docker manager" },
+    { key = "P", panel = "rxtsel/portctl:panel", description = "Open port manager" },
+    { key = "M", panel = "profidev/hypr-screen-mirror:panel", description = "Open screen mirroring" },
+    { key = "N", panel = "noctalia/notes:panel", description = "Open notes" },
+    { key = "S", panel = "launcher '/ssh '", description = "Open SSH launcher" },
+}) do
+    hl.bind(
+        mainMod .. " + CTRL + " .. binding.key,
+        hl.dsp.exec_cmd("noctalia msg panel-toggle " .. binding.panel),
+        { description = binding.description }
+    )
+end
+-- Lid Guard (Super+Ctrl+L) returns with the laptop host.
 
 -- 3. Layout, column size and fullscreen
 hl.bind(
