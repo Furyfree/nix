@@ -83,20 +83,6 @@ installer separate from workstation settings; it need not boot through Limine.
   existing partitions, data and boot files, insufficient space,
   interrupted/repeated runs and boot repair before deploying those changes.
 
-Review `scripts/install.py` and `tests/test_installer.py` for a split by job:
-
-- Planning and disk discovery.
-- Wizard prompts and review.
-- Storage preparation, safety checks and cleanup.
-- Configuration cloning, generation and evaluation.
-- Native installation and verification.
-
-Keep `scripts/install.py` as a thin launcher. Split tests along the same
-boundaries and update ISO packaging to include all modules. Preserve behavior,
-disk guards, read-only previews and native password entry; add no framework or
-dependencies. Propose the exact files and wait for approval before code changes.
-Verify with the existing tests, type checks, flake evaluation and packaged wizard.
-
 Build future installer changes with `just build-iso`. Use throwaway virtual
 disks for VM tests, not host disks.
 
