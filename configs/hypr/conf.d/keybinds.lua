@@ -117,7 +117,7 @@ local function toggle_overview()
     if hl.plugin.scrolloverview then
         hl.plugin.scrolloverview.overview("toggle all")
     else
-        hl.exec_cmd("notify-send 'Workspace overview unavailable' 'ScrollOverview migration is deferred.'")
+        hl.exec_cmd("notify-send 'Workspace overview unavailable' 'ScrollOverview did not load; check hyprctl plugin list.'")
     end
 end
 hl.bind(mainMod .. " + O", toggle_overview, { description = "Toggle workspace overview on all monitors" })
