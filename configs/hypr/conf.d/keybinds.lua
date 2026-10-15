@@ -89,6 +89,11 @@ hl.bind(
     { description = "Open VSCodium" }
 )
 hl.bind(
+    mainMod .. " + SHIFT + T",
+    focus_or_launch("t3code", "uwsm-app -- t3code-desktop"),
+    { description = "Focus or open T3 Code" }
+)
+hl.bind(
     mainMod .. " + W",
     hl.dsp.window.close(),
     { description = "Close focused window" }

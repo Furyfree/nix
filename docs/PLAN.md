@@ -106,8 +106,8 @@ Remaining order:
    Launcher and WowUp, tested on the Qotom first. Proton, protontricks and
    Heroic cover Lutris, standalone Wine and umu; MangoHud settings replace
    GOverlay.
-6. AI: agent CLIs and configs, ACP adapters, agent-proxy, ai-usagebar, Pi
-   packages, T3 Code and Claude Desktop.
+6. AI: agent CLIs and configs, ACP adapters, ai-usagebar, Pi packages and T3
+   Code; then Claude Desktop, packaged from Anthropic's signed Debian package.
 7. Compatible Hyprland plugins, including ScrollOverview.
 8. Printing, when a printer can test it.
 9. Sign-in tools: Git/SSH with 1Password (app, CLI, agent), Git signing and `gh`
@@ -146,7 +146,8 @@ Keep secrets, credentials, history, caches and downloaded plugins outside the
 repo/Nix store. Use 1Password for keys/authentication, with SSH agent and Git
 signing per platform. Preserve local Zed model/agent settings and selected
 Obsidian preferences/plugin settings; the vault keeps content, plugins and lists.
-Leave vis, Niri, DMS, Bash with ble.sh, ChatGPT desktop and Zeron out.
+Leave vis, Niri, DMS, Bash with ble.sh, ChatGPT desktop, Zeron and agent-proxy
+(with Copilot desktop) out.
 ai-workflow owns agent instructions/skills; wow-ui remains independent.
 
 ## Later platforms and open choices

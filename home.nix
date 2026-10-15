@@ -180,14 +180,41 @@ in
     source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/bin/${name}";
   });
 
-  # As the COPR launcher did: opt out of Toolbox's default autostart before its
-  # first launch, then leave the setting to Toolbox.
-  home.activation.jetbrainsToolboxAutostart = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    settings="${config.xdg.dataHome}/JetBrains/Toolbox/.settings.json"
-    if [[ ! -e $settings ]]; then
-      run install -D -m 0644 /dev/stdin "$settings" <<<'{ "autostart": false }'
-    fi
-  '';
+  home.activation = {
+    # As the COPR launcher did: opt out of Toolbox's default autostart before its
+    # first launch, then leave the setting to Toolbox.
+    jetbrainsToolboxAutostart = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      settings="${config.xdg.dataHome}/JetBrains/Toolbox/.settings.json"
+      if [[ ! -e $settings ]]; then
+        run install -D -m 0644 /dev/stdin "$settings" <<<'{ "autostart": false }'
+      fi
+    '';
+
+    # Agents rewrite their own settings; set only the keys in configs/<tool> and
+    # keep everything else. Files Yq cannot parse, such as commented JSON, stay as
+    # they are.
+    agentSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      merge() {
+        local target=$1 patch=$2 format=$3 merged
+        # Yq reads an empty file as nothing, so start those from the patch too.
+        if [[ ! -s $target ]]; then
+          run install -D -m 0600 "$patch" "$target"
+        elif merged=$(${lib.getExe pkgs.yq-go} ea -p "$format" -o "$format" \
+          'select(fi == 0) * select(fi == 1)' "$target" "$patch"); then
+          # Rewrite in place to keep the file's owner and mode.
+          [[ -v DRY_RUN ]] || printf '%s\n' "$merged" >"$target"
+        else
+          warnEcho "Skipping $target: Yq cannot merge it."
+        fi
+      }
+      merge ${config.home.homeDirectory}/.claude/settings.json ${./configs/claude/settings.json} json
+      merge ${config.home.homeDirectory}/.codex/config.toml ${./configs/codex/config.toml} toml
+      merge ${config.home.homeDirectory}/.grok/config.toml ${./configs/grok/config.toml} toml
+      merge ${config.xdg.configHome}/opencode/opencode.jsonc ${./configs/opencode/opencode.json} json
+      merge ${config.home.homeDirectory}/.pi/agent/settings.json ${./configs/pi/settings.json} json
+      merge ${config.xdg.configHome}/ai-usagebar/config.toml ${./configs/ai-usagebar/config.toml} toml
+    '';
+  };
 
   dconf.settings =
     let

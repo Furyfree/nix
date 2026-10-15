@@ -1,0 +1,13 @@
+{
+  "permission": {
+    "*": "allow",
+    "bash": {
+      "*": "allow",
+      "rm -rf *": "ask",
+      "git push *": "ask",
+      "git reset --hard*": "ask",
+      "sudo *": "ask"
+    },
+    "doom_loop": "ask"
+  }
+}
