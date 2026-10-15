@@ -224,7 +224,7 @@ EOF
 
 cmd_launch() {
   [[ -r $settings ]] || die "The Windows VM is not installed; run windows-vm install."
-  local keep_alive=false scale username password
+  local keep_alive=false scale username password started attempt status
   [[ ${1-} == --keep-alive ]] && keep_alive=true
   username=$(setting USERNAME)
   password=$(setting PASSWORD)
@@ -243,9 +243,12 @@ cmd_launch() {
   if ! $keep_alive; then
     trap 'systemctl stop "$WINDOWS_SERVICE"' EXIT
   fi
-  until rdp /auth-only >/dev/null 2>&1; do
+  # Wait for Dockur's boot message from this start, as Omarchy does; FreeRDP's
+  # /auth-only probe can crash while Windows is still starting.
+  started=$(docker inspect --format '{{.State.StartedAt}}' windows)
+  until docker logs --since "$started" windows 2>&1 | grep -qi "windows started successfully"; do
     systemctl is-active --quiet "$WINDOWS_SERVICE" || die "The Windows VM stopped."
-    sleep 5
+    sleep 2
   done
 
   scale=$(hyprctl monitors -j | jq -r '.[] | select(.focused).scale * 100 | floor')
@@ -256,7 +259,20 @@ cmd_launch() {
   elif ((scale >= 130)); then
     args+=(/scale:140)
   fi
-  rdp "${args[@]}"
+  # Booted is not yet ready for Remote Desktop: retry while FreeRDP cannot
+  # connect, but not after a closed window or a rejected login.
+  for attempt in {1..30}; do
+    status=0
+    rdp "${args[@]}" || status=$?
+    case $status in
+      131 | 133 | 137 | 141 | 143) ;;
+      *) return "$status" ;;
+    esac
+    systemctl is-active --quiet "$WINDOWS_SERVICE" || die "The Windows VM stopped."
+    echo "Windows is not ready for Remote Desktop yet (attempt $attempt of 30)."
+    sleep 10
+  done
+  die "Windows did not accept Remote Desktop; check http://127.0.0.1:8006."
 }
 
 cmd_status() {
