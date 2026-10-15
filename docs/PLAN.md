@@ -102,19 +102,21 @@ Remaining order:
    without autostart; wallpapers in their own repo, cloned to
    `~/Pictures/Wallpapers`.
 4. Devices: LibrePods as our own package with its patches, NuPhy and Wooting files.
-5. Printing, when a printer can test it.
-6. Real hosts: multiple flake hosts and installer entries, free-space install
-   for the desktop's dual boot, desktop NVIDIA/Intel, ddcutil, Wi-Fi firmware,
-   GIMP and Voxtype; laptop AMD, brightness, fingerprint and Wi-Fi retry; DTU
-   network and compatible Hyprland plugins.
-7. Gaming on the desktop: Steam, gamemode, gamescope, MangoHud, Heroic,
-   ProtonPlus, Prism Launcher and WowUp. Proton, protontricks and Heroic cover
-   Lutris, standalone Wine and umu; MangoHud settings replace GOverlay.
-8. Sign-in tools: Git/SSH with 1Password (app, CLI, agent), Git signing and `gh`
-   login.
-9. AI: agent CLIs and configs, ACP adapters, agent-proxy, ai-usagebar, Pi
+5. Gaming: Steam, gamemode, gamescope, MangoHud, Heroic, ProtonPlus, Prism
+   Launcher and WowUp, tested on the Qotom first. Proton, protontricks and
+   Heroic cover Lutris, standalone Wine and umu; MangoHud settings replace
+   GOverlay.
+6. AI: agent CLIs and configs, ACP adapters, agent-proxy, ai-usagebar, Pi
    packages, T3 Code and Claude Desktop.
-10. Install the desktop and laptop, run their hardware tests (including
+7. Compatible Hyprland plugins, including ScrollOverview.
+8. Printing, when a printer can test it.
+9. Sign-in tools: Git/SSH with 1Password (app, CLI, agent), Git signing and `gh`
+   login.
+10. Real hosts: multiple flake hosts and installer entries, free-space install
+    for the desktop's dual boot, desktop NVIDIA/Intel, ddcutil, Wi-Fi firmware,
+    GIMP and Voxtype; laptop AMD, brightness, fingerprint and Wi-Fi retry; DTU
+    network.
+11. Install the desktop and laptop, run their hardware tests (including
     LibrePods, since the Qotom has no Bluetooth), then retire Fedora, Nimbus,
     Chezmoi, COPR and fedora-iso.
 
