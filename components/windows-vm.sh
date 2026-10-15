@@ -27,33 +27,31 @@ setting() {
   done <"$settings"
 }
 
-choices() {
-  local size
-  for size in "$@"; do
-    ((size <= limit)) && echo "${size}G"
-  done
+# Ask for a whole number between min and max, starting at a default.
+number() {
+  local header=$1 min=$2 max=$3 default=$4 value
+  ((min <= max)) || die "Not enough resources for $header (needs $min)."
+  value=$(gum input --header "$header ($min-$max)" --value "$((default < max ? default : max))" --char-limit 4) || exit 1
+  if [[ ! $value =~ ^[0-9]+$ ]] || ((value < min || value > max)); then
+    die "Choose $header between $min and $max."
+  fi
+  echo "$value"
 }
 
 cmd_install() {
   [[ -e /dev/kvm ]] || die "KVM is not available; enable virtualization in the firmware."
   [[ ! -e $settings ]] || die "The Windows VM is installed; run windows-vm remove first."
 
-  local total_ram total_cores free limit ram cores disk username password iso
+  local total_ram total_cores free ram cores disk username password iso
   total_ram=$(awk '/MemTotal/ { print int($2 / 1048576) }' /proc/meminfo)
   total_cores=$(nproc)
   free=$(df --output=avail -BG / | awk 'NR == 2 { print int($1) }')
   echo "Host: ${total_ram} GB RAM, ${total_cores} cores, ${free} GB free"
 
-  limit=$((total_ram - 2))
-  ram=$(choices 4 8 16 32 64 | gum choose --header "RAM" --selected 8G) || exit 1
-  cores=$(gum input --header "CPU cores (1-$total_cores)" --value "$((total_cores < 4 ? total_cores : 4))" --char-limit 2) || exit 1
-  if [[ ! $cores =~ ^[0-9]+$ ]] || ((cores < 1 || cores > total_cores)); then
-    die "Choose 1-$total_cores cores."
-  fi
-  # Leave room for the Windows download and the rest of the system.
-  limit=$((free - 20))
-  disk=$(choices 64 128 256 512 | gum choose --header "Disk" --selected 128G) || exit 1
-  [[ -n $ram && -n $disk ]] || die "Not enough RAM or disk space for a Windows VM."
+  # Leave the host some RAM, and disk space for the Windows download.
+  ram=$(number "RAM in GB" 4 "$((total_ram - 2))" 8)
+  cores=$(number "CPU cores" 1 "$total_cores" 4)
+  disk=$(number "Disk in GB" 64 "$((free - 20))" 128)
   username=$(gum input --header "Windows username" --placeholder "letters, digits, - or _") || exit 1
   [[ $username =~ ^[A-Za-z0-9_-]{1,20}$ ]] || die "Use 1-20 letters, digits, - or _."
   password=$(gum input --header "Windows password (only for this VM)" --password) || exit 1
@@ -63,11 +61,11 @@ cmd_install() {
   [[ -z $iso || -f $iso ]] || die "No ISO at $iso."
 
   gum style --border normal --padding "1 2" "Windows VM" "" \
-    "RAM:       $ram" "CPU:       $cores cores" "Disk:      $disk" \
+    "RAM:       $ram GB" "CPU:       $cores cores" "Disk:      $disk GB" \
     "Username:  $username" "ISO:       ${iso:-Windows 11 download}"
   gum confirm "Install? Root access is requested once." || exit 1
 
-  printf 'RAM_SIZE=%s\nCPU_CORES=%s\nDISK_SIZE=%s\nUSERNAME=%s\nPASSWORD=%s\nTZ=%s\n' \
+  printf 'RAM_SIZE=%sG\nCPU_CORES=%s\nDISK_SIZE=%sG\nUSERNAME=%s\nPASSWORD=%s\nTZ=%s\n' \
     "$ram" "$cores" "$disk" "$username" "$password" "$(timedatectl show -p Timezone --value)" |
     sudo "$0" root-prepare "$iso"
 
