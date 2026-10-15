@@ -297,12 +297,131 @@ tint_intensity = 0.2
 [lockscreen_widgets]
 enabled = true
 schema_version = 2
-widget_order = ["minimal-date-", "minimal-clock-", "minimal-avatar-"]
+widget_order = [
+    "lockscreen-login-box@HDMI-A-1",
+    "lockscreen-login-box@DP-3",
+    "lockscreen-login-box@DP-4",
+    "lockscreen-login-box@eDP-1",
+    "minimal-date-",
+    "minimal-clock-",
+    "minimal-avatar-",
+]
 
 [lockscreen_widgets.grid]
 cell_size = 16
 major_interval = 4
 visible = false
+
+# Noctalia gives each monitor its own login box, named after the output; it
+# ignores outputs that are not connected. Qotom: HDMI-A-1; desktop: DP-3 and
+# DP-4; laptop: eDP-1.
+[lockscreen_widgets.widget."lockscreen-login-box@HDMI-A-1"]
+type = "login_box"
+output = "HDMI-A-1"
+cx = 960.0
+cy = 745.0
+box_width = 400.0
+box_height = 70.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."lockscreen-login-box@HDMI-A-1".settings]
+layout = "compact"
+background_color = "surface_variant"
+background_opacity = 0.0
+background_radius = 12.0
+input_opacity = 0.55
+input_radius = 12.0
+center_password_text = true
+show_caps_lock = true
+show_keyboard_layout = false
+show_login_button = false
+show_media = false
+show_session_buttons = false
+show_unlock_hint = false
+show_weather = false
+
+[lockscreen_widgets.widget."lockscreen-login-box@DP-3"]
+type = "login_box"
+output = "DP-3"
+cx = 960.0
+cy = 745.0
+box_width = 400.0
+box_height = 70.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."lockscreen-login-box@DP-3".settings]
+layout = "compact"
+background_color = "surface_variant"
+background_opacity = 0.0
+background_radius = 12.0
+input_opacity = 0.55
+input_radius = 12.0
+center_password_text = true
+show_caps_lock = true
+show_keyboard_layout = false
+show_login_button = false
+show_media = false
+show_session_buttons = false
+show_unlock_hint = false
+show_weather = false
+
+[lockscreen_widgets.widget."lockscreen-login-box@DP-4"]
+type = "login_box"
+output = "DP-4"
+cx = 960.0
+cy = 745.0
+box_width = 400.0
+box_height = 70.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."lockscreen-login-box@DP-4".settings]
+layout = "compact"
+background_color = "surface_variant"
+background_opacity = 0.0
+background_radius = 12.0
+input_opacity = 0.55
+input_radius = 12.0
+center_password_text = true
+show_caps_lock = true
+show_keyboard_layout = false
+show_login_button = false
+show_media = false
+show_session_buttons = false
+show_unlock_hint = false
+show_weather = false
+
+[lockscreen_widgets.widget."lockscreen-login-box@eDP-1"]
+type = "login_box"
+output = "eDP-1"
+cx = 960.0
+cy = 745.0
+box_width = 400.0
+box_height = 70.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."lockscreen-login-box@eDP-1".settings]
+layout = "compact"
+background_color = "surface_variant"
+background_opacity = 0.0
+background_radius = 12.0
+input_opacity = 0.55
+input_radius = 12.0
+center_password_text = true
+show_caps_lock = true
+show_keyboard_layout = false
+show_login_button = false
+show_media = false
+show_session_buttons = false
+show_unlock_hint = false
+show_weather = false
 
 [lockscreen_widgets.widget."minimal-date-"]
 type = "clock"
