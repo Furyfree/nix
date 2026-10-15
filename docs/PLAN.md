@@ -108,10 +108,12 @@ Remaining order:
    GOverlay.
 6. AI: agent CLIs and configs, ACP adapters, ai-usagebar, Pi packages and T3
    Code; then Claude Desktop, packaged from Anthropic's signed Debian package.
-7. Compatible Hyprland plugins, including ScrollOverview.
+7. Hyprland plugins: ScrollOverview, built by Nix and loaded from `overview.lua`.
 8. Printing, when a printer can test it.
 9. Sign-in tools: Git/SSH with 1Password (app, CLI, agent), Git signing and `gh`
-   login.
+   login. Sign-in tests wait for this batch: the agent CLIs, the AI usage
+   widget and Claude Desktop, plus ai-workflow's `just install` on the real
+   hosts.
 10. Real hosts: multiple flake hosts and installer entries, free-space install
     for the desktop's dual boot, desktop NVIDIA/Intel, ddcutil, Wi-Fi firmware,
     GIMP and Voxtype; laptop AMD, brightness, fingerprint and Wi-Fi retry; DTU
