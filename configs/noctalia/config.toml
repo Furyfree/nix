@@ -48,8 +48,8 @@ directory = "~/Pictures/Wallpapers"
 [bar.default]
 start = ["workspaces"]
 center = ["clock", "date", "weather", "timer", "notifications"]
-# Add ai-usage, tailnet and airpods before battery as their integrations arrive.
-end = ["recorder", "battery", "drives", "tray", "volume", "control-center"]
+# Add ai-usage before tailnet and airpods after recorder as their integrations arrive.
+end = ["tailnet", "recorder", "battery", "drives", "tray", "volume", "control-center"]
 background_opacity = 0.80
 widget_spacing = 10
 font_family = "JetBrainsMono Nerd Font Propo"
@@ -68,9 +68,8 @@ hide_when_empty = false
 # provider_limit = 2
 # show_name = true
 
-# Waits for Tailscale.
-# [widget.tailnet]
-# type = "rylos/tailnet:bar"
+[widget.tailnet]
+type = "rylos/tailnet:bar"
 
 [widget.timer]
 type = "noctalia/timer:bar"
@@ -202,7 +201,7 @@ command = "systemctl hibernate"
 enabled = true
 
 # Enable the commented plugins when their integrations arrive: ai-usagebar
-# (AI tools), airpods (LibrePods), tailnet (Tailscale) and lid-guard (laptop).
+# (AI tools), airpods (LibrePods) and lid-guard (laptop).
 [plugins]
 enabled = [
     "noctalia/notes",
@@ -215,7 +214,7 @@ enabled = [
     "profidev/hypr-screen-mirror",
     "kenn/keybind-cheatsheet",
     "8bury/mini-docker",
-    # "rylos/tailnet",
+    "rylos/tailnet",
     "aristides/udiskie",
     "rxtsel/portctl",
     "cleboost/ssh-launcher",
@@ -252,8 +251,8 @@ panel_placement = "floating"
 panel_open_near_click = true
 panel_position = "auto"
 
-# [plugin_settings."rylos/tailnet"]
-# panel_placement = "floating"
+[plugin_settings."rylos/tailnet"]
+panel_placement = "floating"
 
 [plugin_settings."tphilippot/git_companion"]
 main_placement = "floating"

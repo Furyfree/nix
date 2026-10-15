@@ -112,10 +112,12 @@ in
     udiskie
     zathura
     libnotify
-    # Noctalia plugin commands: area selection, screen mirror and crash reports.
+    # Noctalia plugin commands: area selection, screen mirror, crash reports
+    # and the tailnet plugin's gio.
     slurp
     socat
     jq
+    glib
     # Noctalia screenshots, text recognition, QR codes and plugin data.
     grim
     (tesseract.override { enableLanguages = [ "eng" ]; })

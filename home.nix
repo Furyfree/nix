@@ -1,9 +1,39 @@
 # Shared Home Manager settings, added one tool at a time.
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
+let
+  # A copy of a package's launcher entry, hidden from app menus but still
+  # usable for file associations.
+  hidden =
+    package: name:
+    pkgs.runCommand "hidden-${name}" { } ''
+      sed '/^\[Desktop Entry\]/a NoDisplay=true' ${package}/share/applications/${name} > $out
+    '';
+in
 {
   xdg = {
     enable = true;
+    dataFile =
+      lib.mapAttrs'
+        (name: package: lib.nameValuePair "applications/${name}" { source = hidden package name; })
+        {
+          "btop.desktop" = pkgs.btop;
+          "nvim.desktop" = pkgs.neovim;
+          "yazi.desktop" = pkgs.yazi;
+          "mpv.desktop" = pkgs.mpv;
+          "qt5ct.desktop" = pkgs.libsForQt5.qt5ct;
+          "qt6ct.desktop" = pkgs.qt6Packages.qt6ct;
+          "base.desktop" = pkgs.libreoffice;
+          "math.desktop" = pkgs.libreoffice;
+          "remote-viewer.desktop" = pkgs.virt-viewer;
+          "dev.noctalia.Noctalia.desktop" = config.programs.noctalia.package;
+          "uuctl.desktop" = pkgs.uwsm;
+        };
     userDirs = {
       enable = true;
       createDirectories = true;
@@ -119,13 +149,32 @@
     userKeymaps = lib.importJSON ./configs/zed/keymap.json;
   };
 
-  home.file.".zshenv".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/zsh/.zshenv";
-
-  dconf.settings."org/gnome/desktop/interface" = {
-    gtk-enable-primary-paste = true;
-    icon-theme = "Papirus-Dark";
-    cursor-theme = "Bibata-Modern-Ice";
-    cursor-size = 24;
+  home.file = {
+    ".zshenv".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/zsh/.zshenv";
+    ".local/bin/pull-projects".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/bin/pull-projects";
   };
+
+  dconf.settings =
+    let
+      # Show hidden files and folders first; open where the app is working.
+      fileChooser = {
+        show-hidden = true;
+        sort-directories-first = true;
+        startup-mode = "cwd";
+      };
+    in
+    {
+      "org/gnome/desktop/interface" = {
+        gtk-enable-primary-paste = true;
+        icon-theme = "Papirus-Dark";
+        cursor-theme = "Bibata-Modern-Ice";
+        cursor-size = 24;
+      };
+      "org/gnome/nautilus/preferences".show-hidden-files = true;
+      "org/gnome/desktop/privacy".remember-recent-files = false;
+      "org/gtk/settings/file-chooser" = fileChooser;
+      "org/gtk/gtk4/settings/file-chooser" = fileChooser;
+    };
 }
