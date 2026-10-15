@@ -113,14 +113,113 @@ root_prepare() {
     mount -o loop,ro -- "$storage/custom.iso" "$iso"
     answer=$(find "$iso" -maxdepth 1 -iname autounattend.xml -print -quit)
     if [[ -n $answer ]]; then
-      cp -- "$answer" "$storage/custom.xml"
-      echo "Using the ISO's own setup. During install, create the user with the"
-      echo "username and password you chose; afterwards, turn on Remote Desktop"
-      echo "in Windows (Settings > System > Remote Desktop) before windows-vm launch."
+      complete_answer "$answer" >"$storage/custom.xml"
+      echo "Using the ISO's own setup, with the disk, account and Remote Desktop added."
     fi
     umount "$iso"
     rmdir "$iso"
   fi
+}
+
+# Add what the VM needs to an ISO's answer file, using Dockur's own blocks
+# (assets/win11x64.xml): the install disk, the account from settings.env and
+# Remote Desktop. Settings the answer file already has are kept.
+complete_answer() {
+  local account
+  account=$(mktemp -p "$storage")
+  printf '<account><user>%s</user><password>%s</password></account>\n' \
+    "$(setting USERNAME | xmlstarlet esc)" "$(setting PASSWORD | xmlstarlet esc)" >"$account"
+  xmlstarlet tr <(answer_stylesheet) -s account="$account" "$1"
+  rm -f -- "$account"
+}
+
+answer_stylesheet() {
+  cat <<'EOF'
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns="urn:schemas-microsoft-com:unattend" xmlns:u="urn:schemas-microsoft-com:unattend"
+  xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" exclude-result-prefixes="u">
+  <xsl:param name="account"/>
+  <xsl:variable name="user" select="document($account)/account/user"/>
+  <xsl:variable name="password" select="document($account)/account/password"/>
+
+  <xsl:template match="@*|node()">
+    <xsl:copy><xsl:apply-templates select="@*|node()"/></xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="u:settings[@pass='windowsPE']/u:component[@name='Microsoft-Windows-Setup'][not(u:DiskConfiguration)]">
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()"/>
+      <DiskConfiguration>
+        <Disk wcm:action="add">
+          <DiskID>1</DiskID>
+          <WillWipeDisk>true</WillWipeDisk>
+          <CreatePartitions>
+            <CreatePartition wcm:action="add"><Order>1</Order><Type>EFI</Type><Size>128</Size></CreatePartition>
+            <CreatePartition wcm:action="add"><Order>2</Order><Type>MSR</Type><Size>128</Size></CreatePartition>
+            <CreatePartition wcm:action="add"><Order>3</Order><Type>Primary</Type><Extend>true</Extend></CreatePartition>
+          </CreatePartitions>
+          <ModifyPartitions>
+            <ModifyPartition wcm:action="add"><Order>1</Order><PartitionID>1</PartitionID><Label>System</Label><Format>FAT32</Format></ModifyPartition>
+            <ModifyPartition wcm:action="add"><Order>2</Order><PartitionID>2</PartitionID></ModifyPartition>
+            <ModifyPartition wcm:action="add"><Order>3</Order><PartitionID>3</PartitionID><Label>Windows</Label><Letter>C</Letter><Format>NTFS</Format></ModifyPartition>
+          </ModifyPartitions>
+        </Disk>
+      </DiskConfiguration>
+    </xsl:copy>
+  </xsl:template>
+
+  <!-- Install onto the Windows partition above, only when the disk layout is ours. -->
+  <xsl:template match="u:settings[@pass='windowsPE']/u:component[@name='Microsoft-Windows-Setup'][not(u:DiskConfiguration)]//u:OSImage[not(u:InstallTo)]">
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()"/>
+      <InstallTo><DiskID>1</DiskID><PartitionID>3</PartitionID></InstallTo>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="u:settings[@pass='specialize'][not(u:component[@name='Microsoft-Windows-TerminalServices-LocalSessionManager'])]">
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()"/>
+      <component name="Microsoft-Windows-TerminalServices-LocalSessionManager" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+        <fDenyTSConnections>false</fDenyTSConnections>
+      </component>
+      <component name="Microsoft-Windows-TerminalServices-RDP-WinStationExtensions" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+        <UserAuthentication>0</UserAuthentication>
+      </component>
+      <component name="Networking-MPSSVC-Svc" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+        <FirewallGroups>
+          <FirewallGroup wcm:action="add" wcm:keyValue="RemoteDesktop">
+            <Active>true</Active>
+            <Profile>all</Profile>
+            <Group>@FirewallAPI.dll,-28752</Group>
+          </FirewallGroup>
+        </FirewallGroups>
+      </component>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="u:settings[@pass='oobeSystem']/u:component[@name='Microsoft-Windows-Shell-Setup'][not(u:UserAccounts)]">
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()"/>
+      <UserAccounts>
+        <LocalAccounts>
+          <LocalAccount wcm:action="add">
+            <Name><xsl:value-of select="$user"/></Name>
+            <Group>Administrators</Group>
+            <Password><Value><xsl:value-of select="$password"/></Value><PlainText>true</PlainText></Password>
+          </LocalAccount>
+        </LocalAccounts>
+      </UserAccounts>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="u:settings[@pass='oobeSystem']/u:component[@name='Microsoft-Windows-Shell-Setup'][not(u:UserAccounts)]/u:OOBE[not(u:HideLocalAccountScreen)]">
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()"/>
+      <HideLocalAccountScreen>true</HideLocalAccountScreen>
+    </xsl:copy>
+  </xsl:template>
+</xsl:stylesheet>
+EOF
 }
 
 cmd_launch() {

@@ -23,6 +23,7 @@ let
       jq
       systemd
       util-linux
+      xmlstarlet
     ];
     runtimeEnv = {
       WINDOWS_ROOT = root;
