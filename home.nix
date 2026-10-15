@@ -4,12 +4,6 @@
 {
   xdg = {
     enable = true;
-    desktopEntries.windows-vm = {
-      name = "Windows VM";
-      exec = "windows-vm";
-      icon = "windows";
-      categories = [ "System" ];
-    };
     userDirs = {
       enable = true;
       createDirectories = true;
@@ -126,12 +120,8 @@
     userKeymaps = lib.importJSON ./configs/zed/keymap.json;
   };
 
-  home.file = {
-    ".zshenv".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/zsh/.zshenv";
-    # Folder shared with the Windows VM; it outlives the VM disk.
-    "Windows".source = config.lib.file.mkOutOfStoreSymlink "/var/lib/windows/shared";
-  };
+  home.file.".zshenv".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/zsh/.zshenv";
 
   dconf.settings."org/gnome/desktop/interface" = {
     gtk-enable-primary-paste = true;

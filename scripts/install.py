@@ -33,8 +33,6 @@ SUBVOLUMES = (
     ("docker", "/var/lib/docker"),
     ("containerd", "/var/lib/containerd"),
 )
-# Created next to the others; shared components mount them.
-UNMOUNTED_SUBVOLUMES = ("windows",)
 
 
 @dataclass(frozen=True)
@@ -1057,7 +1055,6 @@ def prepare_storage(
                 "subvolume",
                 "create",
                 *(str(INSTALL_ROOT / name) for name, _ in SUBVOLUMES),
-                *(str(INSTALL_ROOT / name) for name in UNMOUNTED_SUBVOLUMES),
             ]
         )
         (INSTALL_ROOT / "snapshots").chmod(0o700)

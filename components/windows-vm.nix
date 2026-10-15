@@ -1,7 +1,6 @@
-# Windows 11 in Dockur's QEMU/KVM container (Nimbus #33 design), started on
-# demand by the windows-vm launcher and reached over local RDP.
-# Per machine, outside Git: credentials.env (USERNAME=… and PASSWORD=…, owned
-# root:docker, mode 0640) and an optional storage/custom.iso for the install.
+# Windows 11 in Dockur's QEMU/KVM container (Nimbus #33 design). Nothing runs
+# until `windows-vm install` creates the subvolume, settings and launcher on a
+# machine; the container then starts on demand and is reached over local RDP.
 {
   config,
   lib,
@@ -11,31 +10,25 @@
 
 let
   root = "/var/lib/windows";
-  service = "${config.virtualisation.oci-containers.containers.windows.serviceName}.service";
-  launcher = pkgs.writeShellApplication {
+  inherit (config.virtualisation.oci-containers.containers.windows) serviceName;
+  windows-vm = pkgs.writeShellApplication {
     name = "windows-vm";
     runtimeInputs = with pkgs; [
+      btrfs-progs
+      coreutils
+      e2fsprogs
       freerdp
-      libnotify
+      gawk
+      gum
+      jq
       systemd
+      util-linux
     ];
-    text = ''
-      # shellcheck source=/dev/null
-      . ${root}/credentials.env
-      rdp() {
-        printf '%s\n' "$PASSWORD" |
-          sdl-freerdp /v:127.0.0.1 /u:"$USERNAME" /from-stdin:force /cert:ignore "$@"
-      }
-
-      systemctl start ${service}
-      trap 'systemctl stop ${service}' EXIT
-      notify-send "Windows VM" "Starting. The first start installs Windows: follow it at http://127.0.0.1:8006"
-      until rdp /auth-only >/dev/null 2>&1; do
-        systemctl is-active --quiet ${service} || exit 1
-        sleep 10
-      done
-      rdp /f +dynamic-resolution +clipboard
-    '';
+    runtimeEnv = {
+      WINDOWS_ROOT = root;
+      WINDOWS_SERVICE = "${serviceName}.service";
+    };
+    text = builtins.readFile ./windows-vm.sh;
   };
 in
 {
@@ -50,26 +43,25 @@ in
       "nofail"
     ];
   };
-  systemd.tmpfiles.rules = [
-    "d ${root}/storage 0700 root root -"
-    "d ${root}/shared 2775 root docker -"
-  ];
 
   virtualisation.oci-containers = {
     backend = "docker";
     containers.windows = {
       image = "docker.io/dockurr/windows:6.06";
       autoStart = false;
-      # A storage/custom.iso replaces the VERSION download.
+      # settings.env from `windows-vm install` adds RAM_SIZE, CPU_CORES,
+      # DISK_SIZE, USERNAME, PASSWORD and TZ. A storage/custom.iso replaces
+      # the VERSION download.
       environment = {
         VERSION = "11";
-        RAM_SIZE = "8G";
-        CPU_CORES = "4";
-        DISK_SIZE = "128G";
         KEYBOARD = "da-DK";
         REGION = "en-DK";
+        # The web console asks for the Windows username and password.
+        PROTECT = "Y";
+        # Windows keeps the hardware clock in local time.
+        ARGUMENTS = "-rtc base=localtime,clock=host,driftfix=slew";
       };
-      environmentFiles = [ "${root}/credentials.env" ];
+      environmentFiles = [ "${root}/settings.env" ];
       ports = [
         "127.0.0.1:8006:8006"
         "127.0.0.1:3389:3389/tcp"
@@ -88,7 +80,7 @@ in
       extraOptions = [ "--stop-timeout=120" ];
     };
   };
-  systemd.services.${config.virtualisation.oci-containers.containers.windows.serviceName} = {
+  systemd.services.${serviceName} = {
     unitConfig.RequiresMountsFor = root;
     serviceConfig.TimeoutStopSec = lib.mkForce 150;
   };
@@ -97,12 +89,12 @@ in
   security.polkit.extraConfig = ''
     polkit.addRule(function(action, subject) {
       if (action.id == "org.freedesktop.systemd1.manage-units" &&
-          action.lookup("unit") == "${service}" &&
+          action.lookup("unit") == "${serviceName}.service" &&
           subject.isInGroup("docker")) {
         return polkit.Result.YES;
       }
     });
   '';
 
-  environment.systemPackages = [ launcher ];
+  environment.systemPackages = [ windows-vm ];
 }
