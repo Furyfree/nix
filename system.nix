@@ -5,6 +5,7 @@
   imports = [
     ./components/apps.nix
     ./components/boot.nix
+    ./components/claude-desktop.nix
     ./components/development.nix
     ./components/devices.nix
     ./components/editors.nix
