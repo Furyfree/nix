@@ -59,3 +59,8 @@ if command -v lazygit >/dev/null 2>&1; then
   alias lg='lazygit'
 fi
 
+# Nixpkgs' 7-Zip only installs 7zz; Fedora's is 7z.
+if ! command -v 7z >/dev/null 2>&1 && command -v 7zz >/dev/null 2>&1; then
+  alias 7z='7zz'
+fi
+
