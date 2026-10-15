@@ -1,0 +1,33 @@
+#!/bin/sh
+# Fast-forward every clean Git repository directly under ~/Projects.
+if [ "$#" -ne 0 ]; then
+  printf '%s\n' 'usage: pull-projects' >&2
+  exit 2
+fi
+
+export GIT_TERMINAL_PROMPT=0
+result=0
+for repo in "$HOME"/Projects/*/; do
+  repo=${repo%/}
+  [ -e "$repo/.git" ] || continue
+  name=${repo##*/}
+  if ! changes=$(git -C "$repo" status --porcelain); then
+    printf '%s: failed: git status\n' "$name"
+    result=1
+  elif [ -n "$changes" ]; then
+    printf '%s: skipped: uncommitted changes\n' "$name"
+  elif ! git -C "$repo" rev-parse --verify --quiet '@{upstream}' >/dev/null 2>&1; then
+    printf '%s: skipped: no upstream\n' "$name"
+  else
+    before=$(git -C "$repo" rev-parse HEAD)
+    if ! git -C "$repo" pull --ff-only --quiet; then
+      printf '%s: failed: not a fast-forward or fetch error\n' "$name"
+      result=1
+    elif [ "$(git -C "$repo" rev-parse HEAD)" = "$before" ]; then
+      printf '%s: up to date\n' "$name"
+    else
+      printf '%s: updated\n' "$name"
+    fi
+  fi
+done
+exit "$result"

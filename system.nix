@@ -9,6 +9,7 @@
     ./components/editors.nix
     ./components/hyprland-noctalia.nix
     ./components/networking.nix
+    ./components/services.nix
     ./components/shell.nix
     ./components/snapper.nix
     ./components/virtualization.nix
