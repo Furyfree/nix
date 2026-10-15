@@ -82,7 +82,13 @@ in
   };
   systemd.services.${serviceName} = {
     unitConfig.RequiresMountsFor = root;
-    serviceConfig.TimeoutStopSec = lib.mkForce 150;
+    # A rebuild must not shut down a running VM; changes apply at the next launch.
+    restartIfChanged = false;
+    serviceConfig = {
+      TimeoutStopSec = lib.mkForce 150;
+      # docker stop ends the container with SIGTERM.
+      SuccessExitStatus = 143;
+    };
   };
 
   # The docker group (already root-equivalent) may start and stop this VM.
