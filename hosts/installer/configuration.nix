@@ -30,6 +30,14 @@ let
         config.system.build.nixos-install
         pkgs.nixos-enter
       ])
+      # The launcher imports the nixos_setup package next to it.
+      "--prefix"
+      "PYTHONPATH"
+      ":"
+      (lib.fileset.toSource {
+        root = ../../scripts;
+        fileset = lib.fileset.fileFilter (file: file.hasExt "py") ../../scripts/nixos_setup;
+      })
     ];
   } ../../scripts/install.py;
 in

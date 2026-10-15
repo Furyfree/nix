@@ -1,0 +1,1 @@
+"""NixOS installation wizard modules."""
