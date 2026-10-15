@@ -206,5 +206,11 @@ in
       "org/gnome/desktop/privacy".remember-recent-files = false;
       "org/gtk/settings/file-chooser" = fileChooser;
       "org/gtk/gtk4/settings/file-chooser" = fileChooser;
+      # ProtonPlus keeps Proton builds updated in the background (hourly by default).
+      "com/vysp3r/ProtonPlus/State" = {
+        background-updates = true;
+        check-updates-on-boot = true;
+        check-updates-on-launch = true;
+      };
     };
 }

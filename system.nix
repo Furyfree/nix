@@ -8,6 +8,7 @@
     ./components/development.nix
     ./components/devices.nix
     ./components/editors.nix
+    ./components/gaming.nix
     ./components/hyprland-noctalia.nix
     ./components/networking.nix
     ./components/services.nix
