@@ -234,9 +234,11 @@ cmd_launch() {
   printf '[libdefaults]\n  dns_lookup_kdc = false\n  dns_lookup_realm = false\n' >"$KRB5_CONFIG"
 
   # Arguments go in on stdin, so the password never appears in the process list.
+  # While the window is open, block suspend and hibernation (locking still works).
   rdp() {
     printf '%s\n' "/u:$username" "/p:$password" /v:127.0.0.1:3389 /cert:ignore "$@" |
-      xfreerdp /args-from:stdin
+      systemd-inhibit --what=sleep --mode=block --who="Windows VM" \
+        --why="The Windows VM window is open" xfreerdp /args-from:stdin
   }
 
   systemctl start "$WINDOWS_SERVICE"
