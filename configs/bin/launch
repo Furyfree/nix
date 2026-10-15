@@ -1,0 +1,69 @@
+#!/bin/sh
+# Small desktop helpers for launcher entries and keybinds, after Omarchy's
+# omarchy-launch-* scripts.
+usage() {
+  cat >&2 <<'EOF'
+usage: launch webapp URL          open a site as an app window
+       launch focus-webapp URL    focus its window, or open it
+       launch floating-terminal [COMMAND...]
+       launch tui COMMAND [ARGS...]   run in its own terminal window, or focus it
+       launch nautilus-cwd        open Files in the focused terminal's folder
+EOF
+  exit 2
+}
+
+# Focus the newest window whose class contains $1; fail if there is none.
+focus() {
+  address=$(hyprctl clients -j |
+    jq -r --arg match "$1" '[.[] | select(.class | contains($match))] | min_by(.focusHistoryID) | .address // empty')
+  [ -n "$address" ] && hyprctl dispatch "hl.dsp.focus({ window = \"address:$address\" })" >/dev/null
+}
+
+site() {
+  case $1 in
+    http://* | https://*) ;;
+    *)
+      printf '%s\n' 'launch: web apps need an http(s) URL' >&2
+      exit 2
+      ;;
+  esac
+  host=${1#*://}
+  host=${host%%/*}
+}
+
+case ${1-} in
+  webapp)
+    [ "$#" -eq 2 ] || usage
+    site "$2"
+    exec uwsm-app -- brave-origin --app="$2"
+    ;;
+  focus-webapp)
+    [ "$#" -eq 2 ] || usage
+    site "$2"
+    # Brave names app windows after the site, such as ...www.fotmob.com__-Default.
+    focus "$host" || exec uwsm-app -- brave-origin --app="$2"
+    ;;
+  floating-terminal)
+    shift
+    # Window rules float and centre this Ghostty class.
+    if [ "$#" -eq 0 ]; then
+      exec uwsm-app -- ghostty --class=com.mitchellh.ghostty.presentation
+    fi
+    exec uwsm-app -- ghostty --class=com.mitchellh.ghostty.presentation -e "$@"
+    ;;
+  tui)
+    [ "$#" -ge 2 ] || usage
+    shift
+    class="launch.tui.$(basename "$1")"
+    focus "$class" || exec uwsm-app -- ghostty --class="$class" -e "$@"
+    ;;
+  nautilus-cwd)
+    [ "$#" -eq 1 ] || usage
+    # The newest shell under the focused terminal holds its current folder.
+    terminal=$(hyprctl activewindow -j | jq -r '.pid // empty')
+    shell=$(cat /proc/"$terminal"/task/*/children 2>/dev/null | tr ' ' '\n' | sort -n | tail -n 1)
+    folder=$(readlink /proc/"$shell"/cwd 2>/dev/null) || folder=$HOME
+    exec uwsm-app -- nautilus --new-window "${folder:-$HOME}"
+    ;;
+  *) usage ;;
+esac

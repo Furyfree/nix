@@ -33,7 +33,23 @@ in
           "remote-viewer.desktop" = pkgs.virt-viewer;
           "dev.noctalia.Noctalia.desktop" = config.programs.noctalia.package;
           "uuctl.desktop" = pkgs.uwsm;
-        };
+        }
+      // lib.genAttrs [ "fotmob" "google-maps" ] (name: {
+        target = "icons/hicolor/512x512/apps/webapp-${name}.png";
+        source = ./configs/icons/webapp-${name}.png;
+      });
+    desktopEntries = {
+      fotmob = {
+        name = "FotMob";
+        exec = "launch focus-webapp https://www.fotmob.com/";
+        icon = "webapp-fotmob";
+      };
+      google-maps = {
+        name = "Google Maps";
+        exec = "launch focus-webapp https://www.google.com/maps";
+        icon = "webapp-google-maps";
+      };
+    };
     userDirs = {
       enable = true;
       createDirectories = true;
@@ -152,9 +168,20 @@ in
   home.file = {
     ".zshenv".source =
       config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/zsh/.zshenv";
-    ".local/bin/pull-projects".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/bin/pull-projects";
-  };
+  }
+  // lib.genAttrs [ "launch" "pull-projects" ] (name: {
+    target = ".local/bin/${name}";
+    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/bin/${name}";
+  });
+
+  # As the COPR launcher did: opt out of Toolbox's default autostart before its
+  # first launch, then leave the setting to Toolbox.
+  home.activation.jetbrainsToolboxAutostart = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    settings="${config.xdg.dataHome}/JetBrains/Toolbox/.settings.json"
+    if [[ ! -e $settings ]]; then
+      run install -D -m 0644 /dev/stdin "$settings" <<<'{ "autostart": false }'
+    fi
+  '';
 
   dconf.settings =
     let

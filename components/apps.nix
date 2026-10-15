@@ -22,5 +22,13 @@
     pinta
     libreoffice
     vscodium
+    brave-origin
+    signal-desktop
+    vesktop
+    spotify
+    obsidian
+    fastmail-desktop
+    woeusb
+    jetbrains-toolbox
   ];
 }

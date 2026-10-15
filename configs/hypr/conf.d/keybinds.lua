@@ -7,6 +7,30 @@ local window_actions = assert(package.loaded["./conf.d/window-actions.lua"])
 -- Keep directional focus and swaps on this monitor; move between monitors explicitly.
 hl.config({ binds = { window_direction_monitor_fallback = false } })
 
+-- Focus the most recently used app window, even on another workspace.
+-- Match exact compositor classes; launcher names and desktop metadata can differ.
+local function focus_or_launch(class, command, alternate_class)
+    return function()
+        local target
+        local newest = math.huge
+        for _, window in ipairs(hl.get_windows({ mapped = true })) do
+            if (window.class == class or window.class == alternate_class) and not window.hidden then
+                local rank = window.focus_history_id
+                if rank < 0 then rank = math.huge end
+                if not target or rank < newest then
+                    target = window
+                    newest = rank
+                end
+            end
+        end
+        if target then
+            if not target.active then hl.dispatch(hl.dsp.focus({ window = target })) end
+        else
+            hl.exec_cmd(command)
+        end
+    end
+end
+
 -- 1. Applications and panels
 -- App shortcuts return as the corresponding applications are migrated.
 hl.bind(
@@ -15,9 +39,44 @@ hl.bind(
     { description = "Open Ghostty terminal" }
 )
 hl.bind(
+    mainMod .. " + SHIFT + B",
+    hl.dsp.exec_cmd("uwsm-app -- brave-origin"),
+    { description = "Open Brave browser" }
+)
+hl.bind(
     mainMod .. " + SHIFT + F",
     hl.dsp.exec_cmd("uwsm-app -- nautilus"),
     { description = "Open file manager" }
+)
+hl.bind(
+    mainMod .. " + ALT + F",
+    hl.dsp.exec_cmd("launch nautilus-cwd"),
+    { description = "Open file manager in the terminal's folder" }
+)
+hl.bind(
+    mainMod .. " + ALT + Return",
+    hl.dsp.exec_cmd("launch floating-terminal"),
+    { description = "Open floating terminal" }
+)
+hl.bind(
+    mainMod .. " + SHIFT + O",
+    focus_or_launch("md.obsidian.Obsidian", "uwsm-app -- obsidian"),
+    { description = "Focus or open Obsidian" }
+)
+hl.bind(
+    mainMod .. " + SHIFT + D",
+    focus_or_launch("vesktop", "uwsm-app -- vesktop", "Vesktop"),
+    { description = "Focus or open Discord in Vesktop" }
+)
+hl.bind(
+    mainMod .. " + SHIFT + G",
+    focus_or_launch("signal", "uwsm-app -- signal-desktop"),
+    { description = "Focus or open Signal" }
+)
+hl.bind(
+    mainMod .. " + SHIFT + E",
+    focus_or_launch("com.fastmail.Fastmail", "uwsm-app -- fastmail"),
+    { description = "Focus or open Fastmail" }
 )
 hl.bind(
     mainMod .. " + SHIFT + Z",
@@ -101,6 +160,17 @@ for _, binding in ipairs({
     )
 end
 -- Lid Guard (Super+Ctrl+L) returns with the laptop host.
+-- Terminal tools in their own window; a second press focuses it.
+hl.bind(
+    mainMod .. " + CTRL + B",
+    hl.dsp.exec_cmd("launch tui btop"),
+    { description = "Open btop" }
+)
+hl.bind(
+    mainMod .. " + CTRL + Y",
+    hl.dsp.exec_cmd("launch tui yazi"),
+    { description = "Open Yazi" }
+)
 
 -- 3. Layout, column size and fullscreen
 hl.bind(

@@ -16,6 +16,9 @@
     ./components/windows-vm.nix
   ];
 
+  # Allow closed-source apps such as Spotify, Obsidian, Steam and NVIDIA.
+  nixpkgs.config.allowUnfree = true;
+
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"
