@@ -22,8 +22,7 @@ Use UEFI, a 4 GiB FAT32 EFI partition at `/boot`, and LUKS2-encrypted Btrfs.
 Unlock with a passphrase; the test machine has no TPM. Keep `/nix` inside root,
 the existing sibling subvolumes and Snapper policy; `windows-vm install`
 creates a sibling `windows` subvolume for the VM. Defer whole-root snapshot
-restoration; root snapshots
-exclude `/boot` and `/home`.
+restoration; root snapshots exclude `/boot` and `/home`.
 
 Snapshot restoration is untested; the ISO reinstall erased the first manual
 install's test snapshot. Test file recovery: change a test file in `/etc` and
@@ -55,8 +54,8 @@ block Qotom work or userland migration. Use upstream Limine support, enrol keys
 with separate approval and keep private keys outside the repo and ISO.
 
 Keep the encrypted swap/resume settings. On Qotom, manual hibernation resumes
-locked and Noctalia's two-hour idle hibernation triggers; nothing inhibits it,
-so it also pauses a running Windows VM. Defer compatibility checks with kernel
+locked and Noctalia's two-hour idle hibernation triggers; an open Windows VM
+window blocks suspend and hibernation. Defer compatibility checks with kernel
 lockdown and Secure Boot to the desktop or laptop.
 
 Check EFI capacity and generation retention, early storage/display drivers and
@@ -139,8 +138,5 @@ ai-workflow owns agent instructions/skills; wow-ui remains independent.
   Terminal profiles/Zed local values in backed-up Windows config copies/merges.
 - Decide EFI handling in preserve mode and recovery with Secure Boot enabled:
   standard ISOs require disabling it, or we need a trusted signed recovery image.
-- Windows VM: test `windows-vm install|launch|stop|status|remove` on a machine;
-  remove the Qotom's earlier test VM files first. Dockur's answer file creates
-  the account, also from a custom ISO.
 - Approve each implementation batch. Approve physical disk, bootloader activation
   and firmware/key changes separately; retire old provisioning only after tests.
