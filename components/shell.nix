@@ -27,13 +27,16 @@ in
     };
     # NH_FLAKE comes from the user's shell, which knows the checkout path.
     nh.enable = true;
+    git = {
+      enable = true;
+      lfs.enable = true;
+    };
   };
 
   environment.systemPackages = with pkgs; [
     starship
     fzf
     zoxide
-    git
     gh
     wl-clipboard
     sheldon
@@ -45,5 +48,21 @@ in
     fastfetch
     tealdeer
     btop
+    just
+    lazygit
+    yq-go
+    file
+    zip
+    unzip
+    _7zz
+    unrar-free
+    poppler-utils
+    imagemagick
+    yt-dlp
+    typst
+    duf
+    tokei
+    nmap
+    gitleaks
   ];
 }
