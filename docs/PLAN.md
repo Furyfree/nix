@@ -54,9 +54,10 @@ verification setup and testing to a machine that supports it; this does not
 block Qotom work or userland migration. Use upstream Limine support, enrol keys
 with separate approval and keep private keys outside the repo and ISO.
 
-Keep the encrypted swap/resume settings. Manual hibernation resumes locked on
-Qotom; Noctalia hibernates after two hours idle. Defer compatibility checks with
-kernel lockdown and Secure Boot to the desktop or laptop.
+Keep the encrypted swap/resume settings. On Qotom, manual hibernation resumes
+locked and Noctalia's two-hour idle hibernation triggers; nothing inhibits it,
+so it also pauses a running Windows VM. Defer compatibility checks with kernel
+lockdown and Secure Boot to the desktop or laptop.
 
 Check EFI capacity and generation retention, early storage/display drivers and
 keyboard input; defer boot appearance work.
