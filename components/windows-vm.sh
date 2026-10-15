@@ -90,7 +90,7 @@ EOF
 # Root step: create and mount the subvolume, turn off copy-on-write for the
 # disk, store the settings from stdin and link an optional ISO.
 root_prepare() {
-  local source top
+  local source top iso answer
   if ! findmnt -n "$WINDOWS_ROOT" >/dev/null; then
     source=$(findmnt -n -o SOURCE -T /)
     top=$(mktemp -d)
@@ -107,6 +107,19 @@ root_prepare() {
   chgrp docker "$settings"
   if [[ -n ${1-} ]]; then
     cp --reflink=auto -- "$1" "$storage/custom.iso"
+    # Dockur replaces an ISO's answer file with its own, which skips the
+    # ISO's setup scripts; as storage/custom.xml it is used instead.
+    iso=$(mktemp -d)
+    mount -o loop,ro -- "$storage/custom.iso" "$iso"
+    answer=$(find "$iso" -maxdepth 1 -iname autounattend.xml -print -quit)
+    if [[ -n $answer ]]; then
+      cp -- "$answer" "$storage/custom.xml"
+      echo "Using the ISO's own setup. During install, create the user with the"
+      echo "username and password you chose; afterwards, turn on Remote Desktop"
+      echo "in Windows (Settings > System > Remote Desktop) before windows-vm launch."
+    fi
+    umount "$iso"
+    rmdir "$iso"
   fi
 }
 
