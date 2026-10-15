@@ -171,6 +171,9 @@ in
   home.file = {
     ".zshenv".source =
       config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/zsh/.zshenv";
+    # Steam's own link, made before Noctalia's Steam template can create a real
+    # folder here that stops Steam's first-run setup.
+    ".steam/steam".source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/Steam";
   }
   // lib.genAttrs [ "launch" "pull-projects" ] (name: {
     target = ".local/bin/${name}";
