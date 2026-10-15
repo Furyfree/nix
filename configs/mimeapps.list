@@ -41,7 +41,7 @@ x-scheme-handler/unknown=brave-origin.desktop;
 
 
 # Mail
-x-scheme-handler/mailto=com.fastmail.Fastmail.desktop;
+x-scheme-handler/mailto=fastmail.desktop;
 
 
 # Images for viewing
