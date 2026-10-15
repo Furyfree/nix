@@ -6,6 +6,7 @@
     ./components/apps.nix
     ./components/boot.nix
     ./components/development.nix
+    ./components/devices.nix
     ./components/editors.nix
     ./components/hyprland-noctalia.nix
     ./components/networking.nix

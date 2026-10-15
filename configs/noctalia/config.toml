@@ -48,8 +48,8 @@ directory = "~/Pictures/Wallpapers"
 [bar.default]
 start = ["workspaces"]
 center = ["clock", "date", "weather", "timer", "notifications"]
-# Add ai-usage before tailnet and airpods after recorder as their integrations arrive.
-end = ["tailnet", "recorder", "battery", "drives", "tray", "volume", "control-center"]
+# Add ai-usage before tailnet when its integration arrives.
+end = ["tailnet", "recorder", "airpods", "battery", "drives", "tray", "volume", "control-center"]
 background_opacity = 0.80
 widget_spacing = 10
 font_family = "JetBrainsMono Nerd Font Propo"
@@ -84,9 +84,8 @@ show_condition = false
 [widget.recorder]
 type = "noctalia/screen_recorder:recorder"
 
-# Waits for LibrePods on the desktop and laptop.
-# [widget.airpods]
-# type = "harveywuk/airpods:airpods"
+[widget.airpods]
+type = "harveywuk/airpods:airpods"
 
 [widget.drives]
 type = "aristides/udiskie:status"
@@ -201,14 +200,14 @@ command = "systemctl hibernate"
 enabled = true
 
 # Enable the commented plugins when their integrations arrive: ai-usagebar
-# (AI tools), airpods (LibrePods) and lid-guard (laptop).
+# (AI tools) and lid-guard (laptop).
 [plugins]
 enabled = [
     "noctalia/notes",
     "noctalia/screen_recorder",
     "noctalia/timer",
     # "felipeartur/ai-usagebar",
-    # "harveywuk/airpods",
+    "harveywuk/airpods",
     "umedbazarov/crashes",
     "tphilippot/git_companion",
     "profidev/hypr-screen-mirror",
@@ -237,9 +236,9 @@ manager_open_near_click = true
 # panel_open_near_click = true
 # panel_placement = "floating"
 
-# [plugin_settings."harveywuk/airpods"]
-# panel_placement = "floating"
-# panel_position = "auto"
+[plugin_settings."harveywuk/airpods"]
+panel_placement = "floating"
+panel_position = "auto"
 
 [plugin_settings."noctalia/notes"]
 panel_position = "top_right"

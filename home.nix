@@ -33,6 +33,7 @@ in
           "remote-viewer.desktop" = pkgs.virt-viewer;
           "dev.noctalia.Noctalia.desktop" = config.programs.noctalia.package;
           "uuctl.desktop" = pkgs.uwsm;
+          "me.kavishdevar.librepods.desktop" = pkgs.librepods;
         }
       // lib.genAttrs [ "fotmob" "google-maps" ] (name: {
         target = "icons/hicolor/512x512/apps/webapp-${name}.png";
