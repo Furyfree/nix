@@ -91,14 +91,31 @@ disks for VM tests, not host disks.
 Migrate one batch at a time and check each on `nixos-test` before the next.
 Remaining order:
 
-1. Printing, when a printer can test it.
-2. Real hosts: multiple flake hosts and installer entries, desktop NVIDIA/Intel,
-   laptop AMD and power, keyboards, DTU network, LibrePods, Voxtype and
-   compatible Hyprland plugins; then gaming on the desktop.
-3. Sign-in tools last: Git/SSH with 1Password, Git signing and `gh` login, then
-   the AI CLIs, ACP adapters, ai-usagebar, Pi packages and remaining apps.
-4. Install the desktop and laptop, run their hardware tests, then retire Fedora,
-   Nimbus and Chezmoi.
+1. CLI tools: git-lfs, just, lazygit, yq, file, zip/unzip/7zip/unrar,
+   poppler-utils, ImageMagick, yt-dlp, typst, duf, tokei, nmap, gitleaks.
+2. System services and polish: fwupd, power profiles/upower, Tailscale,
+   WireGuard, OpenConnect, Nautilus/file-chooser preferences, hidden launcher
+   entries and `pull-projects`.
+3. Launcher and everyday apps: a `launch` script for web apps (FotMob, Google
+   Maps) and later helpers such as a floating terminal; Brave, Signal, Vesktop,
+   Spotify, Obsidian with vault settings, Fastmail, WoeUSB and JetBrains Toolbox
+   without autostart; wallpapers in their own repo, cloned to
+   `~/Pictures/Wallpapers`.
+4. Devices: LibrePods as our own package with its patches, NuPhy and Wooting files.
+5. Printing, when a printer can test it.
+6. Real hosts: multiple flake hosts and installer entries, free-space install
+   for the desktop's dual boot, desktop NVIDIA/Intel, ddcutil, Wi-Fi firmware,
+   GIMP and Voxtype; laptop AMD, brightness, fingerprint and Wi-Fi retry; DTU
+   network and compatible Hyprland plugins.
+7. Gaming on the desktop: Steam, gamemode, gamescope, MangoHud, Heroic,
+   ProtonPlus, Prism Launcher and WowUp. Proton, protontricks and Heroic cover
+   Lutris, standalone Wine and umu; MangoHud settings replace GOverlay.
+8. Sign-in tools: Git/SSH with 1Password (app, CLI, agent), Git signing and `gh`
+   login.
+9. AI: agent CLIs and configs, ACP adapters, agent-proxy, ai-usagebar, Pi
+   packages, T3 Code and Claude Desktop.
+10. Install the desktop and laptop, run their hardware tests, then retire Fedora,
+    Nimbus, Chezmoi, COPR and fedora-iso.
 
 Bring each app's Noctalia plugin, widget and keybind back in the batch that
 installs the app; commented entries in `configs/` mark what waits. Noctalia
@@ -126,7 +143,7 @@ Keep secrets, credentials, history, caches and downloaded plugins outside the
 repo/Nix store. Use 1Password for keys/authentication, with SSH agent and Git
 signing per platform. Preserve local Zed model/agent settings and selected
 Obsidian preferences/plugin settings; the vault keeps content, plugins and lists.
-Leave vis, Niri, DMS and wallpapers out.
+Leave vis, Niri, DMS, Bash with ble.sh, ChatGPT desktop and Zeron out.
 ai-workflow owns agent instructions/skills; wow-ui remains independent.
 
 ## Later platforms and open choices
