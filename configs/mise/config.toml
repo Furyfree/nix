@@ -7,19 +7,24 @@ node = "lts"
 rust = { version = "stable", components = "rust-analyzer" }
 uv = "latest"
 
-# Agent CLIs return with the AI tools batch, after their sign-ins.
-# "npm:@openai/codex" = "latest"
-# "npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = ["@anthropic-ai/claude-code"] }
-# antigravity-cli = "latest"
-# "npm:@xai-official/grok" = "latest"
-# "npm:@opencode/cli" = { version = "latest", allow_builds = ["@opencode/cli"], allow_low_downloads = true }
-# pi = "latest"
-# herdr = "latest"
+# Agent CLIs; ai-workflow links their shared rules and skills.
+"npm:@openai/codex" = "latest"
+"npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = ["@anthropic-ai/claude-code"] }
+antigravity-cli = "latest"
+"npm:@xai-official/grok" = "latest"
+"npm:@opencode/cli" = { version = "latest", allow_builds = ["@opencode/cli"], allow_low_downloads = true }
+# Pi installs its packages with Node; the override pins a fixed transitive dependency.
+pi = { version = "latest", depends = ["node"], postinstall = """
+pi install npm:pi-terminal-math &&
+npm --prefix "$HOME/.pi/agent/npm" pkg set 'overrides.@xmldom/xmldom=0.9.12' &&
+npm --prefix "$HOME/.pi/agent/npm" install --ignore-scripts --legacy-peer-deps
+""" }
+herdr = "latest"
 
 # ACP adapters for Obsidian's Agent Client; OpenCode and Grok speak ACP natively.
-# "npm:@agentclientprotocol/claude-agent-acp" = "latest"
-# "npm:@agentclientprotocol/codex-acp" = "latest"
-# "npm:pi-acp" = "latest"
+"npm:@agentclientprotocol/claude-agent-acp" = "latest"
+"npm:@agentclientprotocol/codex-acp" = "latest"
+"npm:pi-acp" = "latest"
 
 # Agentic helpers
 "npm:@llamaindex/liteparse" = "latest"

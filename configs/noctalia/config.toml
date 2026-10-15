@@ -48,8 +48,7 @@ directory = "~/Pictures/Wallpapers"
 [bar.default]
 start = ["workspaces"]
 center = ["clock", "date", "weather", "timer", "notifications"]
-# Add ai-usage before tailnet when its integration arrives.
-end = ["tailnet", "recorder", "airpods", "battery", "drives", "tray", "volume", "control-center"]
+end = ["ai-usage", "tailnet", "recorder", "airpods", "battery", "drives", "tray", "volume", "control-center"]
 background_opacity = 0.80
 widget_spacing = 10
 font_family = "JetBrainsMono Nerd Font Propo"
@@ -62,11 +61,10 @@ label_source = "name"
 show_all_outputs = false
 hide_when_empty = false
 
-# Waits for the AI tools and their sign-ins.
-# [widget.ai-usage]
-# type = "felipeartur/ai-usagebar:bar"
-# provider_limit = 2
-# show_name = true
+[widget.ai-usage]
+type = "felipeartur/ai-usagebar:bar"
+provider_limit = 2
+show_name = true
 
 [widget.tailnet]
 type = "rylos/tailnet:bar"
@@ -199,14 +197,14 @@ action = "command"
 command = "systemctl hibernate"
 enabled = true
 
-# Enable the commented plugins when their integrations arrive: ai-usagebar
-# (AI tools) and lid-guard (laptop).
+# Enable the commented plugins when their integrations arrive: lid-guard
+# (laptop).
 [plugins]
 enabled = [
     "noctalia/notes",
     "noctalia/screen_recorder",
     "noctalia/timer",
-    # "felipeartur/ai-usagebar",
+    "felipeartur/ai-usagebar",
     "harveywuk/airpods",
     "umedbazarov/crashes",
     "tphilippot/git_companion",
@@ -232,9 +230,9 @@ manager_position = "auto"
 [plugin_settings."aristides/udiskie"]
 manager_open_near_click = true
 
-# [plugin_settings."felipeartur/ai-usagebar"]
-# panel_open_near_click = true
-# panel_placement = "floating"
+[plugin_settings."felipeartur/ai-usagebar"]
+panel_open_near_click = true
+panel_placement = "floating"
 
 [plugin_settings."harveywuk/airpods"]
 panel_placement = "floating"

@@ -22,6 +22,7 @@
     pinta
     libreoffice
     vscodium
+    t3code
     brave-origin
     signal-desktop
     vesktop

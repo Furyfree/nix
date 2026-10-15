@@ -1,0 +1,20 @@
+# Claude, Codex and SuperGrok reuse their own CLI logins; no keys here.
+[ui]
+primary = "openai"
+
+[anthropic]
+enabled = true
+
+[openai]
+enabled = true
+
+[supergrok]
+enabled = true
+
+# Enabled upstream by default; unused here.
+[zai]
+enabled = false
+
+# Its key comes from 1Password with the sign-in tools.
+[openrouter]
+enabled = false
