@@ -101,6 +101,8 @@ in
           "noctalia/assets/profile-picture-circle.svg"
           "btop/btop.conf"
           "fastfetch/config.jsonc"
+          "fastfetch/ff.lua"
+          "fastfetch/ff.sh"
           "zathura/zathurarc"
           "udiskie/config.yml"
           "mise/config.toml"

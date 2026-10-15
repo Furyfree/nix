@@ -114,8 +114,9 @@ Remaining order:
    login.
 9. AI: agent CLIs and configs, ACP adapters, agent-proxy, ai-usagebar, Pi
    packages, T3 Code and Claude Desktop.
-10. Install the desktop and laptop, run their hardware tests, then retire Fedora,
-    Nimbus, Chezmoi, COPR and fedora-iso.
+10. Install the desktop and laptop, run their hardware tests (including
+    LibrePods, since the Qotom has no Bluetooth), then retire Fedora, Nimbus,
+    Chezmoi, COPR and fedora-iso.
 
 Bring each app's Noctalia plugin, widget and keybind back in the batch that
 installs the app; commented entries in `configs/` mark what waits. Noctalia
