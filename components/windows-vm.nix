@@ -14,6 +14,7 @@ let
   windows-vm = pkgs.writeShellApplication {
     name = "windows-vm";
     runtimeInputs = with pkgs; [
+      config.virtualisation.docker.package
       btrfs-progs
       coreutils
       e2fsprogs
