@@ -245,7 +245,11 @@ cmd_launch() {
   fi
   # Wait for Dockur's boot message from this start, as Omarchy does; FreeRDP's
   # /auth-only probe can crash while Windows is still starting.
-  started=$(docker inspect --format '{{.State.StartedAt}}' windows)
+  # The service creates a fresh container a moment after it starts.
+  until started=$(docker inspect --format '{{.State.StartedAt}}' windows 2>/dev/null); do
+    systemctl is-active --quiet "$WINDOWS_SERVICE" || die "The Windows VM stopped."
+    sleep 1
+  done
   until docker logs --since "$started" windows 2>&1 | grep -qi "windows started successfully"; do
     systemctl is-active --quiet "$WINDOWS_SERVICE" || die "The Windows VM stopped."
     sleep 2
