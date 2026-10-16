@@ -9,6 +9,8 @@ Open work only; finished work lives in Git.
 2. Add the OpenRouter key to ai-usagebar's config and the Fastmail calendar in
    Noctalia's settings when wanted.
 3. Then retire Fedora, Nimbus, Chezmoi, COPR and fedora-iso.
+4. Remove the temporary SSH server from `hosts/laptop/configuration.nix` once
+   the laptop works.
 
 ## Untested recovery
 
