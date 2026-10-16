@@ -28,21 +28,26 @@ on its own disk and gets an entry in the boot menu.
 
 1. Secure Boot: in the firmware settings, clear the Secure Boot keys (Setup
    Mode). In NixOS run `sudo sbctl enroll-keys -m`, which keeps Microsoft's
-   keys for Windows and firmware. Turn Secure Boot back on.
-2. `mise install` for the language runtimes and agent CLIs.
-3. Dictation: `voxtype setup --download --model large-v3-turbo` on the desktop,
+   keys for Windows and firmware, then turn Secure Boot back on. `sbctl
+   status` should show Setup Mode disabled and Secure Boot enabled. On the HP
+   laptop, confirm the code that disables Sure Start Secure Boot Keys
+   Protection, which otherwise restores HP's keys; HP then turns Secure Boot
+   on by itself. Set a firmware administrator password afterwards.
+2. `tailscale up` to join the tailnet.
+3. `mise install` for the language runtimes and agent CLIs.
+4. Dictation: `voxtype setup --download --model large-v3-turbo` on the desktop,
    `--model small` elsewhere, then `systemctl --user start voxtype`.
-4. 1Password: sign in, then in Settings → Developer turn on the SSH agent and
+5. 1Password: sign in, then in Settings → Developer turn on the SSH agent and
    the CLI integration.
-5. `op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf`
+6. `op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf`
    for the homelab SSH hosts, and `gh auth login`.
-6. `git clone git@github.com:Furyfree/wallpapers.git ~/Projects/wallpapers`,
+7. `git clone git@github.com:Furyfree/wallpapers.git ~/Projects/wallpapers`,
    then `sudo systemctl restart home-manager-$USER.service` to link it into
    `~/Pictures/Wallpapers`; `nswitch` skips that when nothing else changed.
-7. `git clone git@github.com:Furyfree/ai-workflow.git ~/Projects/ai-workflow`,
+8. `git clone git@github.com:Furyfree/ai-workflow.git ~/Projects/ai-workflow`,
    then in it `nix develop -c just install` for agent rules and skills.
-8. `dtu-eduroam <1Password item>` for DTU Wi-Fi; laptop: `fprintd-enroll`.
-9. Desktop: install Battle.net in Lutris.
+9. `dtu-eduroam <1Password item>` for DTU Wi-Fi; laptop: `fprintd-enroll`.
+10. Desktop: install Battle.net in Lutris.
 
 ## Check
 
