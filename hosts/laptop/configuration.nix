@@ -13,6 +13,13 @@
 
   networking.hostName = "laptop";
 
+  # Temporary, for remote fixes after the install on the home network; remove
+  # with its docs/PLAN.md item.
+  services.openssh = {
+    enable = true;
+    settings.PermitRootLogin = "no";
+  };
+
   # Enroll with fprintd-enroll; password login stays available.
   services.fprintd.enable = true;
 
