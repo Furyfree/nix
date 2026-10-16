@@ -9,4 +9,11 @@ hl.monitor({
     scale = 1.5,
 })
 
+-- Keep the laptop awake with the lid closed, for example on a dock.
+hl.bind(
+    "SUPER + CTRL + L",
+    hl.dsp.exec_cmd("noctalia msg plugin 8bury/lid-guard:lid-guard-service all toggle"),
+    { description = "Toggle Lid Guard" }
+)
+
 return {}

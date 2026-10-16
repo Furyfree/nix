@@ -1,0 +1,6 @@
+# The vscode community selection supplies and updates this input template.
+# Its fixed VSCodium output path may differ between extension galleries.
+# User templates run afterwards and target the extension VSCodium actually uses.
+[theme.templates.user.vscodium]
+input_path = "$XDG_STATE_HOME/noctalia/community-templates/vscode/vscode.json"
+output_path_dynamic = "bash '{{ config_dir }}/templates/vscodium-output-path.sh'"

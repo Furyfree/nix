@@ -19,5 +19,7 @@
     # Brings its own Java runtimes.
     prismlauncher
     wowup-cf
+    # Battle.net through its Wine runner, as on Fedora.
+    lutris
   ];
 }

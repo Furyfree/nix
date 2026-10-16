@@ -65,6 +65,8 @@ in
     dconf.enable = true;
     # Noctalia's screen recorder plugin.
     gpu-screen-recorder.enable = true;
+    # View and unlock the GNOME keyring.
+    seahorse.enable = true;
   };
 
   systemd.user.services = {

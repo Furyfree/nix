@@ -102,10 +102,8 @@ Remaining order:
    without autostart; wallpapers in their own repo, cloned to
    `~/Pictures/Wallpapers`.
 4. Devices: LibrePods as our own package with its patches, NuPhy and Wooting files.
-5. Gaming: Steam, gamemode, gamescope, MangoHud, Heroic, ProtonPlus, Prism
-   Launcher and WowUp, tested on the Qotom first. Proton, protontricks and
-   Heroic cover Lutris, standalone Wine and umu; MangoHud settings replace
-   GOverlay.
+5. Gaming: Steam, gamemode, gamescope, MangoHud with its config, Heroic,
+   ProtonPlus, Prism Launcher, WowUp and Lutris for Battle.net.
 6. AI: agent CLIs and configs, ACP adapters, ai-usagebar, Pi packages and T3
    Code; then Claude Desktop, packaged from Anthropic's signed Debian package.
 7. Hyprland plugins: ScrollOverview, built by Nix and loaded from `overview.lua`.
@@ -131,6 +129,12 @@ Remaining order:
 11. Install the desktop and laptop, run their hardware tests (including
     LibrePods, since the Qotom has no Bluetooth, and printing and scanning on
     the ET-5800), then retire Fedora, Nimbus, Chezmoi, COPR and fedora-iso.
+    Secure Boot, once per machine: on the desktop, first suspend BitLocker in
+    Windows (`manage-bde -protectors -disable C: -RebootCount 3`). Turn Secure
+    Boot off for the unsigned installer, install, set the firmware to Setup
+    Mode, run `sudo sbctl enroll-keys -m` (keep Microsoft's keys on both) and
+    turn Secure Boot on. Then check the Windows anti-cheat games. On the desktop,
+    reinstall Battle.net in Lutris.
 
 Bring each app's Noctalia plugin, widget and keybind back in the batch that
 installs the app; commented entries in `configs/` mark what waits. Noctalia
@@ -159,7 +163,8 @@ repo/Nix store. Use 1Password for keys/authentication, with SSH agent and Git
 signing per platform. Preserve local Zed model/agent settings and selected
 Obsidian preferences/plugin settings; the vault keeps content, plugins and lists.
 Leave vis, Niri, DMS, Bash with ble.sh, ChatGPT desktop, Zeron and agent-proxy
-(with Copilot desktop) out.
+(with Copilot desktop) out. Lutris stays for Battle.net; Proton and Heroic
+cover standalone Wine and umu, and a MangoHud config replaces GOverlay.
 ai-workflow owns agent instructions/skills; wow-ui remains independent.
 
 ## Later platforms and open choices
