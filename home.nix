@@ -108,6 +108,8 @@ in
           "mise/config.toml"
           "mise/conf.d/linux-tools.toml"
           "mimeapps.list"
+          "git/config"
+          "git/ignore"
         ]
         (name: {
           source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${name}";
@@ -116,6 +118,8 @@ in
         # The whole folder, so vim.pack writes its lock file into the checkout.
         "nvim".source =
           config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/nvim";
+        "1Password/ssh/agent.toml".source =
+          config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/1password/ssh/agent.toml";
         "starship.toml".source =
           config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/starship/starship.toml";
         "gtk-3.0/settings.ini".source =
@@ -175,6 +179,10 @@ in
     # folder here that stops Steam's first-run setup.
     ".steam/steam".source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/Steam";
   }
+  // lib.genAttrs [ "config" "personal.pub" ] (name: {
+    target = ".ssh/${name}";
+    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/ssh/${name}";
+  })
   // lib.genAttrs [ "launch" "pull-projects" ] (name: {
     target = ".local/bin/${name}";
     source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/bin/${name}";
@@ -190,10 +198,10 @@ in
       fi
     '';
 
-    # Agents rewrite their own settings; set only the keys in configs/<tool> and
-    # keep everything else. Files Yq cannot parse, such as commented JSON, stay as
-    # they are.
-    agentSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    # Agents and gh rewrite their own settings; set only the keys in
+    # configs/<tool> and keep everything else. Files Yq cannot parse, such as
+    # commented JSON, stay as they are.
+    toolSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       merge() {
         local target=$1 patch=$2 format=$3 merged
         # Yq reads an empty file as nothing, so start those from the patch too.
@@ -213,6 +221,7 @@ in
       merge ${config.xdg.configHome}/opencode/opencode.jsonc ${./configs/opencode/opencode.json} json
       merge ${config.home.homeDirectory}/.pi/agent/settings.json ${./configs/pi/settings.json} json
       merge ${config.xdg.configHome}/ai-usagebar/config.toml ${./configs/ai-usagebar/config.toml} toml
+      merge ${config.xdg.configHome}/gh/config.yml ${./configs/gh/config.yml} yaml
     '';
   };
 

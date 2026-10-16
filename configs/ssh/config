@@ -1,0 +1,11 @@
+# Homelab hosts stay in a private 1Password document; fetch them once with
+#   op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf
+Include ~/.ssh/local.conf
+
+Host github.com
+    User git
+    IdentityFile ~/.ssh/personal.pub
+    IdentitiesOnly yes
+
+Host *
+    IdentityAgent ~/.1password/agent.sock

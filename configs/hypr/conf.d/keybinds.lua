@@ -43,6 +43,17 @@ hl.bind(
     hl.dsp.exec_cmd("uwsm-app -- brave-origin"),
     { description = "Open Brave browser" }
 )
+-- Native activation targets the main window; Quick Access shares its class.
+hl.bind(
+    mainMod .. " + SHIFT + P",
+    hl.dsp.exec_cmd("uwsm-app -- 1password"),
+    { description = "Focus or open 1Password" }
+)
+hl.bind(
+    "CTRL + SHIFT + Space",
+    hl.dsp.exec_cmd("uwsm-app -- 1password --quick-access"),
+    { description = "Open 1Password Quick Access" }
+)
 hl.bind(
     mainMod .. " + SHIFT + F",
     hl.dsp.exec_cmd("uwsm-app -- nautilus"),

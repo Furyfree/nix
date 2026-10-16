@@ -3,6 +3,7 @@
 
 {
   imports = [
+    ./components/1password.nix
     ./components/apps.nix
     ./components/boot.nix
     ./components/claude-desktop.nix

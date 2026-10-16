@@ -110,10 +110,13 @@ Remaining order:
    Code; then Claude Desktop, packaged from Anthropic's signed Debian package.
 7. Hyprland plugins: ScrollOverview, built by Nix and loaded from `overview.lua`.
 8. Printing, when a printer can test it.
-9. Sign-in tools: Git/SSH with 1Password (app, CLI, agent), Git signing and `gh`
-   login. Sign-in tests wait for this batch: the agent CLIs, the AI usage
-   widget and Claude Desktop, plus ai-workflow's `just install` on the real
-   hosts.
+9. Sign-in tools: 1Password (app, CLI, SSH agent), Git signing and `gh`. After
+   signing in: `op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file
+   ~/.ssh/local.conf` for the homelab hosts, `gh auth login` and
+   `pull-projects`, the OpenRouter key in ai-usagebar's config, and the
+   Fastmail calendar through Noctalia's settings. Sign-in tests wait for this
+   batch: the agent CLIs, the AI usage widget and Claude Desktop, plus
+   ai-workflow's `just install` on the real hosts.
 10. Real hosts: multiple flake hosts and installer entries, free-space install
     for the desktop's dual boot, desktop NVIDIA/Intel, ddcutil, Wi-Fi firmware,
     GIMP and Voxtype; laptop AMD, brightness, fingerprint and Wi-Fi retry; DTU

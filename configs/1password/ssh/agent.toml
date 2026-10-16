@@ -1,0 +1,9 @@
+# Keys the 1Password SSH agent offers, by item ID.
+
+# Personal
+[[ssh-keys]]
+item = "n6imsp5vfs5nmlt5rmxgs6zdci"
+
+# Homelab
+[[ssh-keys]]
+item = "3ppqekfxnmjtg2iapnr5d7gewi"
