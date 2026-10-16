@@ -1,82 +1,38 @@
 # Nix
 
-NixOS and integrated Home Manager for workstations: `desktop`, `laptop` and the
-`nixos-test` machine. Each host's output requires its local machine data.
+NixOS with integrated Home Manager for my workstations: `desktop`, `laptop` and
+the `nixos-test` machine. To set up a machine, follow
+[INSTALLATION.md](INSTALLATION.md).
+
+## Daily use
+
+The installed checkout lives at `~/Projects/nix`; app configs in `configs/` are
+linked into place, so editing them takes effect without a rebuild. Each host
+builds only from its ignored `hosts/<host>/local/` data, which the installer
+writes, so always use `path:` flakes.
+
+```sh
+nswitch                                  # build and switch, between Snapper snapshots
+nix flake update --flake "$NH_FLAKE"     # update pinned inputs, then nswitch
+mise install                             # after a rebuild; mise upgrade for tool updates
+pull-projects                            # fast-forward every clean repo in ~/Projects
+```
+
+Roll back with `sudo nixos-rebuild boot --rollback` and a reboot, or pick an
+older generation in the boot menu. Rollback restores the system, not files in
+your home folder.
 
 ## Develop
 
 ```sh
-nix --extra-experimental-features 'nix-command flakes' develop path:.
+nix develop path:.
 uv sync --locked
 just check
 ```
 
-Run `just` to list commands, `just wizard` for the plan-only installer, and
-`just format` to format Python and Nix files. Development tools and the local
-`.venv` stay out of the ISO; it includes the configuration source and installer runtime.
+`just` lists the commands: `just wizard` previews the installer without
+changes, `just build-iso` and `just burn` make the USB stick, and
+`just format` formats Python and Nix files. Build a host without activating it
+with `nh os build`.
 
-## Check and build
-
-```sh
-cd ~/Projects/nix
-nix --extra-experimental-features 'nix-command flakes' flake check --no-build --no-write-lock-file path:.
-nix --extra-experimental-features 'nix-command flakes' build --no-link path:.#nixosConfigurations.<host>.config.system.build.toplevel
-```
-
-Build without activation. The public checkout exposes the installer and development
-shell; installed host outputs require machine data.
-
-## Install
-
-Boot the ISO on a disposable UEFI machine or in a VM. The local console starts
-`nixos-setup` as root. Choose the machine, a disk and a username; use **Change
-settings** for SSH keys or swap size. Installation erases the chosen disk. A
-Windows boot partition on another disk gets an entry in the boot menu. Enter and
-confirm one password for disk encryption, root and your user, then review the
-settings and type the disk's full path to authorize erasure. Installation runs
-without more setup questions. Native tools handle password text outside Python,
-Git and the Nix store. Reboot is optional.
-`nixos-setup --dry-run` and `just wizard` skip passwords and erase authorization;
-they preview without cloning or writing.
-
-The installer needs internet access and public `main`.
-We installed from the ISO on a disposable Qotom machine, then updated the
-installed repo, rebuilt with new changes and tested generation rollback. See
-[boot setup and deferred tests](docs/PLAN.md#boot-and-storage).
-
-## Installed checkout
-
-Configuration generation clones public `main` into `~/Projects/nix` and keeps
-its lock file. It writes detected hardware and `installation.nix` into ignored
-`hosts/<host>/local/`. These files supply the chosen user, public SSH key,
-swap/resume settings and any Windows boot entry. Tracked configuration and custom packages stay unchanged.
-The installed user owns the checkout and its parent directories.
-
-Keep machine data local and backed up; keep passwords and private keys outside the
-checkout. Use explicit `path:` flakes so Nix includes the ignored machine files.
-Old-layout installations must run the migration on revision `13458f10b6bf`
-before updating further. Current configuration requires both files in `local/`;
-old host-directory records are not a fallback. On the compatibility revision:
-
-```sh
-bash scripts/migrations/host-data.sh --dry-run
-bash scripts/migrations/host-data.sh
-```
-
-Migration saves originals under `$XDG_STATE_HOME/nix/host-data-migrations`
-(default `~/.local/state/nix/host-data-migrations`), checks that both layouts produce
-the same system build, and builds without activation before retiring the old files.
-Run it as the checkout owner; it needs Bash, Git, Nix and standard Linux tools,
-not a Python environment. On failure, stop and inspect the preserved originals
-and backup; do not retry over partial local data. Do not rerun after migration.
-From the installed checkout, build changes without activation:
-
-```sh
-cd ~/Projects/nix
-nixos-rebuild build --flake path:.#<host>
-```
-
-To activate them, run `nixos-rebuild switch` as root with
-`--flake "path:/home/<user>/Projects/nix#<host>"`.
-
-- [Boot, installer and migration plan](docs/PLAN.md)
+[docs/PLAN.md](docs/PLAN.md) holds the open work.

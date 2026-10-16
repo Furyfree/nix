@@ -39,9 +39,11 @@ patches on machines.
   application preferences. Keep the checkout at `~/Projects/nix` for these links.
 - `hosts/`: tracked host exceptions; ignored `hosts/<host>/local/` holds detected
   hardware and installation data. Shared policy belongs above it.
+- `configs/hypr/hosts/<host>.lua`: per-host monitors, workspaces and keys,
+  linked as `~/.config/hypr/host.lua` by `hosts/<host>/home.nix`.
+- `INSTALLATION.md`: install steps; update it with installer or first-boot changes.
 - `scripts/install.py`: installer launcher; `scripts/nixos_setup/` holds the
   wizard, storage, configuration, credential and installation modules.
-- `scripts/migrations/`: one-time upgrades for existing checkouts, without activation.
 - `tests/`, `justfile`: installer behavior checks, one file per module, and
   local gates.
 
