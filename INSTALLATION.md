@@ -31,7 +31,7 @@ on its own disk and gets an entry in the boot menu.
    keys for Windows and firmware. Turn Secure Boot back on.
 2. `mise install` for the language runtimes and agent CLIs.
 3. Dictation: `voxtype setup --download --model large-v3-turbo` on the desktop,
-   `--model small` elsewhere.
+   `--model small` elsewhere, then `systemctl --user start voxtype`.
 4. 1Password: sign in, then in Settings → Developer turn on the SSH agent and
    the CLI integration.
 5. `op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf`
