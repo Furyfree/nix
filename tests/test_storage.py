@@ -227,6 +227,7 @@ class StorageExecutionTests(unittest.TestCase):
                 "/mnt/flatpak",
                 "/mnt/docker",
                 "/mnt/containerd",
+                "/mnt/windows",
             },
         )
         mounted = [c[-1] for c in self.commands if c[0] == "mount"]

@@ -9,7 +9,13 @@ Open work only; finished work lives in Git.
 2. Add the OpenRouter key to ai-usagebar's config and the Fastmail calendar in
    Noctalia's settings when wanted.
 3. Then retire Fedora, Nimbus, Chezmoi, COPR and fedora-iso.
-4. Remove the temporary SSH server from `hosts/laptop/configuration.nix` once
+4. Watch laptop Wi-Fi after boot. Fedora needed a one-time retry because the
+   MT7925 card could fail its first handshake; NixOS starts without it. The
+   Fedora unit, ported once, failed on the laptop because it was on Ethernet
+   with no saved Wi-Fi network to connect, not because of the card. Bring a
+   retry back only if Wi-Fi fails at boot, and skip it when no network is
+   saved.
+5. Remove the temporary SSH server from `hosts/laptop/configuration.nix` once
    the laptop works.
 
 ## Untested recovery

@@ -251,6 +251,9 @@ def prepare_storage(
                 "subvolume",
                 "create",
                 *(str(INSTALL_ROOT / name) for name, _ in SUBVOLUMES),
+                # The Windows VM's disk; windows-vm.nix mounts it, so the
+                # installed system does not need it in its hardware settings.
+                str(INSTALL_ROOT / "windows"),
             ]
         )
         (INSTALL_ROOT / "snapshots").chmod(0o700)
