@@ -6,16 +6,20 @@ Open work only; finished work lives in Git.
 
 1. Install the laptop, then the desktop, with [INSTALLATION.md](../INSTALLATION.md)
    and run its checks.
-2. Add the OpenRouter key to ai-usagebar's config and the Fastmail calendar in
-   Noctalia's settings when wanted.
-3. Then retire Fedora, Nimbus, Chezmoi, COPR and fedora-iso.
-4. Watch laptop Wi-Fi after boot. Fedora needed a one-time retry because the
-   MT7925 card could fail its first handshake; NixOS starts without it. The
-   Fedora unit, ported once, failed on the laptop because it was on Ethernet
-   with no saved Wi-Fi network to connect, not because of the card. Bring a
-   retry back only if Wi-Fi fails at boot, and skip it when no network is
-   saved.
-5. Remove the temporary SSH server from `hosts/laptop/configuration.nix` once
+2. Add the OpenRouter key to ai-usagebar's config when wanted.
+3. Then retire Fedora, Nimbus, Chezmoi, COPR and fedora-iso, and
+   `docs/POSTINSTALL.md` in the docs repository.
+4. Watch laptop Wi-Fi. Under wpa_supplicant the MT7925 timed out WPA3's
+   6 GHz handshake (reason 15), which NetworkManager read as a wrong password;
+   that is likely what Fedora's boot retry papered over. Every host now uses
+   iwd. Confirm reconnects and resume without password prompts, and eduroam at
+   DTU; revert the backend in `components/networking.nix` if eduroam fails.
+5. Retest two Noctalia clipboard bugs from Fedora with sample text: a
+   1Password field pasted into Wi-Fi fields and launcher search must paste the
+   current value and stay out of history (noctalia#4457), and text copied in
+   Ghostty must paste after Ghostty closes without picking it from history
+   (noctalia#3793).
+6. Remove the temporary SSH server from `hosts/laptop/configuration.nix` once
    the laptop works.
 
 ## Untested recovery
