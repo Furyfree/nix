@@ -1,0 +1,31 @@
+# Local dictation, controlled through Voxtype's recording commands.
+engine = "whisper"
+state_file = "auto"
+
+# Let compositor shortcuts control recording without raw input-device access.
+[hotkey]
+enabled = false
+
+[audio]
+device = "default"
+max_duration_secs = 60
+pause_media = true
+
+# The voxtype user unit picks the model per machine: large-v3-turbo on the
+# desktop (RTX 3080, about 1.6 GB), small elsewhere.
+[whisper]
+mode = "local"
+language = ["en", "da"]
+translate = false
+
+# Type with wtype, with clipboard fallback.
+[output]
+mode = "type"
+driver_order = ["wtype", "clipboard"]
+auto_submit = false
+
+# Show recording progress without putting dictated text in notifications.
+[output.notification]
+on_recording_start = true
+on_recording_stop = true
+on_transcription = false

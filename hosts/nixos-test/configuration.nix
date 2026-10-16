@@ -18,16 +18,7 @@
       PermitRootLogin = "no";
     };
   };
-  security.sudo.extraRules = [
-    {
-      users = [ "pby" ];
-      commands = [
-        {
-          command = "ALL";
-          options = [ "NOPASSWD" ];
-        }
-      ];
-    }
-  ];
+  # Test machine: the installer-chosen account runs sudo without a password.
+  security.sudo.wheelNeedsPassword = false;
   system.stateVersion = "26.05";
 }

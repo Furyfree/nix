@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from nixos_setup.common import (
+    HOSTS,
     INSTALL_ROOT,
     MAPPER,
     MIB,
@@ -25,8 +26,8 @@ from nixos_setup.planning import discover_disks, plan_storage, swap_error
 
 
 def storage_preflight(plan: Plan) -> None:
-    if plan.host != "nixos-test":
-        raise ValueError("Only nixos-test installation is supported.")
+    if plan.host not in HOSTS:
+        raise ValueError("Unknown installation host.")
     storage = plan.storage
     disk = storage.disk
     if storage.mode != "erase":

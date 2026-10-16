@@ -111,6 +111,7 @@ in
           "git/config"
           "git/ignore"
           "git/allowed_signers"
+          "voxtype/config.toml"
         ]
         (name: {
           source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${name}";

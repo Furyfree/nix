@@ -23,6 +23,13 @@ MAPPER = "/dev/mapper/cryptroot"
 SOURCE_FLAKE = "github:Furyfree/nix/main"
 
 
+HOSTS = ("desktop", "laptop", "nixos-test")
+
+
+# GPT partition type of an EFI system partition.
+ESP_TYPE = "c12a7328-f81f-11d2-ba4b-00a0c93ec93b"
+
+
 SUBVOLUMES = (
     ("root", "/"),
     ("home", "/home"),
@@ -71,6 +78,8 @@ class Plan:
     storage: StoragePlan
     ram: int
     swap_gib: int
+    # GPT partition GUID of a Windows EFI partition on another disk, if any.
+    windows: str = ""
 
 
 @dataclass(frozen=True)

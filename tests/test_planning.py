@@ -8,7 +8,7 @@ from typing import Any
 from unittest.mock import patch
 
 from helpers import GIB, MIB, device, disk, partition
-from nixos_setup import planning
+from nixos_setup import common, planning
 
 
 class PlanningTests(unittest.TestCase):
@@ -187,6 +187,41 @@ class PlanningTests(unittest.TestCase):
             with self.subTest(invalid=invalid):
                 with self.assertRaises(ValueError):
                     planning.key_fingerprint(invalid)
+
+    def test_windows_candidates_are_efi_partitions_on_other_disks(self):
+        guid = "0f2c9a4e-1b7d-4c3a-9e8f-5a6b7c8d9e0f"
+
+        def esp(name: str, **changes: Any) -> dict[str, Any]:
+            return partition(
+                2048,
+                GIB,
+                name=name,
+                **{"parttype": common.ESP_TYPE, "partuuid": guid, **changes},
+            )
+
+        data = {
+            "blockdevices": [
+                device(children=[esp("/dev/fixture0p1")]),
+                device(
+                    name="/dev/fixture1",
+                    children=[
+                        esp(
+                            "/dev/fixture1p1", mountpoints=["/boot/efi", None]
+                        ),
+                        esp(
+                            "/dev/fixture1p2",
+                            parttype="0fc63daf-8483-4772-8e79-3d69d8477de4",
+                        ),
+                        esp("/dev/fixture1p3", partuuid="not-a-guid"),
+                    ],
+                ),
+                device(name="/dev/zram0", type="disk"),
+            ]
+        }
+        self.assertEqual(
+            planning.esp_candidates(data, "/dev/fixture0"),
+            (("/dev/fixture1p1", guid, ("/boot/efi",)),),
+        )
 
 
 if __name__ == "__main__":

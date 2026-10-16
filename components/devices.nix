@@ -1,5 +1,6 @@
-# AirPods through the LibrePods fork that Noctalia's airpods plugin uses, and
-# browser access to NuPhy and Wooting keyboard settings.
+# AirPods through the LibrePods fork that Noctalia's airpods plugin uses,
+# browser access to NuPhy and Wooting keyboard settings, and external monitor
+# brightness through ddcutil.
 { pkgs, ... }:
 
 {
@@ -28,7 +29,13 @@
     })
   ];
 
-  environment.systemPackages = [ pkgs.librepods ];
+  environment.systemPackages = [
+    pkgs.librepods
+    pkgs.ddcutil
+  ];
+
+  # Loads i2c-dev and creates the i2c group that ddcutil's rules use.
+  hardware.i2c.enable = true;
 
   # The COPR package's user unit; it skips machines without Bluetooth.
   systemd.user.services.librepods = {
@@ -74,6 +81,8 @@
   # uaccess must sort before systemd's 73-seat-late.rules, so these keep their
   # 70- names instead of NixOS's 99-local.rules. Replug keyboards after a rebuild.
   services.udev.packages = [
+    # Monitor control for the logged-in user; sorts before 73-seat-late.
+    pkgs.ddcutil
     (pkgs.writeTextDir "lib/udev/rules.d/70-nuphy.rules" ''
       # NuPhy IO over WebHID: grant the logged-in user the settings channel only.
       # ATTRS must match one parent, so use IDs from 60-persistent-hidraw.rules.

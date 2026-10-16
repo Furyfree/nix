@@ -130,6 +130,7 @@ def finish_installation(
     if (
         system + "/init" not in entries
         or f"resume_offset={storage.resume_offset}" not in entries
+        or (plan.windows and f"guid({plan.windows})" not in entries)
     ):
         raise ValueError("Limine entries do not match the installed system.")
     swap = storage.root / "var/swap/swapfile"

@@ -70,9 +70,9 @@ installer separate from workstation settings; it need not boot through Limine.
 - Build one ISO with a host menu for `nixos-test`, desktop and laptop.
 - Use Python and Questionary with native NixOS tools, without Disko or another
   installer framework.
-- Ask for the disk and mode: erase the whole disk or use unallocated space.
-  Preserve mode must stop if space is insufficient; do not shrink or format
-  existing partitions. Review disk/partition changes and confirm before writing.
+- Ask for the machine and disk, then erase the whole disk. Dual boot uses a
+  separate Windows disk, so there is no free-space mode. Review the disk and
+  confirm before writing.
 - Prompt for the encryption passphrase. Require internet for installation; include
   offline recovery tools and networking/Wi-Fi setup. Use the local console;
   keep the image's SSH server disabled.
@@ -118,10 +118,15 @@ Remaining order:
    Fastmail calendar through Noctalia's settings. Sign-in tests wait for this
    batch: the agent CLIs, the AI usage widget and Claude Desktop, plus
    ai-workflow's `just install` on the real hosts.
-10. Real hosts: multiple flake hosts and installer entries, free-space install
-    for the desktop's dual boot, desktop NVIDIA/Intel, ddcutil, Wi-Fi firmware,
-    GIMP and Voxtype; laptop AMD, brightness, fingerprint and Wi-Fi retry; DTU
-    network.
+10. Real hosts, in three parts. Hosts and installer: `desktop`, `laptop` and
+    `nixos-test` build from their own local data; the installer asks for the
+    machine, erases only the chosen disk, and adds a Limine entry for Windows
+    on another disk. Desktop: NVIDIA open modules with Intel, the boot-display
+    rule, GIMP, the full gaming set and its monitors and workspaces in
+    `configs/hypr/hosts/desktop.lua`. Laptop: fingerprint, brightnessctl,
+    Wi-Fi retry, light gaming and its panel scale. Shared: ddcutil, firmware,
+    lid-guard, DTU eduroam (`dtu-eduroam [1PASSWORD-ITEM]` writes the login)
+    and Voxtype (`voxtype setup --download --model <model>` once per host).
 11. Install the desktop and laptop, run their hardware tests (including
     LibrePods, since the Qotom has no Bluetooth), then retire Fedora, Nimbus,
     Chezmoi, COPR and fedora-iso.

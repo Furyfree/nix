@@ -10,18 +10,21 @@
     ./components/development.nix
     ./components/devices.nix
     ./components/editors.nix
-    ./components/gaming.nix
     ./components/hyprland-noctalia.nix
     ./components/networking.nix
     ./components/services.nix
     ./components/shell.nix
     ./components/snapper.nix
     ./components/virtualization.nix
+    ./components/voxtype.nix
     ./components/windows-vm.nix
   ];
 
   # Allow closed-source apps such as Spotify, Obsidian, Steam and NVIDIA.
   nixpkgs.config.allowUnfree = true;
+
+  # Wi-Fi, Bluetooth and GPU firmware, as Fedora's linux-firmware provides.
+  hardware.enableRedistributableFirmware = true;
 
   nix.settings.experimental-features = [
     "nix-command"

@@ -303,6 +303,20 @@ hl.bind(
     hl.dsp.exec_cmd("noctalia msg notification-dnd-toggle"),
     { description = "NuPhy F6: toggle Do Not Disturb", locked = true }
 )
+-- Dictation: the Voxtype daemon only listens for its native recording
+-- commands, so the compositor owns the shortcut. Toggle avoids the
+-- press/release race of push-to-talk; cancel discards a wrong take before
+-- it is typed into the focused window.
+hl.bind(
+    mainMod .. " + D",
+    hl.dsp.exec_cmd("voxtype record toggle"),
+    { description = "Dictation: start or stop recording" }
+)
+hl.bind(
+    mainMod .. " + SHIFT + Escape",
+    hl.dsp.exec_cmd("voxtype record cancel"),
+    { description = "Dictation: cancel recording" }
+)
 -- 6. Window and monitor navigation
 -- Super+arrows focuses windows; Ctrl focuses monitors and moves the pointer.
 -- Shift swaps windows; Shift+Ctrl moves windows between monitors.

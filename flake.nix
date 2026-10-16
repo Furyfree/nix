@@ -17,15 +17,37 @@
       ...
     }:
     let
-      host = ./hosts/nixos-test;
-      localHardware = host + "/local/hardware-configuration.nix";
-      localInstallation = host + "/local/installation.nix";
-      hasLocal = builtins.pathExists localHardware || builtins.pathExists localInstallation;
-      installation =
-        if builtins.pathExists localHardware && builtins.pathExists localInstallation then
-          localInstallation
-        else
-          throw "Incomplete hosts/nixos-test/local: hardware-configuration.nix and installation.nix are both required.";
+      # A host builds only from its ignored local/ data, which the installer
+      # writes; without it, the host has no output.
+      mkHost =
+        name:
+        let
+          host = ./hosts + "/${name}";
+          localHardware = host + "/local/hardware-configuration.nix";
+          localInstallation = host + "/local/installation.nix";
+          installation =
+            if builtins.pathExists localHardware && builtins.pathExists localInstallation then
+              localInstallation
+            else
+              throw "Incomplete hosts/${name}/local: hardware-configuration.nix and installation.nix are both required.";
+        in
+        nixpkgs.lib.optionalAttrs
+          (builtins.pathExists localHardware || builtins.pathExists localInstallation)
+          {
+            ${name} = builtins.seq installation (
+              nixpkgs.lib.nixosSystem {
+                modules = [
+                  (host + "/configuration.nix")
+                  home-manager.nixosModules.home-manager
+                  installation
+                  {
+                    home-manager.useGlobalPkgs = true;
+                    home-manager.useUserPackages = true;
+                  }
+                ];
+              }
+            );
+          };
     in
     {
       devShells.x86_64-linux.default =
@@ -57,20 +79,8 @@
           modules = [ ./hosts/installer/configuration.nix ];
         };
       }
-      // nixpkgs.lib.optionalAttrs hasLocal {
-        nixos-test = builtins.seq installation (
-          nixpkgs.lib.nixosSystem {
-            modules = [
-              ./hosts/nixos-test/configuration.nix
-              home-manager.nixosModules.home-manager
-              installation
-              {
-                home-manager.useGlobalPkgs = true;
-                home-manager.useUserPackages = true;
-              }
-            ];
-          }
-        );
-      };
+      // mkHost "desktop"
+      // mkHost "laptop"
+      // mkHost "nixos-test";
     };
 }
