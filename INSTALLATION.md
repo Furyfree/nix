@@ -49,6 +49,39 @@ on its own disk and gets an entry in the boot menu.
 9. `dtu-eduroam <1Password item>` for DTU Wi-Fi; laptop: `fprintd-enroll`.
 10. Desktop: install Battle.net in Lutris.
 
+## Accounts and projects
+
+- Sign in to the apps: Brave (Sync, then its extensions, including 1Password),
+  Signal, Vesktop, Spotify, Obsidian, Fastmail and JetBrains Toolbox; on the
+  desktop also Steam, Heroic and Lutris.
+- Brave settings: search engine, startup pages and site permissions, as on the
+  old machine.
+- AI: log in to `claude`, `codex`, `opencode`, `grok`, `pi` and `agy`, then to
+  Claude Desktop. In T3 Code, add the providers you use.
+- Projects: clone the repositories you work on into `~/Projects`
+  (`gh repo list` shows them); `pull-projects` keeps them updated.
+- Environments: in each project, follow its README (`mise install`,
+  `nix develop`, `uv sync` or similar) and run its checks.
+- Homelab: `ssh` to each host from `~/.ssh/local.conf` and check access and its
+  services.
+
+## App themes
+
+Noctalia writes the colours; these apps need the theme picked once.
+
+- Brave: Appearance → Use GTK. Claude Code and Codex: the Noctalia theme.
+  OpenCode: `matugen`.
+- Vesktop: enable `~/.config/vesktop/themes/noctalia.theme.css` in Vencord.
+- Heroic: theme folder `~/.config/heroic/themes`, then `matugen.css`. Prism
+  Launcher and OBS: Matugen.
+- VSCodium: install the Noctalia extension, then
+  `noctalia msg templates-apply`.
+- LibreOffice: close it while colours generate. Obsidian: check the snippet is
+  enabled. Zed and Zathura: restart after the first palette.
+- Fastmail calendar, in Noctalia's settings: a CalDAV account with ID
+  `fastmail`, your login and `https://caldav.fastmail.com/dav/`, and a
+  calendar-only app password saved through its keyring option.
+
 ## Check
 
 - Suspend, hibernate (`systemctl hibernate`) and resume, then the boot menu.
