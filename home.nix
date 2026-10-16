@@ -35,11 +35,16 @@ in
           "uuctl.desktop" = pkgs.uwsm;
           "me.kavishdevar.librepods.desktop" = pkgs.librepods;
         }
-      // lib.genAttrs [ "fotmob" "google-maps" ] (name: {
+      // lib.genAttrs [ "chatgpt" "fotmob" "google-maps" ] (name: {
         target = "icons/hicolor/512x512/apps/webapp-${name}.png";
         source = ./configs/icons/webapp-${name}.png;
       });
     desktopEntries = {
+      chatgpt = {
+        name = "ChatGPT";
+        exec = "launch focus-webapp https://chatgpt.com/";
+        icon = "webapp-chatgpt";
+      };
       fotmob = {
         name = "FotMob";
         exec = "launch focus-webapp https://www.fotmob.com/";

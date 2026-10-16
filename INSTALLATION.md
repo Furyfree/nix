@@ -47,40 +47,78 @@ on its own disk and gets an entry in the boot menu.
 8. `git clone git@github.com:Furyfree/ai-workflow.git ~/Projects/ai-workflow`,
    then in it `nix develop -c just install` for agent rules and skills.
 9. `dtu-eduroam <1Password item>` for DTU Wi-Fi; laptop: `fprintd-enroll`.
-10. Desktop: install Battle.net in Lutris.
 
-## Accounts and projects
+## Accounts and apps
 
-- Sign in to the apps: Brave (Sync, then its extensions, including 1Password),
-  Signal, Vesktop, Spotify, Obsidian, Fastmail and JetBrains Toolbox; on the
-  desktop also Steam, Heroic and Lutris.
-- Brave settings: search engine, startup pages and site permissions, as on the
-  old machine.
-- AI: log in to `claude`, `codex`, `opencode`, `grok`, `pi` and `agy`, then to
-  Claude Desktop. In T3 Code, add the providers you use.
-- Projects: clone the repositories you work on into `~/Projects`
-  (`gh repo list` shows them); `pull-projects` keeps them updated.
-- Environments: in each project, follow its README (`mise install`,
-  `nix develop`, `uv sync` or similar) and run its checks.
-- Homelab: `ssh` to each host from `~/.ssh/local.conf` and check access and its
-  services.
+Noctalia writes theme files when an app's config folder exists; after an app's
+first start, run `noctalia msg templates-apply` once so its theme appears.
 
-## App themes
+### Browser and web apps
 
-Noctalia writes the colours; these apps need the theme picked once.
+- Brave: from the Chrome Web Store, install 1Password, Dark Reader,
+  BookmarkHub and Unhook, and sign in to 1Password. In Settings: Use GTK and
+  the system title bar, vertical tabs (expanded), a blank new-tab page, Ctrl+Tab
+  through recently used tabs, no saving passwords, no history suggestions in
+  the address bar, Do Not Track, no usage reports, no background apps, no
+  graphics acceleration, and languages and spellcheck in English (UK) and
+  Danish.
+- ChatGPT, FotMob and Google Maps: open each web app once and sign in.
 
-- Brave: Appearance → Use GTK. Claude Code and Codex: the Noctalia theme.
-  OpenCode: `matugen`.
-- Vesktop: enable `~/.config/vesktop/themes/noctalia.theme.css` in Vencord.
-- Heroic: theme folder `~/.config/heroic/themes`, then `matugen.css`. Prism
-  Launcher and OBS: Matugen.
+### AI
+
+- Log in to `claude`, `codex`, `grok` and `agy`. In Claude Code and Codex,
+  pick the Noctalia theme.
+- OpenCode: `opencode auth login` for each AI provider. Pi: `/login` inside
+  `pi` for each provider.
+- Claude Desktop: sign in. T3 Code: add your providers in its settings.
+
+### Everyday apps
+
+- Signal: link it to your phone. Sign in to Spotify, Zed and Fastmail (your
+  own account and the family one).
+- Obsidian: open the vault and check its Noctalia snippet is enabled.
+- LibreOffice: on Writer's first start, turn on "Enable application theming"
+  in the welcome dialog.
+- Vesktop: sign in, then Settings → Vencord → Themes → Local Themes → enable
+  Noctalia Midnight.
 - VSCodium: install the Noctalia extension, then
-  `noctalia msg templates-apply`.
-- LibreOffice: close it while colours generate. Obsidian: check the snippet is
-  enabled. Zed and Zathura: restart after the first palette.
+  `noctalia msg templates-apply`. Zed and Zathura: restart after the first
+  palette.
 - Fastmail calendar, in Noctalia's settings: a CalDAV account with ID
   `fastmail`, your login and `https://caldav.fastmail.com/dav/`, and a
   calendar-only app password saved through its keyring option.
+- Printer: the Epson ET-5800 shows up in print dialogs by itself. To keep it,
+  add it at <http://localhost:631> → Administration → Add Printer with IPP
+  Everywhere. Scan with Simple Scan.
+
+### JetBrains
+
+- Toolbox: sign in, install Rider (later GoLand, PyCharm, RustRover or CLion
+  as needed). In Toolbox settings, under Tools turn off "Keep previous versions
+  of tools to enable instant rollback", and under Plugins turn on plugin
+  auto-update, which covers every IDE.
+- In each IDE: sign in and turn on Settings Sync with your synced profile.
+
+### Gaming (desktop)
+
+- Steam: sign in. Settings → Interface: Start Up Location Library, and turn
+  off "Notify me about additions or changes to my games". Steam has no
+  Noctalia theme.
+- ProtonPlus: Tools → Proton → Proton-CachyOS → install Latest. Then Steam
+  Settings → Compatibility: make it the default, and restart Steam.
+- Heroic: sign in. Settings → General → Custom Themes Path (the field under
+  Select Theme, not Default Installation Path): `~/.config/heroic/themes`.
+  Restart Heroic, then Select Theme → `matugen`.
+- Lutris: add Battle.net (+ → search Lutris for Battle.net → install), sign
+  in and install World of Warcraft; WowUp manages its addons.
+
+### Projects and homelab
+
+- Clone the repositories you work on into `~/Projects` (`gh repo list` shows
+  them); `pull-projects` keeps them updated.
+- In each project, follow its README (`mise install`, `nix develop`,
+  `uv sync` or similar) and run its checks.
+- `ssh` to each host from `~/.ssh/local.conf` and check access and services.
 
 ## Check
 
