@@ -37,7 +37,8 @@ on its own disk and gets an entry in the boot menu.
 5. `op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf`
    for the homelab SSH hosts, and `gh auth login`.
 6. `git clone git@github.com:Furyfree/wallpapers.git ~/Projects/wallpapers`,
-   then `nswitch` to link it into `~/Pictures/Wallpapers`.
+   then `sudo systemctl restart home-manager-$USER.service` to link it into
+   `~/Pictures/Wallpapers`; `nswitch` skips that when nothing else changed.
 7. `git clone git@github.com:Furyfree/ai-workflow.git ~/Projects/ai-workflow`,
    then in it `nix develop -c just install` for agent rules and skills.
 8. `dtu-eduroam <1Password item>` for DTU Wi-Fi; laptop: `fprintd-enroll`.
