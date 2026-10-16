@@ -109,7 +109,8 @@ Remaining order:
 6. AI: agent CLIs and configs, ACP adapters, ai-usagebar, Pi packages and T3
    Code; then Claude Desktop, packaged from Anthropic's signed Debian package.
 7. Hyprland plugins: ScrollOverview, built by Nix and loaded from `overview.lua`.
-8. Printing, when a printer can test it.
+8. Printing and scanning: CUPS, Avahi, sane-airscan and Simple Scan for the
+   Epson ET-5800. Configured; tested in step 11.
 9. Sign-in tools: 1Password (app, CLI, SSH agent), Git signing and `gh`. After
    signing in: `op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file
    ~/.ssh/local.conf` for the homelab hosts, `gh auth login`, the
@@ -128,8 +129,8 @@ Remaining order:
     lid-guard, DTU eduroam (`dtu-eduroam [1PASSWORD-ITEM]` writes the login)
     and Voxtype (`voxtype setup --download --model <model>` once per host).
 11. Install the desktop and laptop, run their hardware tests (including
-    LibrePods, since the Qotom has no Bluetooth), then retire Fedora, Nimbus,
-    Chezmoi, COPR and fedora-iso.
+    LibrePods, since the Qotom has no Bluetooth, and printing and scanning on
+    the ET-5800), then retire Fedora, Nimbus, Chezmoi, COPR and fedora-iso.
 
 Bring each app's Noctalia plugin, widget and keybind back in the batch that
 installs the app; commented entries in `configs/` mark what waits. Noctalia
