@@ -1,5 +1,6 @@
 git_protocol: ssh
 aliases:
   co: pr checkout
-# Open login pages through UWSM so gh does not wait for a newly started browser.
-browser: uwsm-app -- xdg-open
+# Open login pages as a UWSM service: it returns at once, while a scope would
+# wait until a newly started browser closes.
+browser: uwsm-app -t service -- xdg-open
