@@ -11,6 +11,7 @@ from tempfile import TemporaryDirectory
 from typing import Any
 
 from nixos_setup.common import (
+    HOSTS,
     MAPPER,
     SOURCE_FLAKE,
     SUBVOLUMES,
@@ -20,12 +21,30 @@ from nixos_setup.common import (
     nix_string,
     run_command,
 )
-from nixos_setup.planning import key_fingerprint, swap_error, username_error
+from nixos_setup.planning import (
+    GUID,
+    key_fingerprint,
+    swap_error,
+    username_error,
+)
+
+
+def windows_entry(guid: str) -> str:
+    """Limine menu entry that chainloads Windows from another disk."""
+    return (
+        "/Windows\n"
+        "  protocol: efi\n"
+        f"  path: guid({guid}):/EFI/Microsoft/Boot/bootmgfw.efi\n"
+    )
 
 
 def render_installation(plan: Plan, resume_offset: int) -> str:
-    if plan.host != "nixos-test" or plan.storage.mode != "erase":
-        raise ValueError("Only nixos-test erase installation is supported.")
+    if plan.host not in HOSTS or plan.storage.mode != "erase":
+        raise ValueError(
+            "Only erase installation of a known host is supported."
+        )
+    if plan.windows and not GUID.fullmatch(plan.windows):
+        raise ValueError("Invalid Windows partition GUID.")
     if username_error(plan.username) or swap_error(
         str(plan.swap_gib), plan.storage.capacity
     ):
@@ -36,6 +55,12 @@ def render_installation(plan: Plan, resume_offset: int) -> str:
     user = nix_string(plan.username)
     key = nix_string(plan.ssh_key)
     keys = f"[ {key} ]" if plan.ssh_key else "[ ]"
+    windows = (
+        "  boot.loader.limine.extraEntries = "
+        f"{nix_string(windows_entry(plan.windows))};\n"
+        if plan.windows
+        else ""
+    )
     compression = "\n".join(
         f'  fileSystems.{nix_string(path)}.options = [ "compress=zstd" ];'
         for _, path in SUBVOLUMES
@@ -59,7 +84,7 @@ def render_installation(plan: Plan, resume_offset: int) -> str:
 {compression}
   boot.resumeDevice = {nix_string(MAPPER)};
   boot.kernelParams = [ "resume_offset={resume_offset}" ];
-}}
+{windows}}}
 """
 
 
@@ -110,6 +135,7 @@ def evaluate_configuration(
       efi = c.boot.loader.efi.efiSysMountPoint;
       limine = c.boot.loader.limine.enable && c.boot.loader.limine.efiSupport;
       removable = c.boot.loader.limine.efiInstallAsRemovable;
+      entries = c.boot.loader.limine.extraEntries;
       host = c.networking.hostName;
       user = c.users.users.{user}.isNormalUser;
       groups = c.users.users.{user}.extraGroups;
@@ -166,6 +192,8 @@ def evaluate_configuration(
             }
         ]
         or result["resume"] != MAPPER
+        or (windows_entry(plan.windows) if plan.windows else "")
+        not in result["entries"]
         or [p for p in result["params"] if p.startswith("resume_offset=")]
         != [f"resume_offset={offset}"]
     ):

@@ -197,8 +197,7 @@ action = "command"
 command = "systemctl hibernate"
 enabled = true
 
-# Enable the commented plugins when their integrations arrive: lid-guard
-# (laptop).
+# lid-guard is a laptop toggle; without a lid it has nothing to guard.
 [plugins]
 enabled = [
     "noctalia/notes",
@@ -215,7 +214,7 @@ enabled = [
     "aristides/udiskie",
     "rxtsel/portctl",
     "cleboost/ssh-launcher",
-    # "8bury/lid-guard",
+    "8bury/lid-guard",
 ]
 
 [plugin_settings."umedbazarov/crashes"]
@@ -262,6 +261,8 @@ hyprland_lua_config = "~/.config/hypr/conf.d/keybinds.lua"
 hyprland_parser = "lua"
 
 [brightness]
+# External monitors through ddcutil; laptop panels keep the backlight.
+enable_ddcutil = true
 sync_all_monitors = true
 
 [control_center.calendar]

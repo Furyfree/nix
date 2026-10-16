@@ -6,9 +6,17 @@ import re
 import subprocess
 from collections.abc import Iterator
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 
-from nixos_setup.common import GIB, MIB, Disk, StoragePlan
+from nixos_setup.common import ESP_TYPE, GIB, MIB, Disk, StoragePlan
+
+GUID = re.compile(
+    r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+)
+
+
+WINDOWS_LOADER = ("EFI", "Microsoft", "Boot", "bootmgfw.efi")
 
 
 def device_tree(device: dict[str, Any]) -> Iterator[dict[str, Any]]:
@@ -85,6 +93,84 @@ def discover_disks() -> tuple[Disk, ...]:
         timeout=10,
     )
     return parse_disks(json.loads(output))
+
+
+def esp_candidates(
+    data: dict[str, Any], target: str
+) -> tuple[tuple[str, str, tuple[str, ...]], ...]:
+    """EFI partitions outside the target disk: path, GPT GUID, mounts."""
+    found: list[tuple[str, str, tuple[str, ...]]] = []
+    for device in data["blockdevices"]:
+        if device["type"] != "disk" or device["name"] == target:
+            continue
+        for node in device_tree(device):
+            guid = (node.get("partuuid") or "").lower()
+            if (
+                node["type"] == "part"
+                and (node.get("parttype") or "").lower() == ESP_TYPE
+                and GUID.fullmatch(guid)
+            ):
+                mounts = tuple(p for p in node.get("mountpoints") or () if p)
+                found.append((node["name"], guid, mounts))
+    return tuple(found)
+
+
+def has_windows_loader(root: Path) -> bool:
+    # vfat lookups ignore case, so this matches Windows' own capitalisation.
+    return root.joinpath(*WINDOWS_LOADER).is_file()
+
+
+def find_windows(target: Disk) -> str:
+    """GPT GUID of a Windows EFI partition on another disk, or ''."""
+    output = subprocess.check_output(
+        [
+            "lsblk",
+            "--json",
+            "--paths",
+            "--tree",
+            "--output",
+            "NAME,TYPE,PARTTYPE,PARTUUID,MOUNTPOINTS",
+        ],
+        text=True,
+        timeout=10,
+    )
+    for path, guid, mounts in esp_candidates(json.loads(output), target.path):
+        if any(has_windows_loader(Path(mount)) for mount in mounts):
+            return guid
+        # Unmounted partitions need a read-only mount, which needs root.
+        if mounts or os.geteuid() != 0:
+            continue
+        with TemporaryDirectory(prefix="nixos-setup-esp-") as directory:
+            try:
+                subprocess.run(
+                    [
+                        "mount",
+                        "-o",
+                        "ro,nodev,nosuid,noexec",
+                        "-t",
+                        "vfat",
+                        "--",
+                        path,
+                        directory,
+                    ],
+                    check=True,
+                    capture_output=True,
+                    timeout=30,
+                )
+            except subprocess.CalledProcessError:
+                continue
+            try:
+                found = has_windows_loader(Path(directory))
+            finally:
+                subprocess.run(
+                    ["umount", "--", directory],
+                    check=True,
+                    capture_output=True,
+                    timeout=30,
+                )
+        if found:
+            return guid
+    return ""
 
 
 def detect_ram() -> int:

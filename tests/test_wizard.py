@@ -7,13 +7,14 @@ import subprocess
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 from unittest.mock import Mock, patch
 
 import install as launcher
 import questionary
-from helpers import GIB, device, disk, public_key
-from nixos_setup import planning, wizard
+from helpers import GIB, device, disk, partition, public_key
+from nixos_setup import common, planning, wizard
 from prompt_toolkit.input import create_pipe_input
 from prompt_toolkit.output import DummyOutput
 
@@ -83,7 +84,7 @@ class WizardTests(unittest.TestCase):
 
     def test_preview_uses_defaults_without_asking_for_optional_settings(self):
         status, output, texts, calls = self.run_preview(
-            [disk(), "river", "Finish preview"]
+            ["nixos-test", disk(), "river", "Finish preview"]
         )
         self.assertEqual(status, 0)
         self.assertEqual(texts.call_count, 1)
@@ -101,8 +102,55 @@ class WizardTests(unittest.TestCase):
             self.assertIn(text, output)
         self.assertTrue(calls)
 
+    def test_machine_choice_and_windows_on_another_disk_reach_the_plan(self):
+        guid = "0f2c9a4e-1b7d-4c3a-9e8f-5a6b7c8d9e0f"
+        with TemporaryDirectory(prefix="windows-esp-") as esp:
+            loader = Path(esp).joinpath(*planning.WINDOWS_LOADER)
+            loader.parent.mkdir(parents=True)
+            loader.write_bytes(b"fixture loader")
+            windows_disk = device(
+                name="/dev/fixture1",
+                children=[
+                    partition(
+                        2048,
+                        GIB,
+                        name="/dev/fixture1p1",
+                        parttype=common.ESP_TYPE,
+                        partuuid=guid.upper(),
+                        mountpoints=[esp],
+                    )
+                ],
+            )
+            reviewed: list[Any] = []
+
+            def install(plan: Any) -> int:
+                reviewed.append(wizard.review_plan(plan, dry_run=False))
+                return 0
+
+            with patch.object(launcher, "install", side_effect=install):
+                status, output, _, _ = self.run_preview(
+                    [
+                        "nixos-test",
+                        disk(),
+                        "river",
+                        "Change settings",
+                        "Machine",
+                        "desktop",
+                        "Continue to installation",
+                    ],
+                    metadata={"blockdevices": [device(), windows_disk]},
+                    argv=[],
+                )
+        self.assertEqual(status, 0)
+        self.assertEqual(
+            (reviewed[0].host, reviewed[0].windows), ("desktop", guid)
+        )
+        self.assertIn("Host: desktop", output)
+        self.assertIn(f"Windows: boot menu entry for partition {guid}", output)
+
     def test_changed_settings_survive_review_and_reach_the_installer(self):
         answers = [
+            "nixos-test",
             disk(),
             "river",
             "Change settings",
@@ -143,6 +191,7 @@ class WizardTests(unittest.TestCase):
             with patch.object(launcher, "install", side_effect=install):
                 status, output, _, _ = self.run_preview(
                     [
+                        "nixos-test",
                         disk(),
                         "river",
                         "Change settings",
@@ -162,7 +211,7 @@ class WizardTests(unittest.TestCase):
         self,
     ):
         status, output, _, calls = self.run_preview(
-            [disk(), "river"],
+            ["nixos-test", disk(), "river"],
             argv=[],
         )
         self.assertEqual(status, 1)
@@ -174,14 +223,14 @@ class WizardTests(unittest.TestCase):
     def test_default_mode_dispatches_to_install_but_dry_run_does_not(self):
         with patch.object(launcher, "install", return_value=0) as install:
             status, _, _, _ = self.run_preview(
-                [disk(), "river", "Continue to installation"],
+                ["nixos-test", disk(), "river", "Continue to installation"],
                 argv=[],
             )
             self.assertEqual(status, 0)
             self.assertEqual(install.call_args.args[0].username, "river")
             install.reset_mock()
             status, _, _, _ = self.run_preview(
-                [disk(), "river", "Finish preview"],
+                ["nixos-test", disk(), "river", "Finish preview"],
             )
             self.assertEqual(status, 0)
             install.assert_not_called()
@@ -205,7 +254,13 @@ class WizardTests(unittest.TestCase):
 
     def test_oversized_suggestion_is_not_silently_capped(self):
         status, output, texts, _ = self.run_preview(
-            [disk(size=16 * GIB), "river", "6", "Finish preview"],
+            [
+                "nixos-test",
+                disk(size=16 * GIB),
+                "river",
+                "6",
+                "Finish preview",
+            ],
             metadata={"blockdevices": [device(size=16 * GIB)]},
         )
         self.assertEqual(status, 0)
@@ -216,6 +271,7 @@ class WizardTests(unittest.TestCase):
 
     def test_cancellation_at_every_prompt_exits_without_completing(self):
         answers = [
+            "nixos-test",
             disk(),
             "river",
             "Change settings",
@@ -228,7 +284,7 @@ class WizardTests(unittest.TestCase):
         ]
         modes: list[list[str] | None] = [None, []]
         for argv in modes:
-            prompts = answers if argv is None else answers[:2]
+            prompts = answers if argv is None else answers[:3]
             for index in range(len(prompts)):
                 for error in [KeyboardInterrupt(), EOFError(), None]:
                     with self.subTest(
@@ -240,7 +296,9 @@ class WizardTests(unittest.TestCase):
                         self.assertEqual(status, 0)
                         self.assertIn("Planning cancelled", output)
                         self.assertNotIn("Preview complete", output)
-        status, output, _, _ = self.run_preview([disk(), "river", "Cancel"])
+        status, output, _, _ = self.run_preview(
+            ["nixos-test", disk(), "river", "Cancel"]
+        )
         self.assertEqual(status, 0)
         self.assertIn("Planning cancelled", output)
 
@@ -255,6 +313,7 @@ class WizardTests(unittest.TestCase):
         with patch.object(launcher, "install", side_effect=install):
             status, _, _, _ = self.run_preview(
                 [
+                    "nixos-test",
                     disk(),
                     "river",
                     "Change settings",
@@ -277,7 +336,7 @@ class WizardTests(unittest.TestCase):
         for metadata, failure in examples:
             with self.subTest(metadata=metadata, failure=failure):
                 status, output, _, _ = self.run_preview(
-                    [],
+                    ["nixos-test"],
                     metadata,
                     failure,
                 )

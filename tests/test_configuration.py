@@ -53,6 +53,7 @@ class ConfigurationTests(unittest.TestCase):
             "efi": "/boot",
             "limine": True,
             "removable": False,
+            "entries": "",
             "host": "nixos-test",
             "user": True,
             "groups": ["wheel", "networkmanager"],
@@ -105,9 +106,10 @@ class ConfigurationTests(unittest.TestCase):
             shutil.copy2(root / name, destination / name)
         shutil.copytree(root / "components", destination / "components")
         shutil.copytree(root / "configs", destination / "configs")
-        shutil.copytree(
-            root / "hosts/nixos-test", destination / "hosts/nixos-test"
-        )
+        for host in common.HOSTS:
+            shutil.copytree(
+                root / "hosts" / host, destination / "hosts" / host
+            )
         shutil.copytree(
             root / "hosts/installer", destination / "hosts/installer"
         )
@@ -535,8 +537,9 @@ class ConfigurationTests(unittest.TestCase):
 
     def test_unsupported_plan_and_missing_tools_stop_before_clone(self):
         examples = [
-            replace(self.plan, host="desktop"),
-            replace(self.plan, host="laptop"),
+            replace(self.plan, host="installer"),
+            replace(self.plan, host="unknown"),
+            replace(self.plan, windows="not-a-guid"),
             replace(
                 self.plan, storage=planning.plan_storage(disk(), "preserve")
             ),
@@ -579,6 +582,40 @@ class ConfigurationTests(unittest.TestCase):
             self.assertIs(result["autoLogin"], True)
             self.assertEqual(result["autoLoginUser"], username)
             self.assertEqual(result["initialSessionUser"], username)
+
+    def test_real_nix_evaluation_of_each_host_and_its_windows_entry(self):
+        guid = "0f2c9a4e-1b7d-4c3a-9e8f-5a6b7c8d9e0f"
+        for host, windows in [
+            ("desktop", guid),
+            ("laptop", ""),
+            ("nixos-test", guid),
+        ]:
+            with self.subTest(host=host, windows=windows):
+                plan = replace(self.plan, host=host, windows=windows)
+                local = self.checkout / "hosts" / host / "local"
+                local.mkdir(exist_ok=True)
+                (local / "hardware-configuration.nix").write_text(
+                    configuration.preflight_hardware()
+                )
+                (local / "installation.nix").write_text(
+                    configuration.render_installation(plan, 24680)
+                )
+                result = configuration.evaluate_configuration(
+                    self.checkout, plan, 24680
+                )
+                self.assertEqual(result["host"], host)
+                if windows:
+                    self.assertIn(
+                        f"path: guid({guid}):/EFI/Microsoft/Boot/bootmgfw.efi",
+                        result["entries"],
+                    )
+                else:
+                    self.assertNotIn("/Windows", result["entries"])
+                    # A plan expecting Windows rejects a host without it.
+                    with self.assertRaisesRegex(ValueError, "does not match"):
+                        configuration.evaluate_configuration(
+                            self.checkout, replace(plan, windows=guid), 24680
+                        )
 
     def test_real_nix_evaluation_selects_an_unambiguous_desktop_account(self):
         for accounts, explicit, expected in [

@@ -23,6 +23,13 @@ check-hyprland:
     unset HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY DISPLAY DBUS_SESSION_BUS_ADDRESS
     unset LUA_PATH LUA_CPATH
     Hyprland --verify-config --config "$config"
+    # Each host file loads as ~/.config/hypr/host.lua next to the shared files.
+    for host in configs/hypr/hosts/*.lua; do
+        copy="$temporary/hypr-${host##*/}"
+        cp -r configs/hypr "$copy"
+        cp "$host" "$copy/host.lua"
+        Hyprland --verify-config --config "$copy/hyprland.lua"
+    done
 
 lint:
     uv run --locked ruff check scripts tests

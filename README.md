@@ -1,7 +1,7 @@
 # Nix
 
-NixOS and integrated Home Manager for workstations. Only `nixos-test`
-is supported; its output requires local machine data.
+NixOS and integrated Home Manager for workstations: `desktop`, `laptop` and the
+`nixos-test` machine. Each host's output requires its local machine data.
 
 ## Develop
 
@@ -20,7 +20,7 @@ Run `just` to list commands, `just wizard` for the plan-only installer, and
 ```sh
 cd ~/Projects/nix
 nix --extra-experimental-features 'nix-command flakes' flake check --no-build --no-write-lock-file path:.
-nix --extra-experimental-features 'nix-command flakes' build --no-link path:.#nixosConfigurations.nixos-test.config.system.build.toplevel
+nix --extra-experimental-features 'nix-command flakes' build --no-link path:.#nixosConfigurations.<host>.config.system.build.toplevel
 ```
 
 Build without activation. The public checkout exposes the installer and development
@@ -29,8 +29,9 @@ shell; installed host outputs require machine data.
 ## Install
 
 Boot the ISO on a disposable UEFI machine or in a VM. The local console starts
-`nixos-setup` as root. Choose a disk and username; use **Change settings** for
-SSH keys or swap size. Only `nixos-test` with erase mode is supported. Enter and
+`nixos-setup` as root. Choose the machine, a disk and a username; use **Change
+settings** for SSH keys or swap size. Installation erases the chosen disk. A
+Windows boot partition on another disk gets an entry in the boot menu. Enter and
 confirm one password for disk encryption, root and your user, then review the
 settings and type the disk's full path to authorize erasure. Installation runs
 without more setup questions. Native tools handle password text outside Python,
@@ -47,8 +48,8 @@ installed repo, rebuilt with new changes and tested generation rollback. See
 
 Configuration generation clones public `main` into `~/Projects/nix` and keeps
 its lock file. It writes detected hardware and `installation.nix` into ignored
-`hosts/nixos-test/local/`. These files supply the chosen user, public SSH key and
-swap/resume settings. Tracked configuration and custom packages stay unchanged.
+`hosts/<host>/local/`. These files supply the chosen user, public SSH key,
+swap/resume settings and any Windows boot entry. Tracked configuration and custom packages stay unchanged.
 The installed user owns the checkout and its parent directories.
 
 Keep machine data local and backed up; keep passwords and private keys outside the
@@ -72,10 +73,10 @@ From the installed checkout, build changes without activation:
 
 ```sh
 cd ~/Projects/nix
-nixos-rebuild build --flake path:.#nixos-test
+nixos-rebuild build --flake path:.#<host>
 ```
 
 To activate them, run `nixos-rebuild switch` as root with
-`--flake "path:/home/<user>/Projects/nix#nixos-test"`.
+`--flake "path:/home/<user>/Projects/nix#<host>"`.
 
 - [Boot, installer and migration plan](docs/PLAN.md)

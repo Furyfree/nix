@@ -309,8 +309,8 @@ class StorageExecutionTests(unittest.TestCase):
 
     def test_unsupported_plans_and_invalid_swap_never_reach_writes(self):
         plans = [
-            replace(self.plan, host="desktop"),
-            replace(self.plan, host="laptop"),
+            replace(self.plan, host="installer"),
+            replace(self.plan, host="unknown"),
             common.Plan(
                 "nixos-test",
                 "river",

@@ -4,6 +4,10 @@
 require("./conf.d/window-actions.lua")
 require("./conf.d/input.lua")
 require("./conf.d/monitors.lua")
+-- Per-machine monitors and workspaces, linked by hosts/<host>/home.nix.
+if package.searchpath("host", package.path) then
+    require("host")
+end
 require("./conf.d/layout.lua")
 require("./conf.d/workspaces.lua")
 require("./conf.d/workspace-layouts.lua")

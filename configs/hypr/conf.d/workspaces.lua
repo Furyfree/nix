@@ -1,10 +1,28 @@
 -- Ten workspace slots are available; only the first five stay when empty.
-for workspace = 1, 10 do
-    hl.workspace_rule({
-        workspace = tostring(workspace),
-        default_name = tostring(workspace),
-        persistent = workspace <= 5,
-    })
+-- A host file may give each monitor its own slots, as the desktop does.
+local host = package.loaded["host"]
+local monitorWorkspaces = type(host) == "table" and host.workspaces or {}
+
+if next(monitorWorkspaces) then
+    for monitor, workspaces in pairs(monitorWorkspaces) do
+        for slot, workspace in ipairs(workspaces) do
+            hl.workspace_rule({
+                workspace = tostring(workspace),
+                default_name = tostring(slot),
+                persistent = slot <= 5,
+                monitor = monitor,
+                default = slot == 1,
+            })
+        end
+    end
+else
+    for workspace = 1, 10 do
+        hl.workspace_rule({
+            workspace = tostring(workspace),
+            default_name = tostring(workspace),
+            persistent = workspace <= 5,
+        })
+    end
 end
 
 local actions
@@ -71,7 +89,9 @@ actions = {
         end
     end,
     on_current_monitor = function(slot)
-        return slot
+        local monitor = hl.get_active_monitor()
+        local workspaces = monitor and monitorWorkspaces[monitor.name]
+        return workspaces and workspaces[slot] or slot
     end,
 }
 
