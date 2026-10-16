@@ -112,8 +112,9 @@ Remaining order:
 8. Printing, when a printer can test it.
 9. Sign-in tools: 1Password (app, CLI, SSH agent), Git signing and `gh`. After
    signing in: `op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file
-   ~/.ssh/local.conf` for the homelab hosts, `gh auth login` and
-   `pull-projects`, the OpenRouter key in ai-usagebar's config, and the
+   ~/.ssh/local.conf` for the homelab hosts, `gh auth login`, the
+   wallpapers repo cloned into `~/Projects` (the next rebuild links it to
+   `~/Pictures/Wallpapers`), the OpenRouter key in ai-usagebar's config, and the
    Fastmail calendar through Noctalia's settings. Sign-in tests wait for this
    batch: the agent CLIs, the AI usage widget and Claude Desktop, plus
    ai-workflow's `just install` on the real hosts.
