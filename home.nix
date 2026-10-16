@@ -97,6 +97,8 @@ in
           "zsh/conf.d/prompt.zsh"
           "zsh/conf.d/zoxide.zsh"
           "noctalia/config.toml"
+          "noctalia/vscodium.toml"
+          "noctalia/templates/vscodium-output-path.sh"
           "noctalia/assets/profile-picture.jpg"
           "noctalia/assets/profile-picture-circle.svg"
           "btop/btop.conf"
@@ -112,6 +114,7 @@ in
           "git/ignore"
           "git/allowed_signers"
           "voxtype/config.toml"
+          "MangoHud/MangoHud.conf"
         ]
         (name: {
           source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${name}";

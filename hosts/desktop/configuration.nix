@@ -15,6 +15,7 @@
     ../../components/nvidia.nix
     ../../components/gaming.nix
     ../../components/dtu-eduroam.nix
+    ../../components/secure-boot.nix
     ./local/hardware-configuration.nix
   ];
 
