@@ -70,3 +70,5 @@
 [gpg "ssh"]
 	# On PATH from the 1Password app module.
 	program = op-ssh-sign
+	# Lets git log --show-signature verify commits signed with the personal key.
+	allowedSignersFile = ~/.config/git/allowed_signers
