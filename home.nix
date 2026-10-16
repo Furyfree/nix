@@ -110,6 +110,7 @@ in
           "mimeapps.list"
           "git/config"
           "git/ignore"
+          "git/allowed_signers"
         ]
         (name: {
           source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${name}";
