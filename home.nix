@@ -199,6 +199,23 @@ in
       fi
     '';
 
+    # The wallpapers repository lives with the other clones so pull-projects
+    # updates it; link it where Noctalia looks once it is cloned. Runs before
+    # Home Manager creates the user folders, and replaces only an empty folder.
+    wallpapersLink = lib.hm.dag.entryBetween [ "createXdgUserDirectories" ] [ "writeBoundary" ] ''
+      clone="${config.home.homeDirectory}/Projects/wallpapers"
+      link="${config.home.homeDirectory}/Pictures/Wallpapers"
+      if [[ -d $clone && ! -L $link ]]; then
+        if [[ -d $link && -z $(ls -A "$link") ]]; then
+          run rmdir "$link"
+        fi
+        if [[ ! -e $link ]]; then
+          run mkdir -p "$(dirname "$link")"
+          run ln -s "$clone" "$link"
+        fi
+      fi
+    '';
+
     # Agents and gh rewrite their own settings; set only the keys in
     # configs/<tool> and keep everything else. Files Yq cannot parse, such as
     # commented JSON, stay as they are.
