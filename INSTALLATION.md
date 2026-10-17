@@ -38,7 +38,9 @@ on its own disk and gets an entry in the boot menu.
 4. Dictation: `voxtype setup --download --model large-v3-turbo` on the desktop,
    `--model small` elsewhere, then `systemctl --user start voxtype`.
 5. 1Password: sign in, then in Settings → Developer turn on the SSH agent and
-   the CLI integration.
+   the CLI integration. Git signs commits with your SSH key from 1Password; set
+   which one in a file outside the repo:
+   `git config --file ~/.config/git/local user.signingkey "key::ssh-ed25519 ..."`
 6. `op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf`
    for the homelab SSH hosts, and `gh auth login`. Switch this checkout to
    SSH, since the installer cloned it over HTTPS:

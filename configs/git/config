@@ -2,8 +2,6 @@
 	useConfigOnly = true
 	name = Patrick Byrne
 	email = pby.accounts@byrne.dk
-	# The personal key as text, so signing needs no key file; 1Password signs.
-	signingkey = "key::ssh-ed25519 REMOVED-PUBLIC-KEY"
 
 [core]
 	pager = delta
@@ -70,8 +68,6 @@
 [gpg "ssh"]
 	# On PATH from the 1Password app module.
 	program = op-ssh-sign
-	# Lets git log --show-signature verify commits signed with the personal key.
-	allowedSignersFile = ~/.config/git/allowed_signers
 
 # As `git lfs install` writes it, so a project running that changes nothing.
 [filter "lfs"]
@@ -79,3 +75,8 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+
+# Machine-only settings outside this repo, such as user.signingkey:
+#   git config --file ~/.config/git/local user.signingkey "key::ssh-ed25519 ..."
+[include]
+	path = ~/.config/git/local

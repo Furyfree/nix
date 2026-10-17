@@ -119,7 +119,6 @@ in
           "mimeapps.list"
           "git/config"
           "git/ignore"
-          "git/allowed_signers"
           "voxtype/config.toml"
           "MangoHud/MangoHud.conf"
         ]
@@ -191,10 +190,10 @@ in
     # folder here that stops Steam's first-run setup.
     ".steam/steam".source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/Steam";
   }
-  // lib.genAttrs [ "config" "personal.pub" ] (name: {
-    target = ".ssh/${name}";
-    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/ssh/${name}";
-  })
+  // {
+    ".ssh/config".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/ssh/config";
+  }
   // lib.genAttrs [ "launch" "pull-projects" ] (name: {
     target = ".local/bin/${name}";
     source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/bin/${name}";
