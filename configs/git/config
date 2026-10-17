@@ -72,3 +72,10 @@
 	program = op-ssh-sign
 	# Lets git log --show-signature verify commits signed with the personal key.
 	allowedSignersFile = ~/.config/git/allowed_signers
+
+# As `git lfs install` writes it, so a project running that changes nothing.
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

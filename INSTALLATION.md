@@ -40,7 +40,9 @@ on its own disk and gets an entry in the boot menu.
 5. 1Password: sign in, then in Settings → Developer turn on the SSH agent and
    the CLI integration.
 6. `op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf`
-   for the homelab SSH hosts, and `gh auth login`.
+   for the homelab SSH hosts, and `gh auth login`. Switch this checkout to
+   SSH, since the installer cloned it over HTTPS:
+   `git -C ~/Projects/nix remote set-url origin git@github.com:Furyfree/nix.git`
 7. `git clone git@github.com:Furyfree/wallpapers.git ~/Projects/wallpapers`,
    then `sudo systemctl restart home-manager-$USER.service` to link it into
    `~/Pictures/Wallpapers`; `nswitch` skips that when nothing else changed.
@@ -81,9 +83,9 @@ first start, run `noctalia msg templates-apply` once so its theme appears.
   in the welcome dialog.
 - Vesktop: sign in, then Settings → Vencord → Themes → Local Themes → enable
   Noctalia Midnight.
-- VSCodium: install the Noctalia extension, then
-  `noctalia msg templates-apply`. Zed and Zathura: restart after the first
-  palette.
+- VSCodium: `codium-extensions` installs the extensions, including Noctalia's
+  theme; then `noctalia msg templates-apply` and Developer: Reload Window. Zed
+  and Zathura: restart after the first palette.
 - Fastmail calendar, in Noctalia's settings: a CalDAV account with ID
   `fastmail`, your login and `https://caldav.fastmail.com/dav/`, and a
   calendar-only app password saved through its keyring option.
@@ -115,7 +117,9 @@ first start, run `noctalia msg templates-apply` once so its theme appears.
 ### Projects and homelab
 
 - Clone the repositories you work on into `~/Projects` (`gh repo list` shows
-  them); `pull-projects` keeps them updated.
+  them); `pull-projects` keeps them updated. Then run
+  `noctalia msg templates-apply` again so Obsidian vaults among them get the
+  Noctalia snippet.
 - In each project, follow its README (`mise install`, `nix develop`,
   `uv sync` or similar) and run its checks.
 - `ssh` to each host from `~/.ssh/local.conf` and check access and services.
