@@ -236,7 +236,7 @@ x-scheme-handler/claude-cli=claude-code-url-handler.desktop
 x-scheme-handler/jetbrains=jetbrainsd.desktop
 
 [Added Associations]
-x-scheme-handler/t3code=t3code.desktop;com.t3tools.T3Code.desktop;
+x-scheme-handler/t3code=t3code.desktop;
 text/plain=dev.zed.Zed.desktop;
 text/markdown=dev.zed.Zed.desktop;
 text/x-markdown=dev.zed.Zed.desktop;
