@@ -1,10 +1,4 @@
-# Desktop defaults for the Hyprland and Noctalia session.
-# Entries for apps that are not installed yet fall through to the next one.
-# No trailing ; here: apps that set themselves as default (xdg-mime default)
-# rewrite their lines that way, which would otherwise change this file.
 [Default Applications]
-
-# Folders and archives
 inode/directory=org.gnome.Nautilus.desktop
 application/x-7z-compressed=org.gnome.Nautilus.desktop
 application/x-7z-compressed-tar=org.gnome.Nautilus.desktop
@@ -31,22 +25,13 @@ application/x-bzip2-compressed-tar=org.gnome.Nautilus.desktop
 application/vnd.rar=org.gnome.Nautilus.desktop
 application/zstd=org.gnome.Nautilus.desktop
 application/x-zstd-compressed-tar=org.gnome.Nautilus.desktop
-
-
-# Web pages and email links
 text/html=brave-origin.desktop
 application/xhtml+xml=brave-origin.desktop
 x-scheme-handler/http=brave-origin.desktop
 x-scheme-handler/https=brave-origin.desktop
 x-scheme-handler/about=brave-origin.desktop
 x-scheme-handler/unknown=brave-origin.desktop
-
-
-# Mail
 x-scheme-handler/mailto=fastmail.desktop
-
-
-# Images for viewing
 image/apng=org.gnome.Loupe.desktop
 image/bmp=org.gnome.Loupe.desktop
 image/gif=org.gnome.Loupe.desktop
@@ -73,16 +58,10 @@ image/svg+xml-compressed=org.gnome.Loupe.desktop
 image/avif=org.gnome.Loupe.desktop
 image/heic=org.gnome.Loupe.desktop
 image/jxl=org.gnome.Loupe.desktop
-
-
-# Image editor project formats
 image/x-xcf=gimp.desktop
 image/x-compressed-xcf=gimp.desktop
 image/vnd.adobe.photoshop=gimp.desktop
 image/x-psd=gimp.desktop
-
-
-# Video, local audio and playlists
 application/mxf=io.github.celluloid_player.Celluloid.desktop
 application/ogg=io.github.celluloid_player.Celluloid.desktop
 application/vnd.apple.mpegurl=io.github.celluloid_player.Celluloid.desktop
@@ -190,9 +169,6 @@ video/x-nsv=io.github.celluloid_player.Celluloid.desktop
 video/x-ogm+ogg=io.github.celluloid_player.Celluloid.desktop
 video/x-theora=io.github.celluloid_player.Celluloid.desktop
 video/x-theora+ogg=io.github.celluloid_player.Celluloid.desktop
-
-
-# Text, source code, shell scripts and configuration
 text/plain=dev.zed.Zed.desktop
 text/markdown=dev.zed.Zed.desktop
 text/x-markdown=dev.zed.Zed.desktop
@@ -226,9 +202,6 @@ text/x-yaml=dev.zed.Zed.desktop
 application/xml=dev.zed.Zed.desktop
 text/xml=dev.zed.Zed.desktop
 application/x-desktop=dev.zed.Zed.desktop
-
-
-# Word documents and templates
 application/msword=writer.desktop
 application/vnd.ms-word=writer.desktop
 application/vnd.openxmlformats-officedocument.wordprocessingml.document=writer.desktop
@@ -239,9 +212,6 @@ application/vnd.oasis.opendocument.text=writer.desktop
 application/vnd.oasis.opendocument.text-template=writer.desktop
 application/rtf=writer.desktop
 text/rtf=writer.desktop
-
-
-# Spreadsheets and delimited tables
 application/vnd.ms-excel=calc.desktop
 application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=calc.desktop
 application/vnd.openxmlformats-officedocument.spreadsheetml.template=calc.desktop
@@ -250,35 +220,23 @@ application/vnd.oasis.opendocument.spreadsheet=calc.desktop
 application/vnd.oasis.opendocument.spreadsheet-template=calc.desktop
 text/csv=calc.desktop
 text/tab-separated-values=calc.desktop
-
-
-# Presentations
 application/vnd.ms-powerpoint=impress.desktop
 application/vnd.openxmlformats-officedocument.presentationml.presentation=impress.desktop
 application/vnd.openxmlformats-officedocument.presentationml.slideshow=impress.desktop
 application/vnd.openxmlformats-officedocument.presentationml.template=impress.desktop
 application/vnd.oasis.opendocument.presentation=impress.desktop
 application/vnd.oasis.opendocument.presentation-template=impress.desktop
-
-
-# Draw documents
 application/vnd.oasis.opendocument.graphics=draw.desktop
 application/vnd.oasis.opendocument.graphics-template=draw.desktop
-
-
-# PDFs: the Zathura MuPDF plugin supplies this handler.
 application/pdf=org.pwmt.zathura-pdf-mupdf.desktop;brave-origin.desktop
-
-
-# Preserve application-registered URL handlers
 x-scheme-handler/codex=chatgpt.desktop
-x-scheme-handler/t3code=t3code-url-handler.desktop
+x-scheme-handler/t3code=com.t3tools.T3Code.desktop
 x-scheme-handler/discord=vesktop.desktop
 x-scheme-handler/claude-cli=claude-code-url-handler.desktop
 x-scheme-handler/jetbrains=jetbrainsd.desktop
 
 [Added Associations]
-x-scheme-handler/t3code=t3code.desktop;
+x-scheme-handler/t3code=t3code.desktop;com.t3tools.T3Code.desktop;
 text/plain=dev.zed.Zed.desktop;
 text/markdown=dev.zed.Zed.desktop;
 text/x-markdown=dev.zed.Zed.desktop;

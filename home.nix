@@ -114,6 +114,8 @@ in
           "udiskie/config.yml"
           "mise/config.toml"
           "mise/conf.d/linux-tools.toml"
+          # Kept in GLib's own format, without comments: apps that set themselves
+          # as default rewrite the whole file that way.
           "mimeapps.list"
           "git/config"
           "git/ignore"
