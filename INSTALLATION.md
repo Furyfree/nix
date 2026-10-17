@@ -38,12 +38,21 @@ on its own disk and gets an entry in the boot menu.
 4. Dictation: `voxtype setup --download --model large-v3-turbo` on the desktop,
    `--model small` elsewhere, then `systemctl --user start voxtype`.
 5. 1Password: sign in, then in Settings → Developer turn on the SSH agent and
-   the CLI integration. Git signs commits with your SSH key from 1Password; set
-   which one in a file outside the repo:
-   `git config --file ~/.config/git/local user.signingkey "key::ssh-ed25519 ..."`
-6. `op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf`
-   for the homelab SSH hosts, and `gh auth login`. Switch this checkout to
-   SSH, since the installer cloned it over HTTPS:
+   the CLI integration.
+6. SSH keys stay in 1Password; these public halves only tell SSH which key a
+   host gets (GitHub, homelab or personal for everything else), and the
+   document lists the homelab hosts:
+
+   ```bash
+   op item get n6imsp5vfs5nmlt5rmxgs6zdci --fields "label=public key" >~/.ssh/github.pub
+   op item get 3ppqekfxnmjtg2iapnr5d7gewi --fields "label=public key" >~/.ssh/homelab.pub
+   op item get 3psgdyql5u5zlpamsfc4xr7cbu --fields "label=public key" >~/.ssh/personal.pub
+   op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf
+   git config --file ~/.config/git/local user.signingkey ~/.ssh/github.pub
+   ```
+
+   Then `gh auth login`, and switch this checkout to SSH, since the installer
+   cloned it over HTTPS:
    `git -C ~/Projects/nix remote set-url origin git@github.com:Furyfree/nix.git`
 7. `git clone git@github.com:Furyfree/wallpapers.git ~/Projects/wallpapers`,
    then `sudo systemctl restart home-manager-$USER.service` to link it into

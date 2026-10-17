@@ -77,6 +77,6 @@
 	required = true
 
 # Machine-only settings outside this repo, such as user.signingkey:
-#   git config --file ~/.config/git/local user.signingkey "key::ssh-ed25519 ..."
+#   git config --file ~/.config/git/local user.signingkey ~/.ssh/github.pub
 [include]
 	path = ~/.config/git/local
