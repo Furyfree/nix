@@ -6,7 +6,6 @@
       enable = true;
       maxGenerations = 10;
     };
-    loader.efi.canTouchEfiVariables = true;
 
     kernelPackages = pkgs.linuxPackages_latest;
     initrd.systemd.enable = true;
