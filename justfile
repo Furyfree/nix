@@ -34,9 +34,9 @@ check-hyprland:
 lint:
     uv run --locked ruff check scripts tests
     uv run --locked ruff format --check scripts tests
-    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -exec nixfmt --check {} +
+    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path './hosts/*/local/*' -exec nixfmt --check {} +
     statix check
-    deadnix --fail .
+    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path './hosts/*/local/*' -exec deadnix --fail {} +
 
 typecheck:
     uv run --locked basedpyright
@@ -47,7 +47,7 @@ test:
 # Format Python and Nix source files
 format:
     uv run --locked ruff format scripts tests
-    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -exec nixfmt {} +
+    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path './hosts/*/local/*' -exec nixfmt {} +
 
 # Evaluate configurations without building or deploying a system
 eval:

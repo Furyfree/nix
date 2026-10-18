@@ -107,8 +107,11 @@ class ConfigurationTests(unittest.TestCase):
         shutil.copytree(root / "components", destination / "components")
         shutil.copytree(root / "configs", destination / "configs")
         for host in common.HOSTS:
+            # Leave out this machine's own installer-generated data.
             shutil.copytree(
-                root / "hosts" / host, destination / "hosts" / host
+                root / "hosts" / host,
+                destination / "hosts" / host,
+                ignore=shutil.ignore_patterns("local"),
             )
         shutil.copytree(
             root / "hosts/installer", destination / "hosts/installer"
