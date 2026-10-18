@@ -76,14 +76,14 @@ Type=Application
 Name=Windows
 Comment=Start the Windows VM and connect with RDP
 Exec=uwsm-app -- windows-vm launch
-Icon=windows
+Icon=distributor-logo-windows
 Terminal=false
 Categories=System;Virtualization;
 EOF
   [[ -e $HOME/Windows ]] || ln -s "$shared" "$HOME/Windows"
 
   systemctl start "$WINDOWS_SERVICE"
-  echo "Windows is installing. Follow it at http://127.0.0.1:8006 with your Windows username and password."
+  echo "Windows is installing. Follow it at http://localhost:8006 with your Windows username and password."
   echo "Afterwards, open Windows from the launcher or run: windows-vm launch"
 }
 
@@ -278,14 +278,14 @@ cmd_launch() {
     echo "Windows is not ready for Remote Desktop yet (attempt $attempt of 30)."
     sleep 10
   done
-  die "Windows did not accept Remote Desktop; check http://127.0.0.1:8006."
+  die "Windows did not accept Remote Desktop; check http://localhost:8006."
 }
 
 cmd_status() {
   [[ -e $settings ]] || die "The Windows VM is not installed; run windows-vm install."
   if systemctl is-active --quiet "$WINDOWS_SERVICE"; then
     gum style --border normal --padding "1 2" "Windows VM: running" "" \
-      "Web console: http://127.0.0.1:8006" "Connect:     windows-vm launch" \
+      "Web console: http://localhost:8006" "Connect:     windows-vm launch" \
       "Stop:        windows-vm stop"
   else
     echo "Windows VM: stopped. Start it with: windows-vm launch"
