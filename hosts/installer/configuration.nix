@@ -67,7 +67,12 @@ in
     fi
   '';
 
-  services.openssh.enable = false;
+  # Start SSH at boot for remote inspection; `passwd` on screen enables login.
+  services.openssh = {
+    enable = true;
+    settings.PermitRootLogin = "yes";
+  };
+  systemd.services.sshd.wantedBy = lib.mkForce [ "multi-user.target" ];
 
   environment.etc."nixos-config".source = lib.cleanSourceWith {
     src = self.outPath;
