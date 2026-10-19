@@ -65,6 +65,10 @@ on its own disk and gets an entry in the boot menu.
 
 Noctalia writes theme files when an app's config folder exists; after an app's
 first start, run `noctalia msg templates-apply` once so its theme appears.
+Noctalia downloads its plugins and theme templates only when it starts; if it
+started before the network was up, bar plugins and app themes such as
+Obsidian's are missing. Run `systemctl --user restart noctalia`, then
+`noctalia msg templates-apply`.
 
 ### Browser and web apps
 
@@ -100,6 +104,12 @@ first start, run `noctalia msg templates-apply` once so its theme appears.
 - Fastmail calendar, in Noctalia's settings: a CalDAV account with ID
   `fastmail`, your login and `https://caldav.fastmail.com/dav/`, and a
   calendar-only app password saved through its keyring option.
+- AirPods: pair them in Noctalia's Bluetooth panel. If LibrePods shows their
+  battery but they are missing from the audio outputs, only the battery link
+  is up. `bluetoothctl devices Connected` shows their address; then
+  `bluetoothctl trust <address>` and `bluetoothctl connect <address>`. If that
+  fails, `bluetoothctl remove <address>`, open the case, hold its button until
+  the light flashes white, and pair them again.
 - Printer: the Epson ET-5800 shows up in print dialogs by itself. To keep it,
   add it at <http://localhost:631> → Administration → Add Printer with IPP
   Everywhere. Scan with Simple Scan.
