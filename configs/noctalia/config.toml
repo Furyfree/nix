@@ -160,6 +160,9 @@ variant = "destructive"
 [shell.launcher]
 auto_paste = "off"
 categories = false
+default_view = "all"
+layout = "simple"
+search_position = "top"
 
 [shell.panel]
 control_center_placement = "floating"
