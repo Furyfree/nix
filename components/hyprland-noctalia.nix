@@ -19,24 +19,23 @@ let
     exec ${lib.getExe config.programs.noctalia.package} "$@"
   '';
   # Niri-style workspace overview, built against the system's Hyprland as the
-  # plugin's own flake does. This commit is the one HyprPM built for 0.56.2 on
-  # Fedora; bump it if a Hyprland update stops it compiling.
+  # plugin's own flake does. Bump it if a Hyprland update stops it compiling.
   scrolloverview = pkgs.hyprlandPlugins.mkHyprlandPlugin {
     hyprland = config.programs.hyprland.package;
     pluginName = "scrolloverview";
-    version = "0-unstable-2026-09-07";
+    version = "0-unstable-2026-10-11";
     src = pkgs.fetchFromGitHub {
       owner = "yayuuu";
       repo = "hyprland-scroll-overview";
-      rev = "5e96ae20ec73c320248bcf3ff68b330bc1ed4152";
-      hash = "sha256-clDeTM5itsJPvqpbEkbWUmuPROsz2+YUnTpqsjQDMqU=";
+      rev = "7ff22457dc016239eff1b19c3ea57de93404b5c9";
+      hash = "sha256-TXr37VVVFd6OlWj3FSE631y4w84aXHD9demAvi9uqcI=";
     };
     buildInputs = [ pkgs.lua5_4 ];
     enableParallelBuilding = true;
     dontUseCmakeConfigure = true;
     buildPhase = ''
       runHook preBuild
-      export SCROLLOVERVIEW_BUILD_VERSION=5e96ae2
+      export SCROLLOVERVIEW_BUILD_VERSION=7ff2245
       make all
       runHook postBuild
     '';

@@ -8,11 +8,11 @@
 let
   claude-desktop = pkgs.stdenv.mkDerivation (finalAttrs: {
     pname = "claude-desktop";
-    version = "2.42304.0";
+    version = "3.1623.0";
 
     src = pkgs.fetchurl {
       url = "https://downloads.claude.ai/claude-desktop/apt/stable/pool/main/c/claude-desktop/claude-desktop_${finalAttrs.version}_amd64.deb";
-      hash = "sha256-dM0szCnSQWUUTkVcvIcsbMKiSiY7g+c0IOlfiRZtSqQ=";
+      hash = "sha256-054dmlcPHlF/FYR59aHZA7mnTR7z8nk2IALcrTdeM88=";
     };
 
     nativeBuildInputs = with pkgs; [
