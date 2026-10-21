@@ -302,9 +302,18 @@ widget_order = [
     "lockscreen-login-box@DP-3",
     "lockscreen-login-box@DP-4",
     "lockscreen-login-box@eDP-1",
-    "minimal-date-",
-    "minimal-clock-",
-    "minimal-avatar-",
+    "minimal-date@HDMI-A-1",
+    "minimal-clock@HDMI-A-1",
+    "minimal-avatar@HDMI-A-1",
+    "minimal-date@DP-3",
+    "minimal-clock@DP-3",
+    "minimal-avatar@DP-3",
+    "minimal-date@DP-4",
+    "minimal-clock@DP-4",
+    "minimal-avatar@DP-4",
+    "minimal-date@eDP-1",
+    "minimal-clock@eDP-1",
+    "minimal-avatar@eDP-1",
 ]
 
 [lockscreen_widgets.grid]
@@ -315,6 +324,7 @@ visible = false
 # Noctalia gives each monitor its own login box, named after the output; it
 # ignores outputs that are not connected. Qotom: HDMI-A-1; desktop: DP-3 and
 # DP-4; laptop: eDP-1.
+# No show-password button, so the field and the Caps Lock notice both center.
 [lockscreen_widgets.widget."lockscreen-login-box@HDMI-A-1"]
 type = "login_box"
 output = "HDMI-A-1"
@@ -337,6 +347,7 @@ center_password_text = true
 show_caps_lock = true
 show_keyboard_layout = false
 show_login_button = false
+show_password_reveal = false
 show_media = false
 show_session_buttons = false
 show_unlock_hint = false
@@ -364,6 +375,7 @@ center_password_text = true
 show_caps_lock = true
 show_keyboard_layout = false
 show_login_button = false
+show_password_reveal = false
 show_media = false
 show_session_buttons = false
 show_unlock_hint = false
@@ -391,6 +403,7 @@ center_password_text = true
 show_caps_lock = true
 show_keyboard_layout = false
 show_login_button = false
+show_password_reveal = false
 show_media = false
 show_session_buttons = false
 show_unlock_hint = false
@@ -418,14 +431,19 @@ center_password_text = true
 show_caps_lock = true
 show_keyboard_layout = false
 show_login_button = false
+show_password_reveal = false
 show_media = false
 show_session_buttons = false
 show_unlock_hint = false
 show_weather = false
 
-[lockscreen_widgets.widget."minimal-date-"]
+# Date, clock and avatar on every monitor; a widget without an output shows
+# on one monitor only. The avatar stays clear of the Caps Lock notice, which
+# shows just above the login box. Noctalia's service runs from the user's
+# home; sticker paths do not expand ~.
+[lockscreen_widgets.widget."minimal-date@HDMI-A-1"]
 type = "clock"
-output = ""
+output = "HDMI-A-1"
 cx = 960.0
 cy = 240.0
 box_width = 440.0
@@ -434,7 +452,7 @@ placement_width = 1920.0
 placement_height = 1080.0
 rotation = 0.0
 
-[lockscreen_widgets.widget."minimal-date-".settings]
+[lockscreen_widgets.widget."minimal-date@HDMI-A-1".settings]
 clock_style = "digital"
 format = "{:%A, %d %B}"
 font_family = "Inter"
@@ -444,9 +462,9 @@ background_padding = 0.0
 center_text = true
 shadow = true
 
-[lockscreen_widgets.widget."minimal-clock-"]
+[lockscreen_widgets.widget."minimal-clock@HDMI-A-1"]
 type = "clock"
-output = ""
+output = "HDMI-A-1"
 cx = 960.0
 cy = 330.0
 box_width = 460.0
@@ -455,7 +473,7 @@ placement_width = 1920.0
 placement_height = 1080.0
 rotation = 0.0
 
-[lockscreen_widgets.widget."minimal-clock-".settings]
+[lockscreen_widgets.widget."minimal-clock@HDMI-A-1".settings]
 clock_style = "digital"
 format = "{:%H:%M}"
 font_family = "Inter"
@@ -465,19 +483,195 @@ background_padding = 0.0
 center_text = true
 shadow = true
 
-[lockscreen_widgets.widget."minimal-avatar-"]
+[lockscreen_widgets.widget."minimal-avatar@HDMI-A-1"]
 type = "sticker"
-output = ""
+output = "HDMI-A-1"
 cx = 960.0
-cy = 654.0
+cy = 612.0
 box_width = 72.0
 box_height = 72.0
 placement_width = 1920.0
 placement_height = 1080.0
 rotation = 0.0
 
-[lockscreen_widgets.widget."minimal-avatar-".settings]
-# Noctalia's service runs from the user's home; sticker paths do not expand ~.
+[lockscreen_widgets.widget."minimal-avatar@HDMI-A-1".settings]
+image_path = ".config/noctalia/assets/profile-picture-circle.svg"
+opacity = 1.0
+background = false
+background_padding = 0.0
+
+[lockscreen_widgets.widget."minimal-date@DP-3"]
+type = "clock"
+output = "DP-3"
+cx = 960.0
+cy = 240.0
+box_width = 440.0
+box_height = 38.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-date@DP-3".settings]
+clock_style = "digital"
+format = "{:%A, %d %B}"
+font_family = "Inter"
+color = "#F5F5F7"
+background = false
+background_padding = 0.0
+center_text = true
+shadow = true
+
+[lockscreen_widgets.widget."minimal-clock@DP-3"]
+type = "clock"
+output = "DP-3"
+cx = 960.0
+cy = 330.0
+box_width = 460.0
+box_height = 140.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-clock@DP-3".settings]
+clock_style = "digital"
+format = "{:%H:%M}"
+font_family = "Inter"
+color = "#F5F5F7"
+background = false
+background_padding = 0.0
+center_text = true
+shadow = true
+
+[lockscreen_widgets.widget."minimal-avatar@DP-3"]
+type = "sticker"
+output = "DP-3"
+cx = 960.0
+cy = 612.0
+box_width = 72.0
+box_height = 72.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-avatar@DP-3".settings]
+image_path = ".config/noctalia/assets/profile-picture-circle.svg"
+opacity = 1.0
+background = false
+background_padding = 0.0
+
+[lockscreen_widgets.widget."minimal-date@DP-4"]
+type = "clock"
+output = "DP-4"
+cx = 960.0
+cy = 240.0
+box_width = 440.0
+box_height = 38.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-date@DP-4".settings]
+clock_style = "digital"
+format = "{:%A, %d %B}"
+font_family = "Inter"
+color = "#F5F5F7"
+background = false
+background_padding = 0.0
+center_text = true
+shadow = true
+
+[lockscreen_widgets.widget."minimal-clock@DP-4"]
+type = "clock"
+output = "DP-4"
+cx = 960.0
+cy = 330.0
+box_width = 460.0
+box_height = 140.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-clock@DP-4".settings]
+clock_style = "digital"
+format = "{:%H:%M}"
+font_family = "Inter"
+color = "#F5F5F7"
+background = false
+background_padding = 0.0
+center_text = true
+shadow = true
+
+[lockscreen_widgets.widget."minimal-avatar@DP-4"]
+type = "sticker"
+output = "DP-4"
+cx = 960.0
+cy = 612.0
+box_width = 72.0
+box_height = 72.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-avatar@DP-4".settings]
+image_path = ".config/noctalia/assets/profile-picture-circle.svg"
+opacity = 1.0
+background = false
+background_padding = 0.0
+
+[lockscreen_widgets.widget."minimal-date@eDP-1"]
+type = "clock"
+output = "eDP-1"
+cx = 960.0
+cy = 240.0
+box_width = 440.0
+box_height = 38.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-date@eDP-1".settings]
+clock_style = "digital"
+format = "{:%A, %d %B}"
+font_family = "Inter"
+color = "#F5F5F7"
+background = false
+background_padding = 0.0
+center_text = true
+shadow = true
+
+[lockscreen_widgets.widget."minimal-clock@eDP-1"]
+type = "clock"
+output = "eDP-1"
+cx = 960.0
+cy = 330.0
+box_width = 460.0
+box_height = 140.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-clock@eDP-1".settings]
+clock_style = "digital"
+format = "{:%H:%M}"
+font_family = "Inter"
+color = "#F5F5F7"
+background = false
+background_padding = 0.0
+center_text = true
+shadow = true
+
+[lockscreen_widgets.widget."minimal-avatar@eDP-1"]
+type = "sticker"
+output = "eDP-1"
+cx = 960.0
+cy = 612.0
+box_width = 72.0
+box_height = 72.0
+placement_width = 1920.0
+placement_height = 1080.0
+rotation = 0.0
+
+[lockscreen_widgets.widget."minimal-avatar@eDP-1".settings]
 image_path = ".config/noctalia/assets/profile-picture-circle.svg"
 opacity = 1.0
 background = false
