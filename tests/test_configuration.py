@@ -116,7 +116,12 @@ class ConfigurationTests(unittest.TestCase):
         shutil.copytree(
             root / "hosts/installer", destination / "hosts/installer"
         )
-        shutil.copytree(root / "scripts", destination / "scripts")
+        # Other test workers may be writing bytecode there during the copy.
+        shutil.copytree(
+            root / "scripts",
+            destination / "scripts",
+            ignore=shutil.ignore_patterns("__pycache__"),
+        )
         (destination / ".git").mkdir()
         (destination / ".git/HEAD").write_text("fixture Git metadata\n")
 
