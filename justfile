@@ -103,10 +103,6 @@ clean-iso:
         exit 1
     fi
 
-# Globally delete unused Nix store paths without deleting saved generations
-gc:
-    nix-collect-garbage
-
 # Preview the shared installer wizard without making changes
 wizard:
     uv run --locked python scripts/install.py --dry-run

@@ -59,6 +59,16 @@ if command -v lazygit >/dev/null 2>&1; then
   alias lg='lazygit'
 fi
 
+if command -v nix-workstation >/dev/null 2>&1; then
+  alias nswitch='nix-workstation switch'
+  alias nupdate='nix-workstation update'
+  alias ninfo='nix-workstation info'
+  alias nclean='nix-workstation clean'
+  alias nsearch='nix-workstation search'
+  alias mup='nix-workstation mise'
+  alias fup='nix-workstation firmware'
+fi
+
 # Nixpkgs' 7-Zip only installs 7zz; Fedora's is 7z.
 if ! command -v 7z >/dev/null 2>&1 && command -v 7zz >/dev/null 2>&1; then
   alias 7z='7zz'

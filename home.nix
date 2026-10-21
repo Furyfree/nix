@@ -194,7 +194,7 @@ in
     ".ssh/config".source =
       config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/ssh/config";
   }
-  // lib.genAttrs [ "launch" "pull-projects" ] (name: {
+  // lib.genAttrs [ "launch" "nix-workstation" "pull-projects" ] (name: {
     target = ".local/bin/${name}";
     source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/bin/${name}";
   });

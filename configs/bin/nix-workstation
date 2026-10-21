@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+# Rebuild, update and maintain this workstation. aliases.zsh adds nswitch,
+# nupdate, ninfo, nclean, nsearch, mup and fup.
+set -euo pipefail
+
+# path: includes the ignored machine data in hosts/<host>/local/.
+export NH_FLAKE=${NH_FLAKE:-path:$HOME/Projects/nix}
+repo=${NH_FLAKE#path:}
+
+help() {
+  case ${1-} in
+    switch)
+      cat <<'EOF'
+usage: nix-workstation switch   (alias: nswitch)
+
+Build the system and show the package changes, then ask before switching.
+A yes takes a Snapper pre snapshot, switches and takes the post snapshot.
+A failed build or a no changes nothing and leaves no snapshots.
+EOF
+      ;;
+    update)
+      cat <<'EOF'
+usage: nix-workstation update [INPUT...]   (alias: nupdate)
+
+Update all flake inputs, or only the named ones (nixpkgs, home-manager), and
+show the flake.lock diff. Then run just check and switch. If a step fails or
+you answer no, flake.lock stays updated and the undo command is printed.
+EOF
+      ;;
+    info)
+      cat <<'EOF'
+usage: nix-workstation info   (alias: ninfo)
+
+List system generations with build dates, versions and sizes (nh os info).
+EOF
+      ;;
+    clean)
+      cat <<'EOF'
+usage: nix-workstation clean   (alias: nclean)
+
+Remove old generations and unused store paths. Keeps the newest 10, the boot
+menu's entries, and project build roots; lists what goes and asks first
+(nh clean all --no-gcroots --keep 10 --ask).
+EOF
+      ;;
+    search)
+      cat <<'EOF'
+usage: nix-workstation search [packages|options|prs|issues] QUERY...   (alias: nsearch)
+
+Search nixpkgs packages, NixOS and Home Manager options, or nixpkgs pull
+requests and issues (nh search). nh search --help lists its options.
+EOF
+      ;;
+    mise)
+      cat <<'EOF'
+usage: nix-workstation mise   (alias: mup)
+
+Upgrade the tools Mise manages (mise upgrade).
+EOF
+      ;;
+    firmware)
+      cat <<'EOF'
+usage: nix-workstation firmware   (alias: fup)
+
+Refresh the firmware list and install updates; fwupdmgr asks before
+flashing (fwupdmgr refresh --force, then fwupdmgr update).
+EOF
+      ;;
+    *)
+      cat <<'EOF'
+usage: nix-workstation COMMAND [ARGS...]
+
+Commands (alias):
+  switch (nswitch)             build, show changes, ask, then switch between Snapper snapshots
+  update (nupdate) [INPUT...]  update flake inputs, run just check, then switch
+  info (ninfo)                 list system generations
+  clean (nclean)               remove old generations; keeps the boot menu's 10
+  search (nsearch) QUERY...    search packages and options
+  mise (mup)                   upgrade Mise tools
+  firmware (fup)               install firmware updates
+
+Run nix-workstation COMMAND --help for details.
+EOF
+      ;;
+  esac
+}
+
+usage() {
+  help "$@" >&2
+  exit 2
+}
+
+die() {
+  printf 'nix-workstation: %s\n' "$*" >&2
+  exit 1
+}
+
+# A failed or declined build leaves no snapshots behind.
+cmd_switch() {
+  local answer description pre result=0
+  nh os build
+  read -rp 'Switch? [y/N] ' answer
+  [[ $answer == [yY]* ]] || die 'not switched'
+
+  description="nswitch $(git -C "$repo" describe --always --dirty 2>/dev/null || true)"
+  pre=$(sudo snapper -c root create --type pre --cleanup-algorithm number --print-number --description "$description")
+  # The build above is reused; its diff was already shown.
+  nh os switch --diff never || result=$?
+  if ! sudo snapper -c root create --type post --pre-number "$pre" --cleanup-algorithm number --description "$description"; then
+    printf 'nix-workstation: post snapshot failed; pre snapshot is #%s\n' "$pre" >&2
+    ((result)) || result=1
+  fi
+  return "$result"
+}
+
+# An updated but unapplied lock stays for debugging.
+cmd_update() {
+  nix flake update "$@" --flake "$NH_FLAKE"
+  if git -C "$repo" diff --quiet -- flake.lock; then
+    printf 'flake.lock is unchanged.\n'
+  else
+    git -C "$repo" --no-pager diff -- flake.lock
+    trap '(($? == 0)) || printf "Undo: git -C %q restore flake.lock\n" "$repo" >&2' EXIT
+  fi
+  (cd -- "$repo" && nix develop path:. -c just check)
+  cmd_switch
+}
+
+command=${1-}
+(($#)) && shift
+for arg in "$command" "$@"; do
+  if [[ $arg == -h || $arg == --help ]]; then
+    help "$command"
+    exit
+  fi
+done
+
+[[ $NH_FLAKE == path:* ]] || die 'NH_FLAKE must be a path: flake'
+case $command in
+  switch) (($# == 0)) || usage switch; cmd_switch ;;
+  update) cmd_update "$@" ;;
+  info) nh os info "$@" ;;
+  clean) nh clean all --no-gcroots --keep 10 --ask "$@" ;;
+  search) nh search "$@" ;;
+  mise) (($# == 0)) || usage mise; mise upgrade ;;
+  # --force: a plain refresh fails when the metadata is recent.
+  firmware) (($# == 0)) || usage firmware; fwupdmgr refresh --force && fwupdmgr update ;;
+  *) usage ;;
+esac
