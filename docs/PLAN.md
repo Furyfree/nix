@@ -36,9 +36,12 @@ Open work only; finished work lives in Git.
 
 ## Later platforms
 
-- macOS: standalone Home Manager for the shared configs; Swift mac-setup owns
-  native apps and settings. Confirm architecture, user paths and installer
-  before enabling.
+- macOS: standalone Home Manager for the shared configs (`home/darwin.nix`,
+  flake output `homeConfigurations.macos` for Apple silicon); Swift mac-setup
+  owns native apps and settings. It evaluates but has not run on a Mac yet.
+  Still open: a macOS branch in `nix-workstation` (nh home, no Snapper),
+  fastfetch's Lua rows (the Linux override relies on LD_LIBRARY_PATH), and
+  matching mac-setup's app list to INSTALLATION.md.
 - WSL: NixOS-WSL with integrated Home Manager and selected Linux tools.
   win-setup owns Windows setup and apps; test editor server compatibility and
   keep Terminal profiles and Zed local values in backed-up Windows copies.

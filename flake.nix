@@ -82,5 +82,17 @@
       // mkHost "desktop"
       // mkHost "laptop"
       // mkHost "nixos-test";
+
+      # Standalone Home Manager on an Apple silicon Mac. Like the NixOS hosts, it
+      # builds only once the ignored local/user.nix names the account.
+      homeConfigurations = nixpkgs.lib.optionalAttrs (builtins.pathExists ./hosts/macos/local/user.nix) {
+        macos = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.aarch64-darwin;
+          modules = [
+            ./hosts/macos/home.nix
+            ./hosts/macos/local/user.nix
+          ];
+        };
+      };
     };
 }

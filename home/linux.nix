@@ -1,4 +1,5 @@
-# Shared Home Manager settings, added one tool at a time.
+# Home Manager settings for the NixOS desktop: Hyprland, Noctalia, GTK and Qt,
+# launcher entries and Linux-only tools. Builds on common.nix.
 {
   config,
   lib,
@@ -7,6 +8,7 @@
 }:
 
 let
+  link = path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
   # A copy of a package's launcher entry, hidden from app menus but still
   # usable for file associations.
   hidden =
@@ -16,8 +18,9 @@ let
     '';
 in
 {
+  imports = [ ./common.nix ];
+
   xdg = {
-    enable = true;
     dataFile =
       lib.mapAttrs'
         (name: package: lib.nameValuePair "applications/${name}" { source = hidden package name; })
@@ -37,7 +40,7 @@ in
         }
       // lib.genAttrs [ "chatgpt" "fotmob" "google-maps" ] (name: {
         target = "icons/hicolor/512x512/apps/webapp-${name}.png";
-        source = ./configs/icons/webapp-${name}.png;
+        source = ../configs/icons/webapp-${name}.png;
       });
     desktopEntries = {
       chatgpt = {
@@ -83,60 +86,25 @@ in
           "hypr/conf.d/keybinds.lua"
           "uwsm/env"
           "uwsm/env-hyprland"
-          "ghostty/config"
-          "ghostty/themes/charcoal-blue"
-          "sheldon/plugins.toml"
-          "zsh/.zprofile"
-          "zsh/.zshrc"
-          "zsh/conf.d/aliases.zsh"
-          "zsh/conf.d/completion.zsh"
-          "zsh/conf.d/env.zsh"
-          "zsh/conf.d/functions.zsh"
-          "zsh/conf.d/fzf.zsh"
-          "zsh/conf.d/history.zsh"
-          "zsh/conf.d/keybindings.zsh"
-          "zsh/conf.d/mise.zsh"
           "zsh/conf.d/noctalia.zsh"
-          "zsh/conf.d/options.zsh"
-          "zsh/conf.d/plugins.zsh"
-          "zsh/conf.d/prompt.zsh"
-          "zsh/conf.d/zoxide.zsh"
           "noctalia/config.toml"
           "noctalia/vscodium.toml"
           "noctalia/templates/vscodium-output-path.sh"
           "noctalia/assets/profile-picture.jpg"
           "noctalia/assets/profile-picture-circle.svg"
-          "btop/btop.conf"
-          "fastfetch/config.jsonc"
-          "fastfetch/ff.lua"
-          "fastfetch/ff.sh"
           "zathura/zathurarc"
           "udiskie/config.yml"
-          "mise/config.toml"
           "mise/conf.d/linux-tools.toml"
           # Kept in GLib's own format, without comments: apps that set themselves
           # as default rewrite the whole file that way.
           "mimeapps.list"
-          "git/config"
-          "git/ignore"
           "voxtype/config.toml"
           "MangoHud/MangoHud.conf"
         ]
-        (name: {
-          source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${name}";
-        })
+        (name: { source = link name; })
       // {
-        # The whole folder, so vim.pack writes its lock file into the checkout.
-        "nvim".source =
-          config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/nvim";
-        "1Password/ssh/agent.toml".source =
-          config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/1password/ssh/agent.toml";
-        "starship.toml".source =
-          config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/starship/starship.toml";
-        "gtk-3.0/settings.ini".source =
-          config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/gtk/gtk-3.0/settings.ini";
-        "gtk-4.0/settings.ini".source =
-          config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/gtk/gtk-4.0/settings.ini";
+        "gtk-3.0/settings.ini".source = link "gtk/gtk-3.0/settings.ini";
+        "gtk-4.0/settings.ini".source = link "gtk/gtk-4.0/settings.ini";
         # File manager sidebar; bookmarks need absolute paths.
         "gtk-3.0/bookmarks".text =
           lib.concatMapStrings (path: "file://${config.home.homeDirectory}/${path} ${baseNameOf path}\n")
@@ -163,40 +131,21 @@ in
           style=Fusion
         '';
       })
-      //
-        lib.mapAttrs
-          (_: name: {
-            source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/vscodium/${name}";
-          })
-          {
-            "VSCodium/product.json" = "product.json";
-            "VSCodium/User/settings.json" = "settings.json";
-            "VSCodium/User/keybindings.json" = "keybindings.json";
-          };
-  };
-
-  # Zed rewrites its settings for model choices; merge the repo values into
-  # its own file on activation instead of linking it.
-  programs.zed-editor = {
-    enable = true;
-    userSettings = lib.importJSON ./configs/zed/settings.json;
-    userKeymaps = lib.importJSON ./configs/zed/keymap.json;
+      // lib.mapAttrs (_: name: { source = link "vscodium/${name}"; }) {
+        "VSCodium/product.json" = "product.json";
+        "VSCodium/User/settings.json" = "settings.json";
+        "VSCodium/User/keybindings.json" = "keybindings.json";
+      };
   };
 
   home.file = {
-    ".zshenv".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/zsh/.zshenv";
     # Steam's own link, made before Noctalia's Steam template can create a real
     # folder here that stops Steam's first-run setup.
     ".steam/steam".source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/Steam";
   }
-  // {
-    ".ssh/config".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/ssh/config";
-  }
-  // lib.genAttrs [ "launch" "nix-workstation" "pull-projects" ] (name: {
+  // lib.genAttrs [ "launch" "nix-workstation" ] (name: {
     target = ".local/bin/${name}";
-    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/bin/${name}";
+    source = link "bin/${name}";
   });
 
   home.activation = {
@@ -224,32 +173,6 @@ in
           run ln -s "$clone" "$link"
         fi
       fi
-    '';
-
-    # Agents and gh rewrite their own settings; set only the keys in
-    # configs/<tool> and keep everything else. Files Yq cannot parse, such as
-    # commented JSON, stay as they are.
-    toolSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      merge() {
-        local target=$1 patch=$2 format=$3 merged
-        # Yq reads an empty file as nothing, so start those from the patch too.
-        if [[ ! -s $target ]]; then
-          run install -D -m 0600 "$patch" "$target"
-        elif merged=$(${lib.getExe pkgs.yq-go} ea -p "$format" -o "$format" \
-          'select(fi == 0) * select(fi == 1)' "$target" "$patch"); then
-          # Rewrite in place to keep the file's owner and mode.
-          [[ -v DRY_RUN ]] || printf '%s\n' "$merged" >"$target"
-        else
-          warnEcho "Skipping $target: Yq cannot merge it."
-        fi
-      }
-      merge ${config.home.homeDirectory}/.claude/settings.json ${./configs/claude/settings.json} json
-      merge ${config.home.homeDirectory}/.codex/config.toml ${./configs/codex/config.toml} toml
-      merge ${config.home.homeDirectory}/.grok/config.toml ${./configs/grok/config.toml} toml
-      merge ${config.xdg.configHome}/opencode/opencode.jsonc ${./configs/opencode/opencode.json} json
-      merge ${config.home.homeDirectory}/.pi/agent/settings.json ${./configs/pi/settings.json} json
-      merge ${config.xdg.configHome}/ai-usagebar/config.toml ${./configs/ai-usagebar/config.toml} toml
-      merge ${config.xdg.configHome}/gh/config.yml ${./configs/gh/config.yml} yaml
     '';
   };
 

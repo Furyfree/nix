@@ -1,5 +1,9 @@
-# Future standalone Home Manager entry point for the user on macOS.
-# Select shared files from ../../configs/ and map them to macOS user destinations here.
-# Use the existing Nix installation for Home Manager and project flakes.
-# Swift mac-setup owns native applications and macOS system settings.
-_: { }
+# Standalone Home Manager configuration for the user on macOS. The ignored
+# ./local/user.nix sets home.username (INSTALLATION.md).
+_:
+
+{
+  imports = [ ../../home/darwin.nix ];
+
+  home.stateVersion = "26.11";
+}

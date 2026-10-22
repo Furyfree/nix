@@ -33,36 +33,11 @@ in
     };
   };
 
-  environment.systemPackages = with pkgs; [
-    starship
-    fzf
-    zoxide
-    gh
-    wl-clipboard
-    sheldon
-    bat
-    eza
-    yazi
-    fd
-    ripgrep
+  # The shared list in home/packages.nix, plus the Lua-enabled fastfetch and
+  # the Wayland clipboard.
+  environment.systemPackages = [
     fastfetch
-    tealdeer
-    btop
-    just
-    lazygit
-    yq-go
-    file
-    zip
-    unzip
-    _7zz
-    unrar-free
-    poppler-utils
-    imagemagick
-    yt-dlp
-    typst
-    duf
-    tokei
-    nmap
-    gitleaks
-  ];
+    pkgs.wl-clipboard
+  ]
+  ++ import ../home/packages.nix pkgs;
 }

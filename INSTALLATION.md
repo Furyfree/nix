@@ -152,3 +152,48 @@ Obsidian's are missing. Run `systemctl --user restart noctalia`, then
 - Wi-Fi after boot, eduroam at DTU, AirPods with LibrePods.
 - Printing and scanning on the Epson ET-5800.
 - Desktop: Windows boots from the menu and its anti-cheat games run.
+
+## macOS
+
+macOS uses standalone Home Manager for the shared configs; mac-setup installs
+the apps and system settings. Not yet tested on a Mac.
+
+### Before Home Manager
+
+These come from outside this repository; Home Manager expects them in place.
+
+- Xcode Command Line Tools: `xcode-select --install`. Git for the first clone,
+  and the C compiler Mise and Neovim's tree-sitter parsers build with.
+- Nix with flakes enabled: the multi-user installer from nixos.org, then
+  `experimental-features = nix-command flakes` in `/etc/nix/nix.conf`.
+- From mac-setup:
+  - 1Password, with Settings → Developer → Use the SSH agent and Integrate
+    with 1Password CLI turned on. Home Manager links its agent socket to
+    `~/.1password/agent.sock` and its Git signer to `~/.local/bin/op-ssh-sign`.
+  - 1Password CLI (`op`), for the SSH host list in `configs/ssh/config`.
+  - Ghostty, Zed and VSCodium. Home Manager links or merges their settings
+    but does not install the apps.
+  - JetBrainsMono Nerd Font, which the Ghostty config uses.
+
+Home Manager installs the command-line tools: the shared list in
+`home/packages.nix`, plus Git, Git LFS, Neovim, nh, Mise, tree-sitter, nixd,
+clang-tools and fastfetch from `home/darwin.nix`.
+
+### Set up
+
+1. Clone over HTTPS, since the SSH keys come later from 1Password:
+   `git clone https://github.com/Furyfree/nix ~/Projects/nix`.
+2. Name the account in the ignored `~/Projects/nix/hosts/macos/local/user.nix`:
+
+   ```nix
+   { home.username = "your-macos-username"; }
+   ```
+
+3. Switch for the first time, keeping existing dotfiles as `*.backup`:
+   `nix run home-manager/master -- switch -b backup --flake path:$HOME/Projects/nix#macos`.
+4. Open a new terminal, then `mise install`, and fetch the SSH files as on
+   Linux (see the comments in `configs/ssh/config`).
+
+Later switches: `home-manager switch --flake path:$HOME/Projects/nix#macos`
+(or `nh home switch -c macos`). The `nix-workstation` aliases are Linux-only
+for now.
