@@ -64,7 +64,6 @@ in
 
   home.file = {
     ".zshenv".source = link "zsh/.zshenv";
-    ".ssh/config".source = link "ssh/config";
     ".local/bin/pull-projects".source = link "bin/pull-projects";
   };
 

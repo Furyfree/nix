@@ -40,8 +40,9 @@ on its own disk and gets an entry in the boot menu.
 5. 1Password: sign in, then in Settings → Developer turn on the SSH agent and
    the CLI integration.
 6. SSH keys stay in 1Password; these public halves only tell SSH which key a
-   host gets, and the profile's private document lists its hosts and the key
-   for everything other than GitHub. Personal machines:
+   host gets, and the profile's private document lists its hosts. The SSH
+   config comes from `configs/ssh/personal.conf` or `work.conf`, by the host's
+   profile. Personal machines:
 
    ```bash
    op item get n6imsp5vfs5nmlt5rmxgs6zdci --fields "label=public key" >~/.ssh/github.pub
