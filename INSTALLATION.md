@@ -215,7 +215,9 @@ Home Manager expects these in place; mac-setup provides all but the first two.
    `nix run home-manager/master -- switch -b backup --flake path:$HOME/Projects/nix#macos-personal`.
 4. Open a new terminal, then `mise install`, and fetch the SSH files for this
    Mac's profile as in First boot step 6. On the work Mac, once SSH to the
-   work hosts works through 1Password, remove the old `~/.ssh/id_ed25519`.
+   work hosts works through 1Password, remove the old `~/.ssh/id_ed25519`,
+   and keep work-only shell settings in `~/.config/zsh/work.zsh`, which
+   `.zshrc` sources when it exists.
 
 Later switches use the same `nix run` command without `-b backup`, or
 `nh home switch -c macos-personal` (or `macos-work`) with nh. The `nix-workstation` aliases are
