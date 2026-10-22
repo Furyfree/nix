@@ -142,11 +142,8 @@ in
     # Steam's own link, made before Noctalia's Steam template can create a real
     # folder here that stops Steam's first-run setup.
     ".steam/steam".source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/Steam";
-  }
-  // lib.genAttrs [ "launch" "nix-workstation" ] (name: {
-    target = ".local/bin/${name}";
-    source = link "bin/${name}";
-  });
+    ".local/bin/launch".source = link "bin/launch";
+  };
 
   home.activation = {
     # As the COPR launcher did: opt out of Toolbox's default autostart before its

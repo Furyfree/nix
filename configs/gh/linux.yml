@@ -1,0 +1,3 @@
+# Open login pages as a UWSM service: it returns at once, while a scope would
+# wait until a newly started browser closes.
+browser: uwsm-app -t service -- xdg-open

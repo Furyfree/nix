@@ -18,11 +18,14 @@ in
 {
   imports = [ ./common.nix ];
 
+  # Settings that differ on macOS, loaded by the shared Ghostty config.
+  xdg.configFile."ghostty/macos".source = link "macos/ghostty";
+
   # Zed comes from mac-setup; Home Manager only merges its settings.
   programs.zed-editor.package = null;
 
   home = {
-    # Usernames come from the ignored hosts/macos/local/user.nix.
+    # Usernames come from the host's ignored local/user.nix.
     homeDirectory = lib.mkDefault "/Users/${config.home.username}";
 
     file = {

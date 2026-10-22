@@ -3,6 +3,8 @@ font-size = 9
 theme = charcoal-blue
 # Noctalia owns this generated palette; the static theme works before it exists.
 config-file = ?themes/noctalia
+# macOS-only overrides, linked from configs/macos/ghostty on Macs only.
+config-file = ?macos
 
 window-theme = ghostty
 window-padding-x = 14

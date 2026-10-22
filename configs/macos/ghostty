@@ -1,0 +1,3 @@
+# macOS-only Ghostty settings, linked as ~/.config/ghostty/macos; the shared
+# config loads it when it exists. Retina points are larger than Linux pixels.
+font-size = 13

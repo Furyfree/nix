@@ -197,7 +197,7 @@ Home Manager expects these in place; mac-setup provides all but the first two.
   - Files and media: file, zip, unzip, 7-Zip (`7zz`), unrar, poppler,
     ImageMagick, yt-dlp, typst.
   - Security: nmap, gitleaks.
-  - Optional: nh, for `nh home switch`.
+  - Optional: nh, for richer `nsearch` results.
 
 ### Set up
 
@@ -210,15 +210,34 @@ Home Manager expects these in place; mac-setup provides all but the first two.
    { home.username = "your-macos-username"; }
    ```
 
-3. Switch, keeping existing dotfiles as `*.backup`, with `macos-personal` or
-   `macos-work`:
-   `nix run home-manager/master -- switch -b backup --flake path:$HOME/Projects/nix#macos-personal`.
-4. Open a new terminal, then `mise install`, and fetch the SSH files for this
-   Mac's profile as in First boot step 6. On the work Mac, once SSH to the
-   work hosts works through 1Password, remove the old `~/.ssh/id_ed25519`,
-   and keep work-only shell settings in `~/.config/zsh/work.zsh`, which
-   `.zshrc` sources when it exists.
+3. Move anything you still need from `~/.zprofile` and `~/.zshrc` in your home
+   folder: after the switch zsh reads `~/.config/zsh`, so those stop loading.
+   Work-only settings go in `~/.config/zsh/work.zsh`, which `.zshrc` sources
+   when it exists.
+4. Build and activate for the first time, with `macos-personal` or
+   `macos-work`. Existing files Home Manager replaces are kept as `*.backup`;
+   activation stops if such a backup already exists, so check and remove
+   those from an earlier attempt first.
 
-Later switches use the same `nix run` command without `-b backup`, or
-`nh home switch -c macos-personal` (or `macos-work`) with nh. The `nix-workstation` aliases are
-Linux-only for now.
+   ```bash
+   cd ~/Projects/nix
+   nix build path:.#homeConfigurations.macos-work.activationPackage
+   mkdir -p ~/.local/state/nix/profiles
+   HOME_MANAGER_BACKUP_EXT=backup ./result/activate && rm result
+   ```
+
+5. Open a new terminal, then `mise install`, and fetch the SSH files for this
+   Mac's profile as in First boot step 6. On the work Mac, once SSH to the
+   work hosts works through 1Password, remove the old `~/.ssh/id_ed25519`.
+
+### Daily use
+
+The same aliases as on Linux, run through `nix-workstation`:
+
+- `nswitch`: build this Mac's configuration, show the changes, ask, then
+  activate it as a new Home Manager generation.
+- `nupdate`: update flake inputs, run `nix flake check`, then switch.
+- `ninfo`: list generations; `nrollback N` activates generation `N`.
+- `nclean`: keep the newest 10 generations, then collect garbage.
+- `nsearch`, `mup`: search packages, upgrade Mise tools. `fup` is Linux-only;
+  macOS updates come from mac-setup.

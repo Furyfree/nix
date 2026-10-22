@@ -10,8 +10,12 @@
 let
   # A live link to a file or folder in the checkout's configs/.
   link = path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
-  # Usage data for Noctalia's AI usage widget, which only runs on Linux.
-  aiUsagebar = lib.optionalString pkgs.stdenv.hostPlatform.isLinux "merge ${config.xdg.configHome}/ai-usagebar/config.toml ${../configs/ai-usagebar/config.toml} toml";
+  # Merges that only make sense on Linux: Noctalia's AI usage widget, and gh
+  # opening the browser through UWSM.
+  linuxSettings = lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
+    merge ${config.xdg.configHome}/ai-usagebar/config.toml ${../configs/ai-usagebar/config.toml} toml
+    merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/linux.yml} yaml
+  '';
 in
 {
   imports = [ ./ssh.nix ];
@@ -64,8 +68,11 @@ in
 
   home.file = {
     ".zshenv".source = link "zsh/.zshenv";
-    ".local/bin/pull-projects".source = link "bin/pull-projects";
-  };
+  }
+  // lib.genAttrs [ "pull-projects" "nix-workstation" ] (name: {
+    target = ".local/bin/${name}";
+    source = link "bin/${name}";
+  });
 
   # Agents and gh rewrite their own settings; set only the keys in
   # configs/<tool> and keep everything else. Files Yq cannot parse, such as
@@ -89,7 +96,7 @@ in
     merge ${config.home.homeDirectory}/.grok/config.toml ${../configs/grok/config.toml} toml
     merge ${config.xdg.configHome}/opencode/opencode.jsonc ${../configs/opencode/opencode.json} json
     merge ${config.home.homeDirectory}/.pi/agent/settings.json ${../configs/pi/settings.json} json
-    ${aiUsagebar}
     merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/config.yml} yaml
+    ${linuxSettings}
   '';
 }
