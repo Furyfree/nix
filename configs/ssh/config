@@ -1,17 +1,12 @@
-# Homelab hosts stay in a private 1Password document; fetch them once with
-#   op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf
-# It points them at ~/.ssh/homelab.pub. The .pub files select which agent key
-# to use and come from 1Password at first boot (INSTALLATION.md).
+# Shared by every machine. Hosts and the default key for everything else stay
+# in a private 1Password document per profile, fetched as ~/.ssh/local.conf
+# (INSTALLATION.md). The .pub files select which agent key to use and also
+# come from 1Password.
 Include ~/.ssh/local.conf
 
 Host github.com
     User git
     IdentityFile ~/.ssh/github.pub
-    IdentitiesOnly yes
-
-# Every other host uses the personal key; homelab hosts try theirs first.
-Host * !github.com
-    IdentityFile ~/.ssh/personal.pub
     IdentitiesOnly yes
 
 Host *

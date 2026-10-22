@@ -14,6 +14,8 @@ let
   aiUsagebar = lib.optionalString pkgs.stdenv.hostPlatform.isLinux "merge ${config.xdg.configHome}/ai-usagebar/config.toml ${../configs/ai-usagebar/config.toml} toml";
 in
 {
+  imports = [ ./ssh.nix ];
+
   xdg = {
     enable = true;
     configFile =
@@ -48,7 +50,6 @@ in
       // {
         # The whole folder, so vim.pack writes its lock file into the checkout.
         "nvim".source = link "nvim";
-        "1Password/ssh/agent.toml".source = link "1password/ssh/agent.toml";
         "starship.toml".source = link "starship/starship.toml";
       };
   };

@@ -1,4 +1,4 @@
-# Keys the 1Password SSH agent offers, by item ID.
+# Keys the 1Password SSH agent offers on personal machines, by item ID.
 
 # GitHub
 [[ssh-keys]]

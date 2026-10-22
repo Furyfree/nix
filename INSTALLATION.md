@@ -40,8 +40,8 @@ on its own disk and gets an entry in the boot menu.
 5. 1Password: sign in, then in Settings → Developer turn on the SSH agent and
    the CLI integration.
 6. SSH keys stay in 1Password; these public halves only tell SSH which key a
-   host gets (GitHub, homelab or personal for everything else), and the
-   document lists the homelab hosts:
+   host gets, and the profile's private document lists its hosts and the key
+   for everything other than GitHub. Personal machines:
 
    ```bash
    op item get n6imsp5vfs5nmlt5rmxgs6zdci --fields "label=public key" >~/.ssh/github.pub
@@ -49,6 +49,17 @@ on its own disk and gets an entry in the boot menu.
    op item get 3psgdyql5u5zlpamsfc4xr7cbu --fields "label=public key" >~/.ssh/personal.pub
    op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf
    git config --file ~/.config/git/local user.signingkey ~/.ssh/github.pub
+   ```
+
+   Work machines (`workstation.sshProfile = "work"` in the host's `home.nix`),
+   also setting the work commit email:
+
+   ```bash
+   op item get n6imsp5vfs5nmlt5rmxgs6zdci --fields "label=public key" >~/.ssh/github.pub
+   op item get cwlhpt5lcyn3dsuyx4wyms2ama --fields "label=public key" >~/.ssh/work.pub
+   op document get npl7xfsvir6kbq7jvptugkczhm --out-file ~/.ssh/local.conf
+   git config --file ~/.config/git/local user.signingkey ~/.ssh/github.pub
+   git config --file ~/.config/git/local user.email <work email>
    ```
 
    Then `gh auth login`, and switch this checkout to SSH, since the installer
@@ -156,8 +167,9 @@ Obsidian's are missing. Run `systemctl --user restart noctalia`, then
 ## macOS
 
 macOS uses standalone Home Manager only to link the shared configs; mac-setup
-installs every app and command-line tool, and Nix installs nothing. Not yet
-tested on a Mac.
+installs every app and command-line tool, and Nix installs nothing. The
+personal Mac is `macos-personal` and the work Mac `macos-work`, which gets the
+work SSH keys. Not yet tested on a Mac.
 
 ### Before Home Manager
 
@@ -190,17 +202,20 @@ Home Manager expects these in place; mac-setup provides all but the first two.
 
 1. Clone over HTTPS, since the SSH keys come later from 1Password:
    `git clone https://github.com/Furyfree/nix ~/Projects/nix`.
-2. Name the account in the ignored `~/Projects/nix/hosts/macos/local/user.nix`:
+2. Name the account in the ignored `local/user.nix` of this Mac's host,
+   `~/Projects/nix/hosts/macos-personal/` or `hosts/macos-work/`:
 
    ```nix
    { home.username = "your-macos-username"; }
    ```
 
-3. Switch, keeping existing dotfiles as `*.backup`:
-   `nix run home-manager/master -- switch -b backup --flake path:$HOME/Projects/nix#macos`.
-4. Open a new terminal, then `mise install`, and fetch the SSH files as on
-   Linux (see the comments in `configs/ssh/config`).
+3. Switch, keeping existing dotfiles as `*.backup`, with `macos-personal` or
+   `macos-work`:
+   `nix run home-manager/master -- switch -b backup --flake path:$HOME/Projects/nix#macos-personal`.
+4. Open a new terminal, then `mise install`, and fetch the SSH files for this
+   Mac's profile as in First boot step 6. On the work Mac, once SSH to the
+   work hosts works through 1Password, remove the old `~/.ssh/id_ed25519`.
 
 Later switches use the same `nix run` command without `-b backup`, or
-`nh home switch -c macos` with nh. The `nix-workstation` aliases are
+`nh home switch -c macos-personal` (or `macos-work`) with nh. The `nix-workstation` aliases are
 Linux-only for now.

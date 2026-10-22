@@ -1,4 +1,4 @@
-# Standalone Home Manager configuration for the user on macOS. The ignored
+# Standalone Home Manager configuration for the personal Mac. The ignored
 # ./local/user.nix sets home.username (INSTALLATION.md).
 _:
 

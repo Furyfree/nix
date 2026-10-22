@@ -37,7 +37,7 @@ Open work only; finished work lives in Git.
 ## Later platforms
 
 - macOS: standalone Home Manager links the shared configs (`home/darwin.nix`,
-  flake output `homeConfigurations.macos` for Apple silicon); Swift mac-setup
+  flake outputs `macos-personal` and `macos-work` for Apple silicon); Swift mac-setup
   installs the apps and tools INSTALLATION.md lists and owns system settings.
   It evaluates but has not run on a Mac yet. Still open: a macOS branch in
   `nix-workstation` (nh home, no Snapper) and matching mac-setup's lists to

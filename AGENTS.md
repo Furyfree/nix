@@ -37,8 +37,10 @@ patches on machines.
   through `system.nix`.
 - `home/`, `configs/`: Home Manager integration and links versus native
   application preferences. `common.nix` holds what every platform shares,
-  `linux.nix` and `darwin.nix` the platform parts. Keep the checkout at
-  `~/Projects/nix` for these links.
+  `linux.nix` and `darwin.nix` the platform parts, and `ssh.nix` the
+  personal or work SSH key set a host picks. SSH hosts stay in private
+  1Password documents, never here. Keep the checkout at `~/Projects/nix` for
+  these links.
 - `hosts/`: tracked host exceptions; ignored `hosts/<host>/local/` holds detected
   hardware and installation data, and on macOS the account in `user.nix`.
   Shared policy belongs above it.
