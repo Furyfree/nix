@@ -40,8 +40,9 @@ on its own disk and gets an entry in the boot menu.
 5. 1Password: sign in, then in Settings → Developer turn on the SSH agent and
    the CLI integration.
 6. SSH keys stay in 1Password; these public halves only tell SSH which key a
-   host gets (GitHub, homelab or personal for everything else), and the
-   document lists the homelab hosts:
+   host gets, and the profile's private document lists its hosts. The SSH
+   config comes from `configs/ssh/personal.conf` or `work.conf`, by the host's
+   profile. Personal machines:
 
    ```bash
    op item get n6imsp5vfs5nmlt5rmxgs6zdci --fields "label=public key" >~/.ssh/github.pub
@@ -49,6 +50,17 @@ on its own disk and gets an entry in the boot menu.
    op item get 3psgdyql5u5zlpamsfc4xr7cbu --fields "label=public key" >~/.ssh/personal.pub
    op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf
    git config --file ~/.config/git/local user.signingkey ~/.ssh/github.pub
+   ```
+
+   Work machines (`workstation.sshProfile = "work"` in the host's `home.nix`),
+   also setting the work commit email:
+
+   ```bash
+   op item get n6imsp5vfs5nmlt5rmxgs6zdci --fields "label=public key" >~/.ssh/github.pub
+   op item get cwlhpt5lcyn3dsuyx4wyms2ama --fields "label=public key" >~/.ssh/work.pub
+   op document get npl7xfsvir6kbq7jvptugkczhm --out-file ~/.ssh/local.conf
+   git config --file ~/.config/git/local user.signingkey ~/.ssh/github.pub
+   git config --file ~/.config/git/local user.email <work email>
    ```
 
    Then `gh auth login`, and switch this checkout to SSH, since the installer
@@ -152,3 +164,80 @@ Obsidian's are missing. Run `systemctl --user restart noctalia`, then
 - Wi-Fi after boot, eduroam at DTU, AirPods with LibrePods.
 - Printing and scanning on the Epson ET-5800.
 - Desktop: Windows boots from the menu and its anti-cheat games run.
+
+## macOS
+
+macOS uses standalone Home Manager only to link the shared configs; mac-setup
+installs every app and command-line tool, and Nix installs nothing. The
+personal Mac is `macos-personal` and the work Mac `macos-work`, which gets the
+work SSH keys. Not yet tested on a Mac.
+
+### Before Home Manager
+
+Home Manager expects these in place; mac-setup provides all but the first two.
+
+- Xcode Command Line Tools: `xcode-select --install`. Git for the first clone,
+  and the C compiler Mise and Neovim's tree-sitter parsers build with.
+- Nix with flakes enabled, used only to run Home Manager and project flakes:
+  the multi-user installer from nixos.org, then
+  `experimental-features = nix-command flakes` in `/etc/nix/nix.conf`.
+- 1Password, with Settings → Developer → Use the SSH agent and Integrate with
+  1Password CLI turned on, and the 1Password CLI (`op`). Home Manager links
+  the agent socket to `~/.1password/agent.sock` and the Git signer to
+  `~/.local/bin/op-ssh-sign`.
+- Ghostty, Zed and VSCodium. Home Manager links or merges their settings.
+- JetBrainsMono Nerd Font, which the Ghostty config uses.
+- The command-line tools the shared configs use, as NixOS installs them in
+  `components/shell.nix` and `components/development.nix`:
+  - Shell: starship, sheldon, fzf, zoxide, bat, eza.
+  - Development: Git with Git LFS, Neovim, Mise, tree-sitter, nixd,
+    clang-tools; Mise installs the rest from `configs/mise/config.toml`.
+  - Everyday: gh, lazygit, btop, fastfetch, yazi, fd, ripgrep, tealdeer,
+    just, yq, duf, tokei.
+  - Files and media: file, zip, unzip, 7-Zip (`7zz`), unrar, poppler,
+    ImageMagick, yt-dlp, typst.
+  - Security: nmap, gitleaks.
+  - Optional: nh, for richer `nsearch` results.
+
+### Set up
+
+1. Clone over HTTPS, since the SSH keys come later from 1Password:
+   `git clone https://github.com/Furyfree/nix ~/Projects/nix`.
+2. Name the account in the ignored `local/user.nix` of this Mac's host,
+   `~/Projects/nix/hosts/macos-personal/` or `hosts/macos-work/`:
+
+   ```nix
+   { home.username = "your-macos-username"; }
+   ```
+
+3. Move anything you still need from `~/.zprofile` and `~/.zshrc` in your home
+   folder: after the switch zsh reads `~/.config/zsh`, so those stop loading.
+   Work-only settings go in `~/.config/zsh/work.zsh`, which `.zshrc` sources
+   when it exists.
+4. Build and activate for the first time, with `macos-personal` or
+   `macos-work`. Existing files Home Manager replaces are kept as `*.backup`;
+   activation stops if such a backup already exists, so check and remove
+   those from an earlier attempt first.
+
+   ```bash
+   cd ~/Projects/nix
+   nix build path:.#homeConfigurations.macos-work.activationPackage
+   mkdir -p ~/.local/state/nix/profiles
+   HOME_MANAGER_BACKUP_EXT=backup ./result/activate && rm result
+   ```
+
+5. Open a new terminal, then `mise install`, and fetch the SSH files for this
+   Mac's profile as in First boot step 6. On the work Mac, once SSH to the
+   work hosts works through 1Password, remove the old `~/.ssh/id_ed25519`.
+
+### Daily use
+
+The same aliases as on Linux, run through `nix-workstation`:
+
+- `nswitch`: build this Mac's configuration, show the changes, ask, then
+  activate it as a new Home Manager generation.
+- `nupdate`: update flake inputs, run `nix flake check`, then switch.
+- `ninfo`: list generations; `nrollback N` activates generation `N`.
+- `nclean`: keep the newest 10 generations, then collect garbage.
+- `nsearch`, `mup`: search packages, upgrade Mise tools. `fup` is Linux-only;
+  macOS updates come from mac-setup.

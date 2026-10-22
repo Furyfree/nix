@@ -12,3 +12,8 @@ source "$ZDOTDIR/conf.d/aliases.zsh"
 if [[ -r "$ZDOTDIR/conf.d/noctalia.zsh" ]]; then
   source "$ZDOTDIR/conf.d/noctalia.zsh"
 fi
+
+# Work-only settings, kept on work machines and never in this repo.
+if [[ -r "$ZDOTDIR/work.zsh" ]]; then
+  source "$ZDOTDIR/work.zsh"
+fi

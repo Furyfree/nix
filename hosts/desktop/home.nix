@@ -2,7 +2,7 @@
 { config, ... }:
 
 {
-  imports = [ ../../home.nix ];
+  imports = [ ../../home/linux.nix ];
 
   # The desktop's monitors and workspaces, as a live checkout link.
   xdg.configFile."hypr/host.lua".source =

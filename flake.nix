@@ -48,6 +48,21 @@
               }
             );
           };
+
+      mkMac =
+        name:
+        let
+          user = ./hosts + "/${name}/local/user.nix";
+        in
+        nixpkgs.lib.optionalAttrs (builtins.pathExists user) {
+          ${name} = home-manager.lib.homeManagerConfiguration {
+            pkgs = nixpkgs.legacyPackages.aarch64-darwin;
+            modules = [
+              (./hosts + "/${name}/home.nix")
+              user
+            ];
+          };
+        };
     in
     {
       devShells.x86_64-linux.default =
@@ -82,5 +97,9 @@
       // mkHost "desktop"
       // mkHost "laptop"
       // mkHost "nixos-test";
+
+      # Standalone Home Manager on Apple silicon Macs. Like the NixOS hosts, each
+      # builds only once its ignored local/user.nix names the account.
+      homeConfigurations = mkMac "macos-personal" // mkMac "macos-work";
     };
 }

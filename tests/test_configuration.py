@@ -100,11 +100,11 @@ class ConfigurationTests(unittest.TestCase):
             "flake.nix",
             "flake.lock",
             "system.nix",
-            "home.nix",
             ".gitignore",
         ]:
             shutil.copy2(root / name, destination / name)
         shutil.copytree(root / "components", destination / "components")
+        shutil.copytree(root / "home", destination / "home")
         shutil.copytree(root / "configs", destination / "configs")
         for host in common.HOSTS:
             # Leave out this machine's own installer-generated data.
@@ -225,7 +225,7 @@ class ConfigurationTests(unittest.TestCase):
         local = self.checkout / "hosts/nixos-test/local"
         (local / "hardware-configuration.nix").unlink()
         (local / "hardware-configuration.nix").symlink_to(
-            self.checkout / "home.nix"
+            self.checkout / "home/common.nix"
         )
         with (
             patch.object(subprocess, "check_output") as probe,
@@ -528,7 +528,7 @@ class ConfigurationTests(unittest.TestCase):
                     (
                         path / "hosts/nixos-test/local/installation.nix"
                     ).symlink_to(
-                        self.checkout / "home.nix",
+                        self.checkout / "home/common.nix",
                     )
                 return subprocess.CompletedProcess[str](command, 0)
 

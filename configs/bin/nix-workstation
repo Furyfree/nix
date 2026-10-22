@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
-# Rebuild, update and maintain this workstation. aliases.zsh adds nswitch,
-# nupdate, ninfo, nclean, nsearch, mup and fup.
+# Rebuild, update and maintain this workstation: NixOS on Linux, standalone
+# Home Manager on macOS. aliases.zsh adds nswitch, nupdate, ninfo, nrollback,
+# nclean, nsearch, mup and fup.
 set -euo pipefail
 
 # path: includes the ignored machine data in hosts/<host>/local/.
 export NH_FLAKE=${NH_FLAKE:-path:$HOME/Projects/nix}
 repo=${NH_FLAKE#path:}
+
+# On macOS each switch is a generation of this profile, in place of Snapper.
+darwin=false
+[[ $OSTYPE == darwin* ]] && darwin=true
+profiles=${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles
+profile=$profiles/home-manager
 
 help() {
   case ${1-} in
@@ -16,6 +23,10 @@ usage: nix-workstation switch   (alias: nswitch)
 Build the system and show the package changes, then ask before switching.
 A yes takes a Snapper pre snapshot, switches and takes the post snapshot.
 A failed build or a no changes nothing and leaves no snapshots.
+
+On macOS: build this Mac's Home Manager configuration (the host whose
+local/user.nix exists), show the changes, ask, then activate it as a new
+generation.
 EOF
       ;;
     update)
@@ -25,6 +36,7 @@ usage: nix-workstation update [INPUT...]   (alias: nupdate)
 Update all flake inputs, or only the named ones (nixpkgs, home-manager), and
 show the flake.lock diff. Then run just check and switch. If a step fails or
 you answer no, flake.lock stays updated and the undo command is printed.
+On macOS, nix flake check replaces just check, which needs Linux tools.
 EOF
       ;;
     info)
@@ -32,6 +44,15 @@ EOF
 usage: nix-workstation info   (alias: ninfo)
 
 List system generations with build dates, versions and sizes (nh os info).
+On macOS, list Home Manager generations; nrollback takes their numbers.
+EOF
+      ;;
+    rollback)
+      cat <<'EOF'
+usage: nix-workstation rollback GENERATION   (alias: nrollback)
+
+macOS: activate an earlier Home Manager generation from nix-workstation info.
+On Linux, roll back from the boot menu or a Snapper snapshot instead.
 EOF
       ;;
     clean)
@@ -41,6 +62,8 @@ usage: nix-workstation clean   (alias: nclean)
 Remove old generations and unused store paths. Keeps the newest 10, the boot
 menu's entries, and project build roots; lists what goes and asks first
 (nh clean all --no-gcroots --keep 10 --ask).
+On macOS, keep the newest 10 Home Manager generations, then collect garbage;
+project build roots stay.
 EOF
       ;;
     search)
@@ -49,6 +72,7 @@ usage: nix-workstation search [packages|options|prs|issues] QUERY...   (alias: n
 
 Search nixpkgs packages, NixOS and Home Manager options, or nixpkgs pull
 requests and issues (nh search). nh search --help lists its options.
+Without nh, as on macOS unless mac-setup installs it: nix search nixpkgs.
 EOF
       ;;
     mise)
@@ -63,7 +87,8 @@ EOF
 usage: nix-workstation firmware   (alias: fup)
 
 Refresh the firmware list and install updates; fwupdmgr asks before
-flashing (fwupdmgr refresh --force, then fwupdmgr update).
+flashing (fwupdmgr refresh --force, then fwupdmgr update). Linux only; macOS
+updates come from mac-setup.
 EOF
       ;;
     *)
@@ -74,7 +99,8 @@ Commands (alias):
   switch (nswitch)             build, show changes, ask, then switch between Snapper snapshots
   update (nupdate) [INPUT...]  update flake inputs, run just check, then switch
   info (ninfo)                 list system generations
-  clean (nclean)               remove old generations; keeps the boot menu's 10
+  rollback (nrollback) GEN     macOS: activate an earlier generation
+  clean (nclean)               remove old generations; keeps the newest 10
   search (nsearch) QUERY...    search packages and options
   mise (mup)                   upgrade Mise tools
   firmware (fup)               install firmware updates
@@ -113,6 +139,49 @@ cmd_switch() {
   return "$result"
 }
 
+# The Mac's host is the one whose ignored local/user.nix exists.
+mac_host() {
+  local users=() user
+  for user in "$repo"/hosts/macos-*/local/user.nix; do
+    [[ -e $user ]] && users+=("$user")
+  done
+  ((${#users[@]} == 1)) || die 'expected exactly one hosts/macos-*/local/user.nix'
+  user=${users[0]%/local/user.nix}
+  printf '%s\n' "${user##*/}"
+}
+
+# Build, show the changes, ask, then activate the build as a new generation.
+# A failed build or a no changes nothing.
+cmd_switch_darwin() {
+  local answer host out
+  host=$(mac_host)
+  out=$(mktemp -d)/result
+  nix build "$NH_FLAKE#homeConfigurations.$host.activationPackage" --out-link "$out"
+  if [[ -e $profile ]]; then
+    nix store diff-closures "$profile" "$out"
+  fi
+  read -rp 'Switch? [y/N] ' answer
+  [[ $answer == [yY]* ]] || die 'not switched'
+  # Home Manager needs the folder for its profile but does not create it.
+  mkdir -p "$profiles"
+  "$out/activate"
+}
+
+cmd_rollback_darwin() {
+  local generation=$profile-$1-link
+  [[ -x $generation/activate ]] || die "no generation $1; nix-workstation info lists them"
+  "$generation/activate"
+}
+
+cmd_clean_darwin() {
+  local answer
+  nix-env --list-generations --profile "$profile"
+  read -rp 'Delete all but the newest 10 generations and collect garbage? [y/N] ' answer
+  [[ $answer == [yY]* ]] || die 'nothing removed'
+  nix-env --delete-generations +10 --profile "$profile"
+  nix-store --gc
+}
+
 # An updated but unapplied lock stays for debugging.
 cmd_update() {
   nix flake update "$@" --flake "$NH_FLAKE"
@@ -122,8 +191,14 @@ cmd_update() {
     git -C "$repo" --no-pager diff -- flake.lock
     trap '(($? == 0)) || printf "Undo: git -C %q restore flake.lock\n" "$repo" >&2' EXIT
   fi
-  (cd -- "$repo" && nix develop path:. -c just check)
-  cmd_switch
+  if $darwin; then
+    # just check needs Hyprland and the Linux dev shell; macOS only evaluates.
+    nix flake check --no-build "$NH_FLAKE"
+    cmd_switch_darwin
+  else
+    (cd -- "$repo" && nix develop path:. -c just check)
+    cmd_switch
+  fi
 }
 
 command=${1-}
@@ -136,14 +211,31 @@ for arg in "$command" "$@"; do
 done
 
 [[ $NH_FLAKE == path:* ]] || die 'NH_FLAKE must be a path: flake'
-case $command in
-  switch) (($# == 0)) || usage switch; cmd_switch ;;
-  update) cmd_update "$@" ;;
-  info) nh os info "$@" ;;
-  clean) nh clean all --no-gcroots --keep 10 --ask "$@" ;;
-  search) nh search "$@" ;;
-  mise) (($# == 0)) || usage mise; mise upgrade ;;
-  # --force: a plain refresh fails when the metadata is recent.
-  firmware) (($# == 0)) || usage firmware; fwupdmgr refresh --force && fwupdmgr update ;;
-  *) usage ;;
-esac
+if $darwin; then
+  case $command in
+    switch) (($# == 0)) || usage switch; cmd_switch_darwin ;;
+    update) cmd_update "$@" ;;
+    info) (($# == 0)) || usage info; nix-env --list-generations --profile "$profile" ;;
+    rollback) (($# == 1)) || usage rollback; cmd_rollback_darwin "$1" ;;
+    clean) (($# == 0)) || usage clean; cmd_clean_darwin ;;
+    search)
+      if command -v nh >/dev/null; then nh search "$@"; else nix search nixpkgs "$@"; fi
+      ;;
+    mise) (($# == 0)) || usage mise; mise upgrade ;;
+    firmware) die 'macOS updates come from mac-setup' ;;
+    *) usage ;;
+  esac
+else
+  case $command in
+    switch) (($# == 0)) || usage switch; cmd_switch ;;
+    update) cmd_update "$@" ;;
+    info) nh os info "$@" ;;
+    rollback) die 'on Linux, roll back from the boot menu or a Snapper snapshot' ;;
+    clean) nh clean all --no-gcroots --keep 10 --ask "$@" ;;
+    search) nh search "$@" ;;
+    mise) (($# == 0)) || usage mise; mise upgrade ;;
+    # --force: a plain refresh fails when the metadata is recent.
+    firmware) (($# == 0)) || usage firmware; fwupdmgr refresh --force && fwupdmgr update ;;
+    *) usage ;;
+  esac
+fi

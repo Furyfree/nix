@@ -35,10 +35,15 @@ patches on machines.
 - `flake.nix`: inputs, system outputs and development tools.
 - `system.nix`, `components/`: shared system settings; import new components
   through `system.nix`.
-- `home.nix`, `configs/`: Home Manager integration and links versus native
-  application preferences. Keep the checkout at `~/Projects/nix` for these links.
+- `home/`, `configs/`: Home Manager integration and links versus native
+  application preferences. `common.nix` holds what every platform shares,
+  `linux.nix` and `darwin.nix` the platform parts, and `ssh.nix` the
+  personal or work SSH key set a host picks. SSH hosts stay in private
+  1Password documents, never here. Keep the checkout at `~/Projects/nix` for
+  these links.
 - `hosts/`: tracked host exceptions; ignored `hosts/<host>/local/` holds detected
-  hardware and installation data. Shared policy belongs above it.
+  hardware and installation data, and on macOS the account in `user.nix`.
+  Shared policy belongs above it.
 - `configs/hypr/hosts/<host>.lua`: per-host monitors, workspaces and keys,
   linked as `~/.config/hypr/host.lua` by `hosts/<host>/home.nix`.
 - `INSTALLATION.md`: install steps; update it with installer or first-boot changes.

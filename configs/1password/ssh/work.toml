@@ -1,0 +1,9 @@
+# Keys the 1Password SSH agent offers on work machines, by item ID.
+
+# GitHub
+[[ssh-keys]]
+item = "n6imsp5vfs5nmlt5rmxgs6zdci"
+
+# Work
+[[ssh-keys]]
+item = "cwlhpt5lcyn3dsuyx4wyms2ama"

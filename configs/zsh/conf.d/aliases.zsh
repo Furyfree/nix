@@ -63,6 +63,7 @@ if command -v nix-workstation >/dev/null 2>&1; then
   alias nswitch='nix-workstation switch'
   alias nupdate='nix-workstation update'
   alias ninfo='nix-workstation info'
+  alias nrollback='nix-workstation rollback'
   alias nclean='nix-workstation clean'
   alias nsearch='nix-workstation search'
   alias mup='nix-workstation mise'
