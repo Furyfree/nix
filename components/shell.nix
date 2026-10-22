@@ -33,11 +33,36 @@ in
     };
   };
 
-  # The shared list in home/packages.nix, plus the Lua-enabled fastfetch and
-  # the Wayland clipboard.
-  environment.systemPackages = [
+  environment.systemPackages = with pkgs; [
+    starship
+    fzf
+    zoxide
+    gh
+    wl-clipboard
+    sheldon
+    bat
+    eza
+    yazi
+    fd
+    ripgrep
     fastfetch
-    pkgs.wl-clipboard
-  ]
-  ++ import ../home/packages.nix pkgs;
+    tealdeer
+    btop
+    just
+    lazygit
+    yq-go
+    file
+    zip
+    unzip
+    _7zz
+    unrar-free
+    poppler-utils
+    imagemagick
+    yt-dlp
+    typst
+    duf
+    tokei
+    nmap
+    gitleaks
+  ];
 }

@@ -155,29 +155,36 @@ Obsidian's are missing. Run `systemctl --user restart noctalia`, then
 
 ## macOS
 
-macOS uses standalone Home Manager for the shared configs; mac-setup installs
-the apps and system settings. Not yet tested on a Mac.
+macOS uses standalone Home Manager only to link the shared configs; mac-setup
+installs every app and command-line tool, and Nix installs nothing. Not yet
+tested on a Mac.
 
 ### Before Home Manager
 
-These come from outside this repository; Home Manager expects them in place.
+Home Manager expects these in place; mac-setup provides all but the first two.
 
 - Xcode Command Line Tools: `xcode-select --install`. Git for the first clone,
   and the C compiler Mise and Neovim's tree-sitter parsers build with.
-- Nix with flakes enabled: the multi-user installer from nixos.org, then
+- Nix with flakes enabled, used only to run Home Manager and project flakes:
+  the multi-user installer from nixos.org, then
   `experimental-features = nix-command flakes` in `/etc/nix/nix.conf`.
-- From mac-setup:
-  - 1Password, with Settings → Developer → Use the SSH agent and Integrate
-    with 1Password CLI turned on. Home Manager links its agent socket to
-    `~/.1password/agent.sock` and its Git signer to `~/.local/bin/op-ssh-sign`.
-  - 1Password CLI (`op`), for the SSH host list in `configs/ssh/config`.
-  - Ghostty, Zed and VSCodium. Home Manager links or merges their settings
-    but does not install the apps.
-  - JetBrainsMono Nerd Font, which the Ghostty config uses.
-
-Home Manager installs the command-line tools: the shared list in
-`home/packages.nix`, plus Git, Git LFS, Neovim, nh, Mise, tree-sitter, nixd,
-clang-tools and fastfetch from `home/darwin.nix`.
+- 1Password, with Settings → Developer → Use the SSH agent and Integrate with
+  1Password CLI turned on, and the 1Password CLI (`op`). Home Manager links
+  the agent socket to `~/.1password/agent.sock` and the Git signer to
+  `~/.local/bin/op-ssh-sign`.
+- Ghostty, Zed and VSCodium. Home Manager links or merges their settings.
+- JetBrainsMono Nerd Font, which the Ghostty config uses.
+- The command-line tools the shared configs use, as NixOS installs them in
+  `components/shell.nix` and `components/development.nix`:
+  - Shell: starship, sheldon, fzf, zoxide, bat, eza.
+  - Development: Git with Git LFS, Neovim, Mise, tree-sitter, nixd,
+    clang-tools; Mise installs the rest from `configs/mise/config.toml`.
+  - Everyday: gh, lazygit, btop, fastfetch, yazi, fd, ripgrep, tealdeer,
+    just, yq, duf, tokei.
+  - Files and media: file, zip, unzip, 7-Zip (`7zz`), unrar, poppler,
+    ImageMagick, yt-dlp, typst.
+  - Security: nmap, gitleaks.
+  - Optional: nh, for `nh home switch`.
 
 ### Set up
 
@@ -189,11 +196,11 @@ clang-tools and fastfetch from `home/darwin.nix`.
    { home.username = "your-macos-username"; }
    ```
 
-3. Switch for the first time, keeping existing dotfiles as `*.backup`:
+3. Switch, keeping existing dotfiles as `*.backup`:
    `nix run home-manager/master -- switch -b backup --flake path:$HOME/Projects/nix#macos`.
 4. Open a new terminal, then `mise install`, and fetch the SSH files as on
    Linux (see the comments in `configs/ssh/config`).
 
-Later switches: `home-manager switch --flake path:$HOME/Projects/nix#macos`
-(or `nh home switch -c macos`). The `nix-workstation` aliases are Linux-only
-for now.
+Later switches use the same `nix run` command without `-b backup`, or
+`nh home switch -c macos` with nh. The `nix-workstation` aliases are
+Linux-only for now.

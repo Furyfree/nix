@@ -37,8 +37,7 @@ patches on machines.
   through `system.nix`.
 - `home/`, `configs/`: Home Manager integration and links versus native
   application preferences. `common.nix` holds what every platform shares,
-  `linux.nix` and `darwin.nix` the platform parts, and `packages.nix` the
-  command-line tools the shared configs expect. Keep the checkout at
+  `linux.nix` and `darwin.nix` the platform parts. Keep the checkout at
   `~/Projects/nix` for these links.
 - `hosts/`: tracked host exceptions; ignored `hosts/<host>/local/` holds detected
   hardware and installation data, and on macOS the account in `user.nix`.
