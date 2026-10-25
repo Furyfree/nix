@@ -280,6 +280,9 @@ directory = "~/Videos/Recordings"
 hyprland_lua_config = "~/.config/hypr/conf.d/keybinds.lua"
 hyprland_parser = "lua"
 
+[plugin_settings."furyfree/key-promoter"]
+suggest_after = 2
+
 [brightness]
 # External monitors through ddcutil; laptop panels keep the backlight.
 enable_ddcutil = true
