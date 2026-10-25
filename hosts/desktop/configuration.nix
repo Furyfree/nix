@@ -1,19 +1,13 @@
 # MSI Z690 desktop: Intel integrated graphics plus an NVIDIA RTX 3080, which
 # drives both monitors. The installer writes ./local with the detected
 # hardware, the chosen account and the Windows boot entry.
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ config, lib, ... }:
 
 {
   imports = [
     ../../system.nix
     ../../components/intel-graphics.nix
     ../../components/nvidia.nix
-    ../../components/craft-suite.nix
     ../../components/gaming.nix
     ../../components/dtu-eduroam.nix
     ../../components/secure-boot.nix
@@ -21,8 +15,6 @@
   ];
 
   networking.hostName = "desktop";
-
-  environment.systemPackages = [ pkgs.gimp ];
 
   # The RTX 3080 runs Whisper's recommended large model; others keep small.
   systemd.user.services.voxtype.scriptArgs = "large-v3-turbo";
