@@ -8,7 +8,6 @@
     };
 
     kernelPackages = pkgs.linuxPackages_latest;
-    initrd.systemd.enable = true;
     plymouth.enable = true;
   };
 
