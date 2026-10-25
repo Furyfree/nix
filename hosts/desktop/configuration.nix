@@ -13,6 +13,7 @@
     ../../system.nix
     ../../components/intel-graphics.nix
     ../../components/nvidia.nix
+    ../../components/craft-suite.nix
     ../../components/gaming.nix
     ../../components/dtu-eduroam.nix
     ../../components/secure-boot.nix
