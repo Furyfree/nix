@@ -62,8 +62,8 @@ on its own disk and gets an entry in the boot menu.
 9. `dtu-eduroam <1Password item>` for DTU Wi-Fi; laptop: `fprintd-enroll`.
 10. Local models download on first use; fetch them now instead, one at a
     time, and follow `journalctl -fu llama-cpp` until each has loaded:
-    `curl -d '{"model":"glm-4.7-flash"}' http://127.0.0.1:8080/models/load`,
-    then `gpt-oss-20b` and `gemma-4-e4b`.
+    `curl -d '{"model":"qwen3.6-35b-a3b"}' http://127.0.0.1:8080/models/load`,
+    then `gemma-4-26b-a4b` and `gemma-4-e4b`.
 
 ## Accounts and apps
 

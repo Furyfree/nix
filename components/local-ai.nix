@@ -23,12 +23,14 @@
               # Hide the cache entries of the models below from /models.
               dedup-cache-models = true;
             };
-            # MoE, 30B with 3B active: the coding and agent model.
-            "glm-4.7-flash".hf-repo = "ggml-org/GLM-4.7-Flash-GGUF:Q4_K_M";
-            # MoE, 21B with 3.6B active.
-            "gpt-oss-20b".hf-repo = "ggml-org/gpt-oss-20b-GGUF";
-            # Small and fast, with image input.
-            "gemma-4-e4b".hf-repo = "ggml-org/gemma-4-E4B-it-GGUF";
+            # Unsloth Dynamic 4-bit quants, which keep the sensitive layers at
+            # higher precision.
+            # MoE, 35B with 3B active: the coding and agent model.
+            "qwen3.6-35b-a3b".hf-repo = "unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL";
+            # MoE, 26B with 4B active, with image input.
+            "gemma-4-26b-a4b".hf-repo = "unsloth/gemma-4-26B-A4B-it-GGUF:UD-Q4_K_XL";
+            # Small and fast, with image input; fits the desktop GPU whole.
+            "gemma-4-e4b".hf-repo = "unsloth/gemma-4-E4B-it-GGUF:UD-Q4_K_XL";
           };
         }
       );
