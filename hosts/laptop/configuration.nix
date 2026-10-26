@@ -7,6 +7,7 @@
   imports = [
     ../../system.nix
     ../../components/dtu-eduroam.nix
+    ../../components/local-ai.nix
     ../../components/secure-boot.nix
     ./local/hardware-configuration.nix
   ];
