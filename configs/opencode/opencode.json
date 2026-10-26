@@ -22,14 +22,7 @@
           "name": "Qwen3.6 35B-A3B",
           "limit": {
             "context": 65536,
-            "output": 16384
-          }
-        },
-        "gemma-4-26b-a4b": {
-          "name": "Gemma 4 26B-A4B",
-          "limit": {
-            "context": 65536,
-            "output": 16384
+            "output": 32768
           }
         },
         "gemma-4-e4b": {
@@ -52,14 +45,7 @@
           "name": "Qwen3.6 35B-A3B",
           "limit": {
             "context": 65536,
-            "output": 16384
-          }
-        },
-        "gemma-4-26b-a4b": {
-          "name": "Gemma 4 26B-A4B",
-          "limit": {
-            "context": 65536,
-            "output": 16384
+            "output": 32768
           }
         },
         "gemma-4-e4b": {
