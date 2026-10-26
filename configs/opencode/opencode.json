@@ -18,15 +18,15 @@
         "baseURL": "http://127.0.0.1:8080/v1"
       },
       "models": {
-        "glm-4.7-flash": {
-          "name": "GLM-4.7 Flash",
+        "qwen3.6-35b-a3b": {
+          "name": "Qwen3.6 35B-A3B",
           "limit": {
             "context": 65536,
             "output": 16384
           }
         },
-        "gpt-oss-20b": {
-          "name": "gpt-oss 20B",
+        "gemma-4-26b-a4b": {
+          "name": "Gemma 4 26B-A4B",
           "limit": {
             "context": 65536,
             "output": 16384
@@ -48,15 +48,15 @@
         "baseURL": "http://desktop:8080/v1"
       },
       "models": {
-        "glm-4.7-flash": {
-          "name": "GLM-4.7 Flash",
+        "qwen3.6-35b-a3b": {
+          "name": "Qwen3.6 35B-A3B",
           "limit": {
             "context": 65536,
             "output": 16384
           }
         },
-        "gpt-oss-20b": {
-          "name": "gpt-oss 20B",
+        "gemma-4-26b-a4b": {
+          "name": "Gemma 4 26B-A4B",
           "limit": {
             "context": 65536,
             "output": 16384
