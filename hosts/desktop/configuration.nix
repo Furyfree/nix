@@ -1,7 +1,12 @@
 # MSI Z690 desktop: Intel integrated graphics plus an NVIDIA RTX 3080, which
 # drives both monitors. The installer writes ./local with the detected
 # hardware, the chosen account and the Windows boot entry.
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -9,6 +14,7 @@
     ../../components/intel-graphics.nix
     ../../components/nvidia.nix
     ../../components/gaming.nix
+    ../../components/local-ai.nix
     ../../components/dtu-eduroam.nix
     ../../components/secure-boot.nix
     ./local/hardware-configuration.nix
@@ -18,6 +24,17 @@
 
   # The RTX 3080 runs Whisper's recommended large model; others keep small.
   systemd.user.services.voxtype.scriptArgs = "large-v3-turbo";
+
+  # Local models on CUDA, served to the laptop over the tailnet only. Building
+  # for the RTX 3080 alone keeps the local CUDA build short.
+  nixpkgs.config.cudaCapabilities = [ "8.6" ];
+  services.llama-cpp = {
+    package = pkgs.llama-cpp-cuda;
+    settings.host = "0.0.0.0";
+  };
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [
+    config.services.llama-cpp.settings.port
+  ];
 
   # Both monitors hang on the NVIDIA card. With an Intel driver in the early
   # boot image, Plymouth binds the unused iGPU and the unlock prompt is

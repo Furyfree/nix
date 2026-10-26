@@ -9,5 +9,67 @@
       "sudo *": "ask"
     },
     "doom_loop": "ask"
+  },
+  "provider": {
+    "llama.cpp": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "llama.cpp (this machine)",
+      "options": {
+        "baseURL": "http://127.0.0.1:8080/v1"
+      },
+      "models": {
+        "glm-4.7-flash": {
+          "name": "GLM-4.7 Flash",
+          "limit": {
+            "context": 65536,
+            "output": 16384
+          }
+        },
+        "gpt-oss-20b": {
+          "name": "gpt-oss 20B",
+          "limit": {
+            "context": 65536,
+            "output": 16384
+          }
+        },
+        "gemma-4-e4b": {
+          "name": "Gemma 4 E4B",
+          "limit": {
+            "context": 65536,
+            "output": 16384
+          }
+        }
+      }
+    },
+    "llama.cpp-desktop": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "llama.cpp (desktop)",
+      "options": {
+        "baseURL": "http://desktop:8080/v1"
+      },
+      "models": {
+        "glm-4.7-flash": {
+          "name": "GLM-4.7 Flash",
+          "limit": {
+            "context": 65536,
+            "output": 16384
+          }
+        },
+        "gpt-oss-20b": {
+          "name": "gpt-oss 20B",
+          "limit": {
+            "context": 65536,
+            "output": 16384
+          }
+        },
+        "gemma-4-e4b": {
+          "name": "Gemma 4 E4B",
+          "limit": {
+            "context": 65536,
+            "output": 16384
+          }
+        }
+      }
+    }
   }
 }
