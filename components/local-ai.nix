@@ -50,6 +50,12 @@
       # One model at a time keeps memory for the desktop session.
       models-max = 1;
       sleep-idle-seconds = 600;
+      # Only local pages may read responses; the default lets any website.
+      cors-origins = "localhost";
     };
   };
+
+  # The service has no home, so GPU drivers keep compiled shaders here instead
+  # of rebuilding them on every model load.
+  systemd.services.llama-cpp.environment.XDG_CACHE_HOME = "/var/cache/llama-cpp";
 }
