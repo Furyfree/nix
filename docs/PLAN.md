@@ -39,9 +39,10 @@ Open work only; finished work lives in Git.
 - macOS: standalone Home Manager links the shared configs (`home/darwin.nix`,
   flake outputs `macos-personal` and `macos-work` for Apple silicon); Swift mac-setup
   installs the apps and tools INSTALLATION.md lists and owns system settings.
-  It evaluates but has not run on a Mac yet; `nix-workstation` has a macOS
-  branch tested only with stand-in commands. Still open: matching
-  mac-setup's lists to INSTALLATION.md.
+  Follow [the macOS review and implementation plan](MACOS.md) before activation.
+  Explicit Mac evaluation, builds and live activation remain to be verified;
+  `nix-workstation` has a macOS branch tested only with stand-in commands.
+  Still open: matching mac-setup's lists to INSTALLATION.md.
 - WSL: NixOS-WSL with integrated Home Manager and selected Linux tools.
   win-setup owns Windows setup and apps; test editor server compatibility and
   keep Terminal profiles and Zed local values in backed-up Windows copies.
