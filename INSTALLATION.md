@@ -72,6 +72,10 @@ on its own disk and gets an entry in the boot menu.
 8. `git clone git@github.com:Furyfree/ai-workflow.git ~/Projects/ai-workflow`,
    then in it `nix develop -c just install` for agent rules and skills.
 9. `dtu-eduroam <1Password item>` for DTU Wi-Fi; laptop: `fprintd-enroll`.
+10. Local models download on first use; fetch them now instead, one at a
+    time, and follow `journalctl -fu llama-cpp` until each has loaded:
+    `curl -d '{"model":"qwen3.6-35b-a3b"}' http://127.0.0.1:8080/models/load`,
+    then `gemma-4-e4b`.
 
 ## Accounts and apps
 
@@ -98,7 +102,8 @@ Obsidian's are missing. Run `systemctl --user restart noctalia`, then
 - Log in to `claude`, `codex`, `grok` and `agy`. In Claude Code and Codex,
   pick the Noctalia theme.
 - OpenCode: `opencode auth login` for each AI provider. Pi: `/login` inside
-  `pi` for each provider.
+  `pi` for each provider, and `/login llama.cpp` with the default URL for
+  local models; `/llama` shows them.
 - Claude Desktop: sign in. T3 Code: add your providers in its settings.
 
 ### Everyday apps
