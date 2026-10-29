@@ -18,9 +18,17 @@ in
 {
   imports = [ ./common.nix ];
 
-  # Settings that differ on macOS, loaded by the shared Ghostty and Git configs.
+  # Mac-only files: the macOS parts of the shared Ghostty and Git configs, and
+  # the Mac apps' own settings.
   xdg.configFile = {
     "ghostty/macos".source = link "macos/ghostty";
+    # OmniWM and Tinycast keep these links when they save, so their settings
+    # windows write into the checkout. Caps Lock is Tinycast's Hyper key.
+    "omniwm/settings.toml".source = link "macos/omniwm/settings.toml";
+    "tinycast/settings.json".source = link "macos/tinycast/settings.json";
+    # SwiftBar runs this from ~/.config/swiftbar to show OmniWM's workspaces in
+    # the menu bar, through OmniWM's IPC.
+    "swiftbar/omniwm-workspaces.sh".source = link "macos/swiftbar/omniwm-workspaces.sh";
     # Apps started from the Dock or Finder do not get the shell's PATH, so Git
     # names 1Password's signer by its full path.
     "git/macos".text = ''
