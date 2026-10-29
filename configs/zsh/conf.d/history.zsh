@@ -4,7 +4,7 @@ SAVEHIST=10000
 
 # Keep history private without changing the shell's umask.
 command mkdir -p -m 700 -- "${HISTFILE:h}" &&
-  command chmod 700 -- "${HISTFILE:h}" || {
+  command chmod -- 700 "${HISTFILE:h}" || {
   unset HISTFILE
   return 1
 }
