@@ -23,12 +23,12 @@ let
   scrolloverview = pkgs.hyprlandPlugins.mkHyprlandPlugin {
     hyprland = config.programs.hyprland.package;
     pluginName = "scrolloverview";
-    version = "0-unstable-2026-10-22";
+    version = "0-unstable-2026-10-28";
     src = pkgs.fetchFromGitHub {
       owner = "yayuuu";
       repo = "hyprland-scroll-overview";
-      rev = "6b59bd8bfaec54ceba2d2e2add2dde114d277b9b";
-      hash = "sha256-m/hCIJmg0adw7Df0hFlOskLqo5Iy1KZ1MvbcvuOlAcs=";
+      rev = "07a944e4d16f11d2d9be6ce10bea74a6f1e5f2ae";
+      hash = "sha256-M4NbHbRn/YGDGP54ts/WGxPjQhZMcGy1cIqQ5D89C3E=";
     };
     buildInputs = [ pkgs.lua5_4 ];
     enableParallelBuilding = true;
