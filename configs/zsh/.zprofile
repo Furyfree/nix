@@ -11,6 +11,7 @@ fi
 path=(
   "$HOME/.local/bin"
   "$HOME/.pixi/bin"(N/)
+  "$HOME/.lmstudio/bin"(N/)
   "${path[@]}"
 )
 
