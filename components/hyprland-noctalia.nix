@@ -23,19 +23,19 @@ let
   scrolloverview = pkgs.hyprlandPlugins.mkHyprlandPlugin {
     hyprland = config.programs.hyprland.package;
     pluginName = "scrolloverview";
-    version = "0-unstable-2026-10-11";
+    version = "0-unstable-2026-10-28";
     src = pkgs.fetchFromGitHub {
       owner = "yayuuu";
       repo = "hyprland-scroll-overview";
-      rev = "7ff22457dc016239eff1b19c3ea57de93404b5c9";
-      hash = "sha256-TXr37VVVFd6OlWj3FSE631y4w84aXHD9demAvi9uqcI=";
+      rev = "07a944e4d16f11d2d9be6ce10bea74a6f1e5f2ae";
+      hash = "sha256-M4NbHbRn/YGDGP54ts/WGxPjQhZMcGy1cIqQ5D89C3E=";
     };
     buildInputs = [ pkgs.lua5_4 ];
     enableParallelBuilding = true;
     dontUseCmakeConfigure = true;
     buildPhase = ''
       runHook preBuild
-      export SCROLLOVERVIEW_BUILD_VERSION=7ff2245
+      export SCROLLOVERVIEW_BUILD_VERSION=6b59bd8
       make all
       runHook postBuild
     '';

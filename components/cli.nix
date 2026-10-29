@@ -1,4 +1,5 @@
-_:
+{ pkgs, ... }:
 
 {
+  environment.systemPackages = [ pkgs.ffmpeg ];
 }

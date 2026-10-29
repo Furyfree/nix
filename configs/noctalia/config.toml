@@ -217,7 +217,25 @@ enabled = [
     "rxtsel/portctl",
     "cleboost/ssh-launcher",
     "8bury/lid-guard",
+    "furyfree/key-promoter",
 ]
+
+# The built-in sources are listed so adding one keeps them.
+[[plugins.source]]
+name = "official"
+kind = "git"
+location = "https://github.com/noctalia-dev/official-plugins"
+
+[[plugins.source]]
+name = "community"
+kind = "git"
+location = "https://github.com/noctalia-dev/community-plugins"
+
+# Key Promoter: shows the Hyprland shortcut after mouse use.
+[[plugins.source]]
+name = "furyfree"
+kind = "git"
+location = "https://github.com/Furyfree/noctalia-key-promoter"
 
 [plugin_settings."umedbazarov/crashes"]
 terminal_cmd = "ghostty --class=com.mitchellh.ghostty.presentation -e"
@@ -261,6 +279,9 @@ directory = "~/Videos/Recordings"
 [plugin_settings."kenn/keybind-cheatsheet"]
 hyprland_lua_config = "~/.config/hypr/conf.d/keybinds.lua"
 hyprland_parser = "lua"
+
+[plugin_settings."furyfree/key-promoter"]
+suggest_after = 2
 
 [brightness]
 # External monitors through ddcutil; laptop panels keep the backlight.

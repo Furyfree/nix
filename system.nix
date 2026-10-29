@@ -7,6 +7,8 @@
     ./components/apps.nix
     ./components/boot.nix
     ./components/claude-desktop.nix
+    ./components/cli.nix
+    ./components/craft-suite.nix
     ./components/development.nix
     ./components/devices.nix
     ./components/editors.nix
