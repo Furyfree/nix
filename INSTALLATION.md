@@ -183,8 +183,8 @@ Home Manager expects these in place; mac-setup provides all but the first two.
   `experimental-features = nix-command flakes` in `/etc/nix/nix.conf`.
 - 1Password, with Settings → Developer → Use the SSH agent and Integrate with
   1Password CLI turned on, and the 1Password CLI (`op`). Home Manager links
-  the agent socket to `~/.1password/agent.sock` and the Git signer to
-  `~/.local/bin/op-ssh-sign`.
+  the agent socket to `~/.1password/agent.sock` and points Git at the app's
+  signer in `~/.config/git/macos`.
 - Ghostty, Zed and VSCodium. Home Manager links or merges their settings.
 - JetBrainsMono Nerd Font, which the Ghostty config uses.
 - The command-line tools the shared configs use, as NixOS installs them in

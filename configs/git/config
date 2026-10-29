@@ -69,6 +69,10 @@
 	# On PATH from the 1Password app module.
 	program = op-ssh-sign
 
+# macOS-only overrides, written by home/darwin.nix; Git skips a missing include.
+[include]
+	path = ~/.config/git/macos
+
 # As `git lfs install` writes it, so a project running that changes nothing.
 [filter "lfs"]
 	clean = git-lfs clean -- %f
