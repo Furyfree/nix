@@ -9,7 +9,9 @@
 
 let
   # A live link to a file or folder in the checkout's configs/.
-  link = path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
+  link =
+    path:
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
   # Merges that only make sense on Linux: Noctalia's AI usage widget, and gh
   # opening the browser through UWSM.
   linuxSettings = lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
@@ -50,7 +52,9 @@ in
           "git/config"
           "git/ignore"
         ]
-        (name: { source = link name; })
+        (name: {
+          source = link name;
+        })
       // {
         # The whole folder, so vim.pack writes its lock file into the checkout.
         "nvim".source = link "nvim";

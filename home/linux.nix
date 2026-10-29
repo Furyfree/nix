@@ -8,7 +8,9 @@
 }:
 
 let
-  link = path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
+  link =
+    path:
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
   # A copy of a package's launcher entry, hidden from app menus but still
   # usable for file associations.
   hidden =
@@ -101,7 +103,9 @@ in
           "voxtype/config.toml"
           "MangoHud/MangoHud.conf"
         ]
-        (name: { source = link name; })
+        (name: {
+          source = link name;
+        })
       // {
         "gtk-3.0/settings.ini".source = link "gtk/gtk-3.0/settings.ini";
         "gtk-4.0/settings.ini".source = link "gtk/gtk-4.0/settings.ini";
