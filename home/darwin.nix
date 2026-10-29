@@ -18,8 +18,16 @@ in
 {
   imports = [ ./common.nix ];
 
-  # Settings that differ on macOS, loaded by the shared Ghostty config.
-  xdg.configFile."ghostty/macos".source = link "macos/ghostty";
+  # Settings that differ on macOS, loaded by the shared Ghostty and Git configs.
+  xdg.configFile = {
+    "ghostty/macos".source = link "macos/ghostty";
+    # Apps started from the Dock or Finder do not get the shell's PATH, so Git
+    # names 1Password's signer by its full path.
+    "git/macos".text = ''
+      [gpg "ssh"]
+        program = ${onePasswordSigner}
+    '';
+  };
 
   # Zed comes from mac-setup; Home Manager only merges its settings.
   programs.zed-editor.package = null;
@@ -35,8 +43,6 @@ in
     file = {
       # The shared SSH config uses the Linux socket path.
       ".1password/agent.sock".source = config.lib.file.mkOutOfStoreSymlink onePasswordAgent;
-      # The shared Git config signs with op-ssh-sign from PATH.
-      ".local/bin/op-ssh-sign".source = config.lib.file.mkOutOfStoreSymlink onePasswordSigner;
     }
     # VSCodium keeps its settings under Application Support on macOS.
     // lib.mapAttrs (_: name: { source = link "vscodium/${name}"; }) {
