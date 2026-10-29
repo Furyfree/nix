@@ -170,7 +170,8 @@ Obsidian's are missing. Run `systemctl --user restart noctalia`, then
 macOS uses standalone Home Manager only to link the shared configs; mac-setup
 installs every app and command-line tool, and Nix installs nothing. The
 personal Mac is `macos-personal` and the work Mac `macos-work`, which gets the
-work SSH keys. Not yet tested on a Mac.
+work SSH keys. Tested on the personal Mac with macOS 27.0.1; the work Mac is
+not yet set up.
 
 ### Before Home Manager
 
