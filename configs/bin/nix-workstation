@@ -151,12 +151,13 @@ mac_host() {
 }
 
 # Build, show the changes, ask, then activate the build as a new generation.
-# A failed build or a no changes nothing.
+# A failed build or a no changes nothing. The build gets no result link, which
+# would outlive a no or a failure and keep it from garbage collection;
+# activation makes the new generation a root itself.
 cmd_switch_darwin() {
   local answer host out
   host=$(mac_host)
-  out=$(mktemp -d)/result
-  nix build "$NH_FLAKE#homeConfigurations.$host.activationPackage" --out-link "$out"
+  out=$(nix build "$NH_FLAKE#homeConfigurations.$host.activationPackage" --no-link --print-out-paths)
   if [[ -e $profile ]]; then
     nix store diff-closures "$profile" "$out"
   fi
