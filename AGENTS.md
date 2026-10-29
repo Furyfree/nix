@@ -7,8 +7,11 @@ preferences and generation rollback.
 Finish the full NixOS/Linux setup with integrated Home Manager and move onto it
 first. Then extend compatible user configuration through Home Manager to macOS
 and WSL. macOS runs standalone Home Manager on the personal Mac; WSL is a
-future target, not working support today. Migrate tools one at a time; keep
-Fedora, Nimbus and Chezmoi until their replacements work.
+future target, not working support today. mac-setup holds every macOS
+instruction and the open macOS work, this repository's part included: keep
+the Home Manager code here and only point to mac-setup in these docs. Migrate
+tools one at a time; keep Fedora, Nimbus and Chezmoi until their replacements
+work.
 
 ## What must not break
 
@@ -47,7 +50,8 @@ patches on machines.
   Shared policy belongs above it.
 - `configs/hypr/hosts/<host>.lua`: per-host monitors, workspaces and keys,
   linked as `~/.config/hypr/host.lua` by `hosts/<host>/home.nix`.
-- `INSTALLATION.md`: install steps; update it with installer or first-boot changes.
+- `INSTALLATION.md`: NixOS install steps; update it with installer or
+  first-boot changes. The Macs' steps live in mac-setup.
 - `scripts/install.py`: installer launcher; `scripts/nixos_setup/` holds the
   wizard, storage, configuration, credential and installation modules.
 - `tests/`, `justfile`: installer behavior checks, one file per module, and
