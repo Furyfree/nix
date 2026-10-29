@@ -20,6 +20,9 @@ inline = 'source "$ZDOTDIR/conf.d/zoxide.zsh"'
 [plugins.zsh-autosuggestions]
 github = "zsh-users/zsh-autosuggestions"
 
+[plugins.zsh-you-should-use]
+github = "MichaelAquilina/zsh-you-should-use"
+
 # Highlighting must load after completion and other line-editor plugins.
 [plugins.zsh-syntax-highlighting]
 github = "zsh-users/zsh-syntax-highlighting"

@@ -26,9 +26,9 @@ os_age() {
 }
 
 noctalia_label() {
-  # The native package's running process is named noctalia. Installation alone
-  # does not establish that this shell is running.
-  pgrep -u "$(id -u)" -x noctalia >/dev/null 2>&1 || return
+  # Match the command path: the Nix wrapper renames the process. Installation
+  # alone does not establish that this shell is running.
+  pgrep -u "$(id -u)" -f '/bin/noctalia( |$)' >/dev/null 2>&1 || return
   # `noctalia --version` prints "noctalia v5.1.0"; keep the plain label otherwise.
   version=$(noctalia --version 2>/dev/null)
   version=${version#noctalia v}

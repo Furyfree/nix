@@ -90,7 +90,9 @@ actions = {
     end,
     on_current_monitor = function(slot)
         local monitor = hl.get_active_monitor()
-        local workspaces = monitor and monitorWorkspaces[monitor.name]
+        -- Host tables key monitors by name or by "desc:<description>".
+        local workspaces = monitor and (monitorWorkspaces[monitor.name]
+            or monitorWorkspaces["desc:" .. monitor.description])
         return workspaces and workspaces[slot] or slot
     end,
 }
