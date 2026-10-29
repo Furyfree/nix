@@ -25,16 +25,10 @@
   # The RTX 3080 runs Whisper's recommended large model; others keep small.
   systemd.user.services.voxtype.scriptArgs = "large-v3-turbo";
 
-  # Local models on CUDA, served to the laptop over the tailnet only. Building
-  # for the RTX 3080 alone keeps the local CUDA build short.
+  # Local models on CUDA. Building for the RTX 3080 alone keeps the local CUDA
+  # build short.
   nixpkgs.config.cudaCapabilities = [ "8.6" ];
-  services.llama-cpp = {
-    package = pkgs.llama-cpp-cuda;
-    settings.host = "0.0.0.0";
-  };
-  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [
-    config.services.llama-cpp.settings.port
-  ];
+  services.llama-cpp.package = pkgs.llama-cpp-cuda;
 
   # Both monitors hang on the NVIDIA card. With an Intel driver in the early
   # boot image, Plymouth binds the unused iGPU and the unlock prompt is

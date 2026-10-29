@@ -13,32 +13,9 @@
   "provider": {
     "llama.cpp": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "llama.cpp (this machine)",
+      "name": "llama.cpp",
       "options": {
         "baseURL": "http://127.0.0.1:8080/v1"
-      },
-      "models": {
-        "qwen3.6-35b-a3b": {
-          "name": "Qwen3.6 35B-A3B",
-          "limit": {
-            "context": 65536,
-            "output": 32768
-          }
-        },
-        "gemma-4-e4b": {
-          "name": "Gemma 4 E4B",
-          "limit": {
-            "context": 65536,
-            "output": 16384
-          }
-        }
-      }
-    },
-    "llama.cpp-desktop": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "llama.cpp (desktop)",
-      "options": {
-        "baseURL": "http://desktop:8080/v1"
       },
       "models": {
         "qwen3.6-35b-a3b": {
