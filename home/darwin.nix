@@ -24,6 +24,10 @@ in
   # Zed comes from mac-setup; Home Manager only merges its settings.
   programs.zed-editor.package = null;
 
+  # mac-setup installs every app, so Home Manager has none to copy into
+  # ~/Applications and needs no App Management check.
+  targets.darwin.copyApps.enable = false;
+
   home = {
     # Usernames come from the host's ignored local/user.nix.
     homeDirectory = lib.mkDefault "/Users/${config.home.username}";
