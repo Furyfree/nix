@@ -44,34 +44,54 @@
     ],
     "apps": {
       "com.1password.1password": {
-        "shortcut": "hyper+shift+p"
+        "shortcut": "hyper+shift+p",
+        "alias": null,
+        "showInLauncher": true
       },
       "com.apple.finder": {
-        "shortcut": "hyper+shift+f"
+        "shortcut": "hyper+shift+f",
+        "alias": null,
+        "showInLauncher": true
       },
       "com.brave.Browser.origin": {
-        "shortcut": "hyper+shift+b"
+        "shortcut": "hyper+shift+b",
+        "alias": null,
+        "showInLauncher": true
       },
       "com.hnc.Discord": {
-        "shortcut": "hyper+shift+d"
+        "shortcut": "hyper+shift+d",
+        "alias": null,
+        "showInLauncher": true
       },
       "com.mitchellh.ghostty": {
-        "shortcut": "hyper+return"
+        "shortcut": "hyper+return",
+        "alias": null,
+        "showInLauncher": true
       },
       "com.t3tools.t3code": {
-        "shortcut": "hyper+shift+t"
+        "shortcut": "hyper+shift+t",
+        "alias": null,
+        "showInLauncher": true
       },
       "com.vscodium": {
-        "shortcut": "hyper+shift+v"
+        "shortcut": "hyper+shift+v",
+        "alias": null,
+        "showInLauncher": true
       },
       "dev.zed.Zed": {
-        "shortcut": "hyper+shift+z"
+        "shortcut": "hyper+shift+z",
+        "alias": null,
+        "showInLauncher": true
       },
       "md.obsidian": {
-        "shortcut": "hyper+shift+o"
+        "shortcut": "hyper+shift+o",
+        "alias": null,
+        "showInLauncher": true
       },
       "org.whispersystems.signal-desktop": {
-        "shortcut": "hyper+shift+g"
+        "shortcut": "hyper+shift+g",
+        "alias": null,
+        "showInLauncher": true
       }
     }
   },
@@ -83,7 +103,9 @@
     "enabled": true,
     "actions": {
       "lock-screen": {
-        "shortcut": "hyper+l"
+        "shortcut": "hyper+l",
+        "alias": null,
+        "showInLauncher": true
       }
     }
   },
@@ -132,14 +154,20 @@
     "language": null
   },
   "fileSearch": {
-    "enabled": false,
+    "enabled": true,
     "scopes": [
       "~"
     ],
     "ignorePatterns": [],
     "removedDefaultPatterns": [],
     "showInLauncher": false,
-    "commands": {}
+    "commands": {
+      "search-files": {
+        "shortcut": "option+cmd+space",
+        "alias": null,
+        "showInLauncher": true
+      }
+    }
   },
   "notes": {
     "enabled": false,
@@ -212,14 +240,23 @@
   "clipboard": {
     "enabled": true,
     "retentionDays": 90,
-    "defaultAction": "paste",
+    "defaultAction": "copy",
     "disabledApps": [
       "com.apple.keychainaccess",
-      "com.apple.Passwords"
+      "com.apple.Passwords",
+      "com.1password.1password",
+      "com.1password.safari"
     ],
     "commands": {
       "clipboard-history": {
-        "shortcut": "hyper+v"
+        "shortcut": "hyper+v",
+        "alias": null,
+        "showInLauncher": true
+      },
+      "paste-sequentially": {
+        "shortcut": null,
+        "alias": null,
+        "showInLauncher": false
       }
     }
   },
