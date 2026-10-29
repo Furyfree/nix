@@ -5,9 +5,10 @@ Windows where possible. I want repeatable installs and updates, shared desktop
 preferences and generation rollback.
 
 Finish the full NixOS/Linux setup with integrated Home Manager and move onto it
-first. Then extend compatible user configuration through Home Manager to WSL
-and macOS. Those are future targets, not working support today. Migrate tools
-one at a time; keep Fedora, Nimbus and Chezmoi until their replacements work.
+first. Then extend compatible user configuration through Home Manager to macOS
+and WSL. macOS runs standalone Home Manager on the personal Mac; WSL is a
+future target, not working support today. Migrate tools one at a time; keep
+Fedora, Nimbus and Chezmoi until their replacements work.
 
 ## What must not break
 
