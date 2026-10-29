@@ -2,7 +2,9 @@
 
 NixOS with integrated Home Manager for my workstations: `desktop`, `laptop` and
 the `nixos-test` machine. To set up a machine, follow
-[INSTALLATION.md](INSTALLATION.md).
+[INSTALLATION.md](INSTALLATION.md). The Macs use the standalone Home Manager
+outputs here, but [mac-setup](https://github.com/Furyfree/mac-setup) documents
+their setup and daily use.
 
 ## Daily use
 
