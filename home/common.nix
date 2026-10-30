@@ -31,6 +31,8 @@ in
           "ghostty/themes/charcoal-blue"
           "sheldon/plugins.toml"
           "zsh/.zprofile"
+          # Child zsh inherits ZDOTDIR and reads this copy, not ~/.zshenv.
+          "zsh/.zshenv"
           "zsh/.zshrc"
           "zsh/conf.d/aliases.zsh"
           "zsh/conf.d/completion.zsh"

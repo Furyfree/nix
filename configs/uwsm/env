@@ -16,3 +16,7 @@ for uwsm_directory in \
 done
 export PATH
 unset uwsm_mise_data uwsm_directory
+
+# Agents write bash, so run their commands in bash; .zshenv sets the same.
+export CLAUDE_CODE_SHELL=/run/current-system/sw/bin/bash
+export GROK_SHELL=/run/current-system/sw/bin/bash
