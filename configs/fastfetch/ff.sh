@@ -2,8 +2,10 @@
 # Shell rows for config.jsonc; fastfetch's Lua cannot read files or run commands.
 
 os_age() {
-  # NixOS writes machine-id on first boot after installation.
-  birth=$(stat -c %W /etc/machine-id 2>/dev/null) || birth=
+  # NixOS writes machine-id on first boot after installation; macOS writes
+  # .AppleSetupDone when Setup Assistant finishes.
+  birth=$(stat -c %W /etc/machine-id 2>/dev/null ||
+    stat -f %B /var/db/.AppleSetupDone 2>/dev/null) || birth=
   now=$(date +%s 2>/dev/null) || now=
   case "$birth:$now" in
     *[!0-9:]* | :* | *:)

@@ -44,22 +44,17 @@
     ],
     "apps": {
       "com.1password.1password": {
-        "shortcut": "hyper+shift+p",
+        "shortcut": "hyper+p",
         "alias": null,
         "showInLauncher": true
       },
       "com.apple.finder": {
-        "shortcut": "hyper+shift+f",
+        "shortcut": "hyper+f",
         "alias": null,
         "showInLauncher": true
       },
       "com.brave.Browser.origin": {
-        "shortcut": "hyper+shift+b",
-        "alias": null,
-        "showInLauncher": true
-      },
-      "com.hnc.Discord": {
-        "shortcut": "hyper+shift+d",
+        "shortcut": "hyper+b",
         "alias": null,
         "showInLauncher": true
       },
@@ -69,27 +64,27 @@
         "showInLauncher": true
       },
       "com.t3tools.t3code": {
-        "shortcut": "hyper+shift+t",
+        "shortcut": "hyper+t",
         "alias": null,
         "showInLauncher": true
       },
       "com.vscodium": {
-        "shortcut": "hyper+shift+v",
+        "shortcut": "hyper+c",
         "alias": null,
         "showInLauncher": true
       },
       "dev.zed.Zed": {
-        "shortcut": "hyper+shift+z",
+        "shortcut": "hyper+z",
         "alias": null,
         "showInLauncher": true
       },
       "md.obsidian": {
-        "shortcut": "hyper+shift+o",
+        "shortcut": "hyper+o",
         "alias": null,
         "showInLauncher": true
       },
       "org.whispersystems.signal-desktop": {
-        "shortcut": "hyper+shift+g",
+        "shortcut": "hyper+g",
         "alias": null,
         "showInLauncher": true
       }
@@ -195,14 +190,14 @@
     "layoutsShowInLauncher": true,
     "roomsShowInLauncher": true,
     "shortcuts": {
-      "left-half": "hyper+left",
-      "right-half": "hyper+right",
-      "top-half": "hyper+up",
-      "bottom-half": "hyper+down",
-      "top-left-quarter": "hyper+u",
-      "top-right-quarter": "hyper+i",
-      "bottom-left-quarter": "hyper+j",
-      "bottom-right-quarter": "hyper+k",
+      "left-half": "ctrl+option+left",
+      "right-half": "ctrl+option+right",
+      "top-half": "ctrl+option+up",
+      "bottom-half": "ctrl+option+down",
+      "top-left-quarter": "ctrl+option+u",
+      "top-right-quarter": "ctrl+option+i",
+      "bottom-left-quarter": "ctrl+option+j",
+      "bottom-right-quarter": "ctrl+option+k",
       "first-three-fourths": null,
       "last-three-fourths": null,
       "first-third": null,
@@ -210,26 +205,26 @@
       "last-third": null,
       "first-two-thirds": null,
       "last-two-thirds": null,
-      "maximize": "hyper+f",
+      "maximize": "ctrl+option+return",
       "almost-maximize": null,
       "reasonable-size": null,
       "maximize-height": null,
       "maximize-width": null,
-      "center": "hyper+c",
+      "center": "ctrl+option+c",
       "center-half": null,
       "center-two-thirds": null,
       "make-larger": null,
       "make-smaller": null,
-      "restore": "hyper+r",
+      "restore": "ctrl+option+r",
       "move-left": null,
       "move-right": null,
       "move-up": null,
       "move-down": null,
-      "next-display": "hyper+.",
-      "previous-display": "hyper+,",
-      "toggle-fullscreen": "hyper+shift+return",
-      "previous-space": "hyper+shift+left",
-      "next-space": "hyper+shift+right"
+      "next-display": "ctrl+option+.",
+      "previous-display": "ctrl+option+,",
+      "toggle-fullscreen": "ctrl+option+f",
+      "previous-space": "hyper+left",
+      "next-space": "hyper+right"
     },
     "aliases": {},
     "customSizes": [],

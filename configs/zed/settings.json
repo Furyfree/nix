@@ -61,6 +61,13 @@
         "!basedpyright",
         "..."
       ]
+    },
+    "Nix": {
+      "language_servers": [
+        "nixd",
+        "!nil",
+        "..."
+      ]
     }
   },
   "auto_install_extensions": {
