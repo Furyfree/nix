@@ -113,6 +113,9 @@ in
           source = link name;
         })
       // {
+        # Key Promoter snippet, as a live checkout link; hyprland.lua loads it first.
+        "hypr/conf.d/key-promoter.lua".source =
+          config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/noctalia-key-promoter/key-promoter/hypr/key-promoter.lua";
         "gtk-3.0/settings.ini".source = link "gtk/gtk-3.0/settings.ini";
         "gtk-4.0/settings.ini".source = link "gtk/gtk-4.0/settings.ini";
         # File manager sidebar; bookmarks need absolute paths.
