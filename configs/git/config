@@ -1,7 +1,8 @@
 [user]
 	useConfigOnly = true
 	name = Patrick Byrne
-	email = pby.accounts@byrne.dk
+	# GitHub's noreply address, so public commits never show a real one.
+	email = 89527463+Furyfree@users.noreply.github.com
 
 [core]
 	pager = delta
