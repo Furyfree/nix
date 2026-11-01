@@ -105,6 +105,11 @@ hl.bind(
     { description = "Focus or open T3 Code" }
 )
 hl.bind(
+    mainMod .. " + SHIFT + C",
+    focus_or_launch("com.anthropic.Claude", "uwsm-app -- claude-desktop"),
+    { description = "Focus or open Claude" }
+)
+hl.bind(
     mainMod .. " + W",
     hl.dsp.window.close(),
     { description = "Close focused window" }
