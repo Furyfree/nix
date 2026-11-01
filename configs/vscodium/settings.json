@@ -33,6 +33,7 @@
   "editor.formatOnSave": false,
   "editor.formatOnPaste": false,
   "editor.formatOnType": false,
+  "editor.accessibilitySupport": "off",
   "files.autoSave": "off",
   "prettier.enable": false,
   "[go]": {

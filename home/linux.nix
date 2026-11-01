@@ -60,6 +60,12 @@ in
         exec = "launch focus-webapp https://www.google.com/maps";
         icon = "webapp-google-maps";
       };
+      # Watch, pause or help an agent in its hidden desktop.
+      agent-workspace = {
+        name = "Agent Workspace";
+        exec = "agent-workspace-linux viewer --id default --input-forwarding";
+        icon = "preferences-desktop-remote-desktop";
+      };
     };
     userDirs = {
       enable = true;
@@ -147,6 +153,10 @@ in
     # folder here that stops Steam's first-run setup.
     ".steam/steam".source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/Steam";
     ".local/bin/launch".source = link "bin/launch";
+    # T3 Code keeps these next to its threads and secrets, which stay unlinked.
+    ".t3/userdata/settings.json".source = link "t3code/settings.json";
+    ".t3/userdata/client-settings.json".source = link "t3code/client-settings.json";
+    ".t3/userdata/keybindings.json".source = link "t3code/keybindings.json";
   };
 
   home.activation = {
@@ -192,6 +202,8 @@ in
         icon-theme = "Papirus-Dark";
         cursor-theme = "Bibata-Modern-Ice";
         cursor-size = 24;
+        # Apps list their buttons and fields for computer-use-linux.
+        toolkit-accessibility = true;
       };
       "org/gnome/nautilus/preferences".show-hidden-files = true;
       "org/gnome/desktop/privacy".remember-recent-files = false;

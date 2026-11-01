@@ -28,13 +28,22 @@ let
   };
 
   # Programs the hidden desktop may launch. Ghostty runs a shell, so it lets
-  # an agent start anything; the list keeps other GUI apps out.
+  # an agent start anything; the list keeps other GUI apps out. The system
+  # paths match the installed apps, flags included. Signal, Fastmail and
+  # 1Password stay out so agents cannot read them unseen.
   permissions = pkgs.writeText "agent-workspace-permissions.json" (
     builtins.toJSON {
-      apps.allow = map lib.getExe [
-        pkgs.brave-origin
-        pkgs.ghostty
-      ];
+      apps.allow =
+        map lib.getExe [
+          pkgs.brave-origin
+          pkgs.ghostty
+        ]
+        ++ map (name: "/run/current-system/sw/bin/${name}") [
+          "obsidian"
+          "codium"
+          "claude-desktop"
+          "windows-vm"
+        ];
     }
   );
 
@@ -60,7 +69,9 @@ let
       runtimeDependencies = [ pkgs.libxkbcommon ];
 
       # The server finds the on-screen indicator next to itself. hyprctl comes
-      # from the Hyprland session.
+      # from the Hyprland session. complete_interaction tells me with a
+      # notification when an agent has finished, since the indicator hides
+      # between actions.
       installPhase = ''
         runHook preInstall
         install -Dm755 ${server} $out/bin/computer-use-linux
@@ -71,11 +82,13 @@ let
               with pkgs;
               [
                 grim
+                libnotify
                 wtype
                 ydotool
               ]
             )
-          }
+          } \
+          --set-default COMPUTER_USE_LINUX_NOTIFY_ON_COMPLETE 1
         runHook postInstall
       '';
 
@@ -112,7 +125,8 @@ let
       appendRunpaths = [ "${pkgs.addDriverRunpath.driverLink}/lib" ];
 
       # The tools behind its default X11 desktop, the app allowlist, and Brave
-      # as the browser it opens with a profile of its own.
+      # as the browser it opens with a profile of its own. Agents in T3 Code
+      # inherit ELECTRON_RUN_AS_NODE, which would start Electron apps as Node.
       installPhase = ''
         runHook preInstall
         install -Dm755 $src $out/bin/agent-workspace-linux
@@ -134,6 +148,7 @@ let
               ]
             )
           } \
+          --unset ELECTRON_RUN_AS_NODE \
           --set-default AGENT_WORKSPACE_PERMISSIONS ${permissions} \
           --set-default BROWSER_BIN ${lib.getExe pkgs.brave-origin}
         runHook postInstall

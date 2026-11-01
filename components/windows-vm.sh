@@ -257,7 +257,10 @@ cmd_launch() {
     sleep 2
   done
 
-  scale=$(hyprctl monitors -j | jq -r '.[] | select(.focused).scale * 100 | floor')
+  # Outside Hyprland, such as in an agent's hidden desktop, keep FreeRDP's
+  # default scale.
+  scale=$(hyprctl monitors -j 2>/dev/null |
+    jq -r '.[] | select(.focused).scale * 100 | floor' 2>/dev/null) || scale=100
   local args=(-grab-keyboard /sound /microphone /clipboard /dynamic-resolution
     /gfx:AVC444 "/title:Windows VM" "/floatbar:sticky:off,default:visible,show:fullscreen" /f)
   if ((scale >= 170)); then

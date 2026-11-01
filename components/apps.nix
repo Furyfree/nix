@@ -1,9 +1,16 @@
 # Desktop applications that need no sign-in.
 { pkgs, ... }:
 
+let
+  # Chrome-based apps list their contents for computer-use-linux only with this
+  # flag. Signal and Fastmail stay without, so other programs cannot read them.
+  accessible = pkg: pkg.override { commandLineArgs = "--force-renderer-accessibility"; };
+in
 {
   programs = {
     gnome-disks.enable = true;
+    # Opens its port 53317 for receiving.
+    localsend.enable = true;
     obs-studio.enable = true;
   };
 
@@ -21,13 +28,13 @@
     mpv
     pinta
     libreoffice
-    vscodium
+    (accessible vscodium)
     t3code
-    brave-origin
+    (accessible brave-origin)
     signal-desktop
     vesktop
     spotify
-    obsidian
+    (accessible obsidian)
     fastmail-desktop
     woeusb
     jetbrains-toolbox
