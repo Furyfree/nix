@@ -10,8 +10,7 @@ and WSL. macOS runs standalone Home Manager on the personal Mac; WSL is a
 future target, not working support today. mac-setup holds every macOS
 instruction and the open macOS work, this repository's part included: keep
 the Home Manager code here and only point to mac-setup in these docs. Migrate
-tools one at a time; keep Fedora, Nimbus and Chezmoi until their replacements
-work.
+tools one at a time.
 
 ## What must not break
 

@@ -173,6 +173,6 @@ Obsidian's are missing. Run `systemctl --user restart noctalia`, then
 ## macOS
 
 The Macs use this repository's standalone Home Manager configuration,
-`macos-personal` and `macos-work`. [mac-setup](https://github.com/Furyfree/mac-setup)
-documents them: its `INSTALLATION.md` holds their whole setup, Home Manager
-included, and its README their daily use.
+`macos-personal` and `macos-work`. My private mac-setup repository documents
+them: its `INSTALLATION.md` holds their whole setup, Home Manager included, and
+its README their daily use.

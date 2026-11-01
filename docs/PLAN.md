@@ -38,9 +38,8 @@ Open work only; finished work lives in Git.
 
 - macOS: standalone Home Manager links the shared configs (`home/darwin.nix`,
   flake outputs `macos-personal` and `macos-work` for Apple silicon). Its open
-  work lives in mac-setup's
-  [docs/PLAN.md](https://github.com/Furyfree/mac-setup/blob/main/docs/PLAN.md),
-  under Nix repository changes.
+  work lives in the private mac-setup repository's `docs/PLAN.md`, under Nix
+  repository changes.
 - WSL: NixOS-WSL with integrated Home Manager and selected Linux tools.
   win-setup owns Windows setup and apps; test editor server compatibility and
   keep Terminal profiles and Zed local values in backed-up Windows copies.
