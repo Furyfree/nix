@@ -27,23 +27,21 @@ let
     platforms = [ "x86_64-linux" ];
   };
 
-  # Programs the hidden desktop may launch. Ghostty runs a shell, so it lets
-  # an agent start anything; the list keeps other GUI apps out. The system
-  # paths match the installed apps, flags included. Signal, Fastmail and
-  # 1Password stay out so agents cannot read them unseen.
+  # Programs the hidden desktop may launch. The system paths match the
+  # installed apps, flags included. Signal, Fastmail and 1Password stay out
+  # so agents cannot read them unseen; Ghostty and Claude Desktop stay out
+  # because a shell or another Claude session would get around the agents'
+  # permission prompts. VSCodium's terminal is barred only by the skill.
   permissions = pkgs.writeText "agent-workspace-permissions.json" (
     builtins.toJSON {
-      apps.allow =
-        map lib.getExe [
-          pkgs.brave-origin
-          pkgs.ghostty
-        ]
-        ++ map (name: "/run/current-system/sw/bin/${name}") [
-          "obsidian"
-          "codium"
-          "claude-desktop"
-          "windows-vm"
-        ];
+      apps.allow = [
+        (lib.getExe pkgs.brave-origin)
+      ]
+      ++ map (name: "/run/current-system/sw/bin/${name}") [
+        "obsidian"
+        "codium"
+        "windows-vm"
+      ];
     }
   );
 
