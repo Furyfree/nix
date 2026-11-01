@@ -102,6 +102,7 @@ in
     merge ${config.home.homeDirectory}/.grok/config.toml ${../configs/grok/config.toml} toml
     merge ${config.xdg.configHome}/opencode/opencode.jsonc ${../configs/opencode/opencode.json} json
     merge ${config.home.homeDirectory}/.pi/agent/settings.json ${../configs/pi/settings.json} json
+    merge ${config.home.homeDirectory}/.pi/agent/mcp.json ${../configs/pi/mcp.json} json
     merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/config.yml} yaml
     ${linuxSettings}
   '';

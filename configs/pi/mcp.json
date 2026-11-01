@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "computer-use-linux": {
+      "command": "computer-use-linux",
+      "args": ["mcp"]
+    },
+    "agent-workspace-linux": {
+      "command": "agent-workspace-linux",
+      "args": ["mcp"]
+    }
+  }
+}

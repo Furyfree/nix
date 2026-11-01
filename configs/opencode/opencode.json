@@ -35,5 +35,21 @@
         }
       }
     }
+  },
+  "mcp": {
+    "computer-use-linux": {
+      "type": "local",
+      "command": [
+        "computer-use-linux",
+        "mcp"
+      ]
+    },
+    "agent-workspace-linux": {
+      "type": "local",
+      "command": [
+        "agent-workspace-linux",
+        "mcp"
+      ]
+    }
   }
 }

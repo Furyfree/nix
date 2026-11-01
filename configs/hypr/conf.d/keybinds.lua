@@ -124,14 +124,6 @@ hl.bind(
     hl.dsp.exec_cmd("noctalia msg panel-toggle clipboard"),
     { description = "Open clipboard history" }
 )
-local function toggle_overview()
-    if hl.plugin.scrolloverview then
-        hl.plugin.scrolloverview.overview("toggle all")
-    else
-        hl.exec_cmd("notify-send 'Workspace overview unavailable' 'ScrollOverview did not load; check hyprctl plugin list.'")
-    end
-end
-hl.bind(mainMod .. " + O", toggle_overview, { description = "Toggle workspace overview on all monitors" })
 hl.bind(
     mainMod .. " + SHIFT + N",
     hl.dsp.exec_cmd("noctalia msg panel-toggle control-center notifications"),
@@ -291,8 +283,7 @@ for _, binding in ipairs({
     )
 end
 
--- NuPhy top row without Fn: F3 is Mission Control, F5 dictation, F6 moon.
-hl.bind("XF86LaunchA", toggle_overview, { description = "NuPhy F3: toggle workspace overview" })
+-- NuPhy top row without Fn: F3 (overview) is in overview.lua, F5 dictation, F6 moon.
 hl.bind(
     "XF86VoiceCommand",
     hl.dsp.exec_cmd("noctalia msg mic-mute"),

@@ -14,7 +14,8 @@ require("./conf.d/workspace-layouts.lua")
 require("./conf.d/decoration.lua")
 require("./conf.d/animations.lua")
 require("./conf.d/window-rules.lua")
-require("./conf.d/overview.lua")
+-- enableoverview: off with components/scrolloverview.nix in system.nix until the plugin builds.
+-- require("./conf.d/overview.lua")
 require("./conf.d/autostart.lua")
 require("./conf.d/keybinds.lua")
 

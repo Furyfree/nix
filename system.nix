@@ -8,6 +8,7 @@
     ./components/boot.nix
     ./components/claude-desktop.nix
     ./components/cli.nix
+    ./components/computer-use.nix
     ./components/craft-suite.nix
     ./components/development.nix
     ./components/devices.nix
@@ -15,6 +16,9 @@
     ./components/hyprland-noctalia.nix
     ./components/networking.nix
     ./components/printing.nix
+    # enableoverview: off until the plugin builds against Hyprland 0.57; also
+    # re-enable conf.d/overview.lua in configs/hypr/hyprland.lua.
+    # ./components/scrolloverview.nix
     ./components/services.nix
     ./components/shell.nix
     ./components/snapper.nix
