@@ -17,6 +17,8 @@
     ../../components/local-ai.nix
     ../../components/dtu-eduroam.nix
     ../../components/secure-boot.nix
+    # SSH server: uncomment while this host needs remote access.
+    # ../../components/ssh.nix
     ./local/hardware-configuration.nix
   ];
 
