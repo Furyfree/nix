@@ -5,16 +5,12 @@ Open work only; finished work lives in Git.
 ## NixOS follow-up
 
 1. Add the OpenRouter key to ai-usagebar's config when wanted.
-2. Watch laptop Wi-Fi. Under wpa_supplicant the MT7925 timed out WPA3's
-   6 GHz handshake (reason 15), which NetworkManager read as a wrong password;
-   that is likely what Fedora's boot retry papered over. Every host now uses
-   iwd. Confirm reconnects and resume without password prompts, and eduroam at
-   DTU; revert the backend in `components/networking.nix` if eduroam fails.
-3. Retest two Noctalia clipboard bugs from Fedora with sample text: a
+2. Retest two Noctalia clipboard bugs from Fedora with sample text. A
    1Password field pasted into Wi-Fi fields and launcher search must paste the
-   current value and stay out of history (noctalia#4457), and text copied in
-   Ghostty must paste after Ghostty closes without picking it from history
-   (noctalia#3793).
+   current value and stay out of history (noctalia#4457). It is fixed upstream
+   but not released; retest once a release with the fix reaches nixpkgs
+   (5.4.0 is pinned now). Text copied in Ghostty must paste after Ghostty
+   closes without picking it from history (noctalia#3793).
 
 ## Untested recovery
 
