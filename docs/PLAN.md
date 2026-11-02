@@ -15,8 +15,6 @@ Open work only; finished work lives in Git.
    current value and stay out of history (noctalia#4457), and text copied in
    Ghostty must paste after Ghostty closes without picking it from history
    (noctalia#3793).
-4. Remove the temporary SSH server from `hosts/laptop/configuration.nix` once
-   the laptop works.
 
 ## Untested recovery
 
