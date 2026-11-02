@@ -11,7 +11,7 @@
     # Keep video memory across suspend and hibernation.
     powerManagement.enable = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
-    # Its X11 settings app does little on Wayland; Fedora hid it too.
+    # Its X11 settings app does little on Wayland.
     nvidiaSettings = false;
   };
 }

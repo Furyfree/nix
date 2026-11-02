@@ -21,7 +21,7 @@
     daemon.settings.log-driver = "local";
   };
 
-  # The docker group is root-equivalent, as on Fedora. Installer-selected
+  # Docker without sudo; the docker group is root-equivalent. Installer-selected
   # users come from Home Manager, so no username is written here.
   users.users = lib.genAttrs (builtins.attrNames config.home-manager.users) (_: {
     extraGroups = [ "docker" ];

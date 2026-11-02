@@ -1,5 +1,5 @@
-# Network printing and scanning, as Nimbus set up for the Epson ET-5800: CUPS
-# prints driverless (IPP Everywhere) and sane-airscan scans without drivers.
+# Network printing and scanning for the Epson ET-5800: CUPS prints driverless
+# (IPP Everywhere) and sane-airscan scans without drivers.
 { pkgs, ... }:
 
 {

@@ -14,8 +14,8 @@ in
     fwupd.enable = true;
     tailscale = {
       enable = true;
-      # As Nimbus's tailscale-operator step: the desktop user, and Noctalia's
-      # tailnet plugin, control Tailscale without sudo. Sign in with tailscale up.
+      # The desktop user, and Noctalia's tailnet plugin, control Tailscale
+      # without sudo. Sign in with tailscale up.
       extraSetFlags = lib.optional (user != null) "--operator=${user}";
     };
   };

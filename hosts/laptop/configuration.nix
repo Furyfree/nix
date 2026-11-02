@@ -19,7 +19,7 @@
   # Enroll with fprintd-enroll; password login stays available.
   services.fprintd.enable = true;
 
-  # Light gaming, as on Fedora.
+  # Light gaming.
   programs.gamemode.enable = true;
   environment.systemPackages = with pkgs; [
     brightnessctl

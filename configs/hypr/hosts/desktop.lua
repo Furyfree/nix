@@ -22,7 +22,7 @@ hl.monitor({
 hl.config({ cursor = { default_monitor = benq } })
 
 return {
-    -- Each monitor's ten workspace slots; the IDs match Fedora's.
+    -- Each monitor's ten workspace slots.
     workspaces = {
         [benq] = { 1, 2, 3, 4, 5, 11, 12, 13, 14, 15 },
         [zowie] = { 6, 7, 8, 9, 10, 16, 17, 18, 19, 20 },

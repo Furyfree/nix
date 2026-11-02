@@ -42,8 +42,8 @@ in
       WorkingDirectory = "%h";
       ExecStart = lib.mkForce noctaliaSession;
     };
-    # Start with the session as on Fedora; the recorder plugin checks for the
-    # running process instead of activating it over D-Bus.
+    # Start with the session: the recorder plugin checks for the running
+    # process instead of activating it over D-Bus.
     xdg-desktop-portal.wantedBy = [ "graphical-session.target" ];
   };
 

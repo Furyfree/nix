@@ -4,13 +4,12 @@ This is my public, personal workstation configuration for Linux, macOS and
 Windows where possible. I want repeatable installs and updates, shared desktop
 preferences and generation rollback.
 
-Finish the full NixOS/Linux setup with integrated Home Manager and move onto it
-first. Then extend compatible user configuration through Home Manager to macOS
-and WSL. macOS runs standalone Home Manager on the personal Mac; WSL is a
-future target, not working support today. mac-setup holds every macOS
-instruction and the open macOS work, this repository's part included: keep
-the Home Manager code here and only point to mac-setup in these docs. Migrate
-tools one at a time.
+My Linux workstations run NixOS with integrated Home Manager. Extend compatible
+user configuration through Home Manager to macOS and WSL, one tool at a time.
+macOS runs standalone Home Manager on the personal Mac; WSL is a future target,
+not working support today. mac-setup holds every macOS instruction and the open
+macOS work, this repository's part included: keep the Home Manager code here
+and only point to mac-setup in these docs.
 
 ## What must not break
 
@@ -28,8 +27,8 @@ tools one at a time.
 
 Use pinned upstream NixOS/Home Manager modules and native tools. This is a
 personal workstation configuration, not another provisioning framework.
-During setup and testing, edit configuration in this repository and deploy
-through Git and a rebuild from the machine's checkout. Use SSH for read-only
+Edit configuration in this repository and deploy through Git and a rebuild
+from the machine's checkout. Use SSH for read-only
 inspection and approved deployment/rebuild commands, never direct configuration
 patches on machines.
 
@@ -62,7 +61,7 @@ The installer erases the selected disk. Use disposable targets for installation
 trials and temporary checkouts for tests. Require detected machine data for host
 builds; pre-install fixtures belong only in temporary checkouts.
 Native desktop tools keep live state outside the checkout. Do not import whole
-application-data directories or overwrite GUI state while migrating preferences.
+application-data directories or overwrite GUI state while adding app preferences.
 
 ## Verify
 

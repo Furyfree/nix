@@ -31,6 +31,6 @@ on_recording_stop = true
 on_transcription = false
 
 # The on-screen indicator's frontends are not packaged; the notifications above
-# show recording state, as on Fedora.
+# show recording state.
 [osd]
 enabled = false

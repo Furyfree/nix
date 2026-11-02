@@ -1,4 +1,4 @@
-# DTU eduroam, as Nimbus set it up: PEAP/MSCHAPv2 against DTU's two RADIUS
+# DTU eduroam: PEAP/MSCHAPv2 against DTU's two RADIUS
 # servers and the DTU CAT CA bundle (SHA256 4044ec3c...a7c1). The login lives
 # in a root-only local file that dtu-eduroam writes once.
 { lib, pkgs, ... }:

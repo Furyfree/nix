@@ -32,7 +32,6 @@ local function focus_or_launch(class, command, alternate_class)
 end
 
 -- 1. Applications and panels
--- App shortcuts return as the corresponding applications are migrated.
 hl.bind(
     mainMod .. " + Return",
     hl.dsp.exec_cmd("uwsm-app -- ghostty +new-window"),

@@ -1,4 +1,4 @@
-# Local dictation for Super+D: Whisper on the GPU through Vulkan, as on Fedora.
+# Local dictation for Super+D: Whisper on the GPU through Vulkan.
 # Download the host's model once with
 #   voxtype setup --download --model <model>
 { lib, pkgs, ... }:

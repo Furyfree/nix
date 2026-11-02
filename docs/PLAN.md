@@ -2,7 +2,7 @@
 
 Open work only; finished work lives in Git.
 
-## Move onto NixOS
+## NixOS follow-up
 
 1. Add the OpenRouter key to ai-usagebar's config when wanted.
 2. Watch laptop Wi-Fi. Under wpa_supplicant the MT7925 timed out WPA3's

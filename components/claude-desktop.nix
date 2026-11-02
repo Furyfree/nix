@@ -66,8 +66,8 @@ let
       cp -r usr/lib usr/share $out/
       # Store files cannot be setuid; Electron uses user namespaces instead.
       rm $out/lib/claude-desktop/chrome-sandbox
-      # As the COPR launcher did: keep the sign-in in the GNOME keyring rather
-      # than in a file Electron leaves unencrypted on unrecognised desktops.
+      # Keep the sign-in in the GNOME keyring rather than in a file Electron
+      # leaves unencrypted on unrecognised desktops.
       # --force-renderer-accessibility lists its contents for computer-use-linux.
       makeWrapper $out/lib/claude-desktop/claude-desktop $out/bin/claude-desktop \
         --add-flags "--password-store=gnome-libsecret" \
