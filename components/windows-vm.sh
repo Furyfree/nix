@@ -224,7 +224,7 @@ EOF
 
 cmd_launch() {
   [[ -r $settings ]] || die "The Windows VM is not installed; run windows-vm install."
-  local keep_alive=false scale username password started attempt status
+  local keep_alive=false username password started attempt status
   [[ ${1-} == --keep-alive ]] && keep_alive=true
   username=$(setting USERNAME)
   password=$(setting PASSWORD)
@@ -257,17 +257,10 @@ cmd_launch() {
     sleep 2
   done
 
-  # Outside Hyprland, such as in an agent's hidden desktop, keep FreeRDP's
-  # default scale.
-  scale=$(hyprctl monitors -j 2>/dev/null |
-    jq -r '.[] | select(.focused).scale * 100 | floor' 2>/dev/null) || scale=100
+  # No /scale: Hyprland already scales XWayland windows such as xfreerdp, so
+  # Windows gets the monitor's logical size at 100% and matches other apps.
   local args=(-grab-keyboard /sound /microphone /clipboard /dynamic-resolution
     /gfx:AVC444 "/title:Windows VM" "/floatbar:sticky:off,default:visible,show:fullscreen" /f)
-  if ((scale >= 170)); then
-    args+=(/scale:180)
-  elif ((scale >= 130)); then
-    args+=(/scale:140)
-  fi
   # Booted is not yet ready for Remote Desktop: retry while FreeRDP cannot
   # connect, but not after a closed window or a rejected login.
   for attempt in {1..30}; do
