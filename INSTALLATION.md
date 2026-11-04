@@ -182,6 +182,29 @@ Every Mac uses the nix-darwin host `macos`. Its ignored
 
 ### Set up a Mac
 
+Before migrating an existing shell, keep private settings in
+`~/.config/zsh/local.zsh`, outside this checkout. The shared interactive shell
+sources it last, only when readable.
+Home Manager manages individual shared files, not the whole zsh directory;
+it leaves this private file alone and never copies it into the Nix store.
+Do not import its contents through Nix. Rename an existing `work.zsh` to
+`local.zsh` and update the old shell's loader before switching.
+
+On macOS, existing files displaced by Home Manager are renamed with the
+`.before-home-manager` suffix. If that backup already exists, review the
+conflict before switching again; do not force an overwrite. The backups are
+not sourced automatically. Test a new terminal before closing your existing
+session.
+
+For existing SSH settings, keep private host entries in `~/.ssh/local.conf`,
+which both shared SSH profiles include before their defaults. If that file
+does not exist, copy your existing `~/.ssh/config` there before switching;
+otherwise merge the entries into it. Home Manager replaces `~/.ssh/config`
+with the selected profile and backs up the old file as above; it does not
+manage `local.conf`, public key files or known hosts. Do not copy private host
+entries into this repository. Existing `Include` directives must not point
+back to `~/.ssh/config` or `~/.ssh/local.conf`, which would recurse.
+
 1. In Setup Assistant, create your administrator account and turn on
    FileVault; store its recovery key in 1Password from another device. Then
    update macOS.
@@ -222,20 +245,23 @@ Every Mac:
 - Permissions: Accessibility and Menu Bar Layout Access for Thaw,
   Accessibility for Tinycast, Screen Recording for OBS and Calendars for
   Itsycal.
-- Tinycast: start at login, then Settings → Backup → Settings File → Import,
-  so the linked `~/.config/tinycast/settings.json` applies.
+- Tinycast: start at login, then Settings → Backup → Settings File: turn on
+  **Sync settings file**. When asked **Import the existing settings file?**,
+  choose **Import** to apply the linked `~/.config/tinycast/settings.json`.
+  **Replace** overwrites that file with Tinycast's current settings.
 - Spaces: in Mission Control (Hyper+M), add desktops until each display has
   five, for Hyper+1–5.
 - Thaw: start at login; show Wi-Fi, battery, Itsycal and Control Center, and
   hide the other icons and the clock.
-- Vorssaint, CodexBar and Itsycal: quit and reopen them after a switch to
-  load their settings. CodexBar's Keychain prompts and OpenRouter key, the
-  calendars Itsycal shows, and launch at login for both.
+- Vorssaint and Itsycal: quit and reopen them after a switch to load their
+  settings. Choose the calendars Itsycal shows and enable its launch at login.
 - JetBrains Toolbox autostart off, Spotify's login item off, Brave Origin as
   the default browser, and Finder's sidebar favourites.
 
 Personal Mac: Discord's sign-in, Screen Recording and keyboard access for
 push-to-talk; Tailscale's network extension, VPN configuration and sign-in.
+CodexBar: quit and reopen after a switch; its Keychain prompts, OpenRouter
+key and launch at login are configured by hand.
 
 Work Mac: work apps from your own notes, the work Git identity in
 `~/.config/git/local`, and the work accounts.

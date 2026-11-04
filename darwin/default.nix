@@ -26,6 +26,10 @@ in
 
   users.users.${user}.home = "/Users/${user}";
 
+  # Preserve native files displaced by the first Home Manager switch. An
+  # existing backup is a conflict to review, never something to overwrite.
+  home-manager.backupFileExtension = "before-home-manager";
+
   # Native user config owns completion initialization and the prompt.
   programs.zsh = {
     enable = true;

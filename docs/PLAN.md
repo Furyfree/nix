@@ -81,7 +81,7 @@ setting or doc each one concerns.
 - Vorssaint answers ⇧⌘3, ⇧⌘4, ⇧⌘5, Hyper+E and Hyper+S.
 - A value copied from 1Password's extension in Brave stays out of Tinycast's
   history.
-- CodexBar's menu bar icon shows while Thaw runs (CodexBar#4506).
+- Personal Mac: CodexBar's menu bar icon shows while Thaw runs (CodexBar#4506).
 - `op` works through 1Password's app integration, without a CLI sign-in.
 - `nclean` with disposable generations.
 - `brew upgrade` of a cask in Terminal.app keeps its Dock position and

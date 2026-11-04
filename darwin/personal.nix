@@ -6,6 +6,7 @@
 {
   homebrew = {
     casks = [
+      "codexbar" # menu bar icon issue on 27: CodexBar#4506
       "microsoft-word" # .pkg without AutoUpdate: upgrade with --greedy
       "microsoft-excel"
       "microsoft-powerpoint"
@@ -30,6 +31,8 @@
   home-manager.users.${config.system.primaryUser} =
     { config, ... }:
     {
+      imports = [ ../home/darwin-personal.nix ];
+
       xdg.configFile."mise/conf.d/runtimes.toml".source =
         config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/mise/conf.d/runtimes.toml";
     };

@@ -13,7 +13,7 @@ if [[ -r "$ZDOTDIR/conf.d/noctalia.zsh" ]]; then
   source "$ZDOTDIR/conf.d/noctalia.zsh"
 fi
 
-# Work-only settings, kept on work machines and never in this repo.
-if [[ -r "$ZDOTDIR/work.zsh" ]]; then
-  source "$ZDOTDIR/work.zsh"
+# Private overrides belong outside the checkout and load last.
+if [[ -r "$ZDOTDIR/local.zsh" ]]; then
+  source "$ZDOTDIR/local.zsh"
 fi
