@@ -25,6 +25,14 @@ let
       # The DE row and the Noctalia probe that only it reads.
       desktopOnly =
         module: (module.key or "") == "DE          " || lib.hasSuffix " noctalia" (module.text or "");
+      # Homebrew installs the Mac's programs. Nix holds only nh, nixd and
+      # nix-darwin's tools, and fastfetch would count all their dependencies.
+      withoutNix =
+        module:
+        if builtins.isAttrs module && (module.type or "") == "packages" then
+          module // { disabled = [ "nix" ]; }
+        else
+          module;
     in
     pkgs.writeText "fastfetch-config.jsonc" (
       builtins.toJSON (
@@ -33,7 +41,9 @@ let
           logo = shared.logo // {
             source = "macOS2";
           };
-          modules = builtins.filter (module: !(builtins.isAttrs module && desktopOnly module)) shared.modules;
+          modules = map withoutNix (
+            builtins.filter (module: !(builtins.isAttrs module && desktopOnly module)) shared.modules
+          );
         }
       )
     );

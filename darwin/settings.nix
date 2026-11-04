@@ -48,6 +48,8 @@ in
       EnableTilingByEdgeDrag = false;
       EnableTopTilingByEdgeDrag = false;
       EnableTilingOptionAccelerator = false;
+      # Clicking the wallpaper never pushes the windows aside.
+      EnableStandardClickToShowDesktop = false;
     };
 
     # Spaces separate on each display, and in a fixed order below.
