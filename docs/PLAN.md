@@ -51,14 +51,13 @@ the work Mac never gets what IT manages; FileVault, SIP, Gatekeeper,
 Secure Boot, TPM, Defender, Firewall, UAC and Windows Update stay on;
 BitLocker keys never appear in output or logs.
 
-### 1. Macs (a VM, then the work Mac)
+### 1. The work Mac
 
-- Run `darwin/bootstrap.sh` on a throwaway macOS 27 VM, for what the personal
-  Mac already had from mac-setup: the Command Line Tools, Rosetta, Homebrew,
-  Nix and the clone. Then log out and `nswitch`: it must change nothing.
-- The work Mac, once IT allows Nix and Homebrew. Check first which settings
-  IT forces, and keep the apps IT installs, such as 1Password, out of
-  `darwin/common.nix` so Homebrew does not take them over.
+- Once IT allows Nix and Homebrew. Check first which settings IT forces, and
+  keep the apps IT installs, such as 1Password, out of `darwin/common.nix` so
+  Homebrew does not take them over.
+- It is the first Mac to run the bootstrap's installs: the Command Line
+  Tools, Rosetta, Homebrew, Nix and the clone. After an error, run it again.
 - Done when: the work Mac switches and the checks below pass.
 
 Checks from mac-setup, by hand on a Mac. Record the macOS version in the
@@ -138,16 +137,8 @@ setting or doc each one concerns.
 ### 5. Retire the old repos
 
 - Update `AGENTS.md`'s map and the README as each part lands.
-- Archive mac-setup with a README pointing here: its Mac runs from here, and
-  the work Mac never used it. Archive win-setup once phases 2 and 3 run on
+- Archive win-setup with a README pointing here once phases 2 and 3 run on
   real machines.
-
-### Carried over from mac-setup
-
-- T3 Code keeps its settings in `~/.t3/userdata` on the Mac too, where
-  `client-settings.json` and `keybindings.json` already exist and would stop
-  Home Manager. Compare them with `configs/t3code/`, then move the three
-  links from `home/linux.nix` to `home/common.nix`.
 
 ### Fallbacks
 

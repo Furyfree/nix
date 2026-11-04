@@ -158,10 +158,6 @@ in
     # folder here that stops Steam's first-run setup.
     ".steam/steam".source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/Steam";
     ".local/bin/launch".source = link "bin/launch";
-    # T3 Code keeps these next to its threads and secrets, which stay unlinked.
-    ".t3/userdata/settings.json".source = link "t3code/settings.json";
-    ".t3/userdata/client-settings.json".source = link "t3code/client-settings.json";
-    ".t3/userdata/keybindings.json".source = link "t3code/keybindings.json";
   };
 
   home.activation = {

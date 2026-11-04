@@ -94,6 +94,10 @@ in
 
   home.file = {
     ".zshenv".source = link "zsh/.zshenv";
+    # T3 Code keeps these next to its threads and secrets, which stay unlinked.
+    ".t3/userdata/settings.json".source = link "t3code/settings.json";
+    ".t3/userdata/client-settings.json".source = link "t3code/client-settings.json";
+    ".t3/userdata/keybindings.json".source = link "t3code/keybindings.json";
   }
   // lib.genAttrs [ "pull-projects" "nix-workstation" ] (name: {
     target = ".local/bin/${name}";
