@@ -27,7 +27,8 @@ gtk-single-instance = true
 quit-after-last-window-closed = true
 gtk-toolbar-style = flat
 # Copy selections to PRIMARY; middle-click pastes PRIMARY, not the regular clipboard.
-copy-on-select = true
+# macOS has no PRIMARY, so this copies nothing there.
+copy-on-select = primary
 # Hyprland takes Ghostty's default Super+Ctrl+Shift+arrows split resize.
 keybind = ctrl+alt+shift+arrow_up=resize_split:up,10
 keybind = ctrl+alt+shift+arrow_down=resize_split:down,10

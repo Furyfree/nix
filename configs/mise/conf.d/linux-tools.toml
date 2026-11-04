@@ -7,9 +7,16 @@ resvg = "latest"
 "github:mroboff/vm-curator" = { version = "latest", os = ["linux/x64"], asset_pattern = "vm-curator-*-linux-x86_64.tar.gz" }
 # Usage data for Noctalia's AI usage widget.
 "cargo:ai-usagebar" = "latest"
-# Upstream publishes bare binaries; no registry entry.
-"github:lightpanda-io/browser" = { version = "latest", bin = "lightpanda" }
 
-[env]
-# Lightpanda sends usage telemetry unless this is set.
-LIGHTPANDA_DISABLE_TELEMETRY = "true"
+# The other agent CLIs; ai-workflow links their shared rules and skills.
+antigravity-cli = "latest"
+"npm:@xai-official/grok" = "latest"
+"npm:@opencode/cli" = { version = "latest", allow_builds = ["@opencode/cli"], allow_low_downloads = true }
+# Pi installs its packages with Node; the override pins a fixed transitive dependency.
+pi = { version = "latest", depends = ["node"], postinstall = """
+pi install npm:pi-terminal-math &&
+npm --prefix "$HOME/.pi/agent/npm" pkg set 'overrides.@xmldom/xmldom=0.9.12' &&
+npm --prefix "$HOME/.pi/agent/npm" install --ignore-scripts --legacy-peer-deps
+""" }
+# Pi's ACP adapter for Obsidian's Agent Client.
+"npm:pi-acp" = "latest"

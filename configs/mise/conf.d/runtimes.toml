@@ -1,0 +1,13 @@
+# Language runtimes and their tools: Linux and the personal Mac.
+[tools]
+# Current LTS families; resolve the latest patch within each family.
+dotnet = "10"
+go = "latest"
+java = "corretto-25"
+rust = { version = "stable", components = "rust-analyzer" }
+uv = "latest"
+
+# Go's language server and linters, which need Go.
+"go:golang.org/x/tools/gopls" = "latest"
+staticcheck = "latest"
+golangci-lint = "latest"

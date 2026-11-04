@@ -5,7 +5,9 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 
 export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
 
-# Agents write bash, so run their commands in bash; macOS has only /bin/bash.
+# Agents write bash, so run their commands in bash: the system's current one,
+# which NixOS and nix-darwin provide; /bin/bash is macOS's old one, until
+# nix-darwin's first switch.
 agent_bash=/run/current-system/sw/bin/bash
 [[ -x $agent_bash ]] || agent_bash=/bin/bash
 export CLAUDE_CODE_SHELL=$agent_bash GROK_SHELL=$agent_bash

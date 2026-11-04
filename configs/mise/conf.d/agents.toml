@@ -1,0 +1,5 @@
+# Agent CLIs on Linux and the work Mac; ai-workflow links their shared rules and
+# skills. Homebrew installs them on the personal Mac, for every account there.
+[tools]
+"npm:@openai/codex" = "latest"
+"npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = ["@anthropic-ai/claude-code"] }

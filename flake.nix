@@ -1,10 +1,14 @@
 {
-  description = "NixOS and Home Manager configurations";
+  description = "NixOS, nix-darwin and Home Manager configurations";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -14,6 +18,7 @@
       self,
       nixpkgs,
       home-manager,
+      nix-darwin,
       ...
     }:
     let
@@ -49,20 +54,10 @@
             );
           };
 
-      mkMac =
-        name:
-        let
-          user = ./hosts + "/${name}/local/user.nix";
-        in
-        nixpkgs.lib.optionalAttrs (builtins.pathExists user) {
-          ${name} = home-manager.lib.homeManagerConfiguration {
-            pkgs = nixpkgs.legacyPackages.aarch64-darwin;
-            modules = [
-              (./hosts + "/${name}/home.nix")
-              user
-            ];
-          };
-        };
+      # Every Apple silicon Mac runs one nix-darwin host. Like the NixOS hosts, it
+      # builds only once its ignored local/user.nix names the account and this
+      # Mac's profile.
+      macUser = ./hosts/macos/local/user.nix;
     in
     {
       devShells.x86_64-linux.default =
@@ -98,8 +93,18 @@
       // mkHost "laptop"
       // mkHost "nixos-test";
 
-      # Standalone Home Manager on Apple silicon Macs. Like the NixOS hosts, each
-      # builds only once its ignored local/user.nix names the account.
-      homeConfigurations = mkMac "macos-personal" // mkMac "macos-work";
+      darwinConfigurations = nixpkgs.lib.optionalAttrs (builtins.pathExists macUser) {
+        macos = nix-darwin.lib.darwinSystem {
+          modules = [
+            ./hosts/macos/configuration.nix
+            home-manager.darwinModules.home-manager
+            macUser
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+            }
+          ];
+        };
+      };
     };
 }

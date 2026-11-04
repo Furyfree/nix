@@ -28,7 +28,7 @@ fi
 
 # Install the checkout's VSCodium extensions; installed ones are skipped.
 if command -v codium >/dev/null 2>&1; then
-  alias codium-extensions='xargs -a ~/Projects/nix/configs/vscodium/extensions.txt -n1 codium --install-extension'
+  alias codium-extensions='xargs -n1 codium --install-extension <~/Projects/nix/configs/vscodium/extensions.txt'
 fi
 
 if ! command -v code >/dev/null 2>&1; then

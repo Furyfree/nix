@@ -1,0 +1,34 @@
+# Linux only, where the computer-use tools exist. Codex passes MCP servers only
+# a short list of variables; these carry the desktop session, as in
+# computer-use-linux's own Codex manifest.
+[mcp_servers.computer-use-linux]
+command = "computer-use-linux"
+args = ["mcp"]
+env_vars = [
+  "DBUS_SESSION_BUS_ADDRESS",
+  "DESKTOP_SESSION",
+  "DISPLAY",
+  "HYPRLAND_INSTANCE_SIGNATURE",
+  "NIRI_SOCKET",
+  "WAYLAND_DISPLAY",
+  "XAUTHORITY",
+  "XDG_CACHE_HOME",
+  "XDG_CURRENT_DESKTOP",
+  "XDG_RUNTIME_DIR",
+  "XDG_SESSION_DESKTOP",
+  "XDG_SESSION_TYPE",
+  "XDG_STATE_HOME",
+]
+
+[mcp_servers.agent-workspace-linux]
+command = "agent-workspace-linux"
+args = ["mcp"]
+env_vars = [
+  "DBUS_SESSION_BUS_ADDRESS",
+  "DISPLAY",
+  "WAYLAND_DISPLAY",
+  "XAUTHORITY",
+  "XDG_CACHE_HOME",
+  "XDG_RUNTIME_DIR",
+  "XDG_STATE_HOME",
+]

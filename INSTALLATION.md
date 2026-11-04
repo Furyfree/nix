@@ -172,7 +172,75 @@ Obsidian's are missing. Run `systemctl --user restart noctalia`, then
 
 ## macOS
 
-The Macs use this repository's standalone Home Manager configuration,
-`macos-personal` and `macos-work`. My private mac-setup repository documents
-them: its `INSTALLATION.md` holds their whole setup, Home Manager included, and
-its README their daily use.
+Every Mac uses the nix-darwin host `macos`. Its ignored
+`hosts/macos/local/user.nix` names the account and imports the Mac's profile,
+`personal.nix` or `work.nix` from `darwin/`:
+
+```nix
+{ imports = [ ../../../darwin/personal.nix ]; system.primaryUser = "alice"; }
+```
+
+### Set up a Mac
+
+1. In Setup Assistant, create your administrator account and turn on
+   FileVault; store its recovery key in 1Password from another device. Then
+   update macOS.
+2. In Terminal:
+
+   ```sh
+   curl -fsSL \
+     https://raw.githubusercontent.com/Furyfree/nix/main/darwin/bootstrap.sh | bash
+   ```
+
+   It reports FileVault, SIP, Gatekeeper, the firewall and device management
+   without changing them. Then it installs the Command Line Tools, Rosetta,
+   Homebrew and Nix, clones this repository, asks which Mac this is and
+   writes `local/user.nix`. It saves the settings it changes to
+   `~/.local/state/nix-workstation/macos-before/` (restore one with
+   `defaults import DOMAIN FILE`), renames the shell and Nix files in `/etc`
+   to `*.before-nix-darwin` and switches. Some apps ask for your password.
+   After an error, run it again; it carries on.
+3. Log out and back in, for the settings that wait for it.
+4. 1Password: sign in, then in Settings → Developer turn on the SSH agent and
+   the CLI integration. Fetch the SSH files, run `gh auth login` and switch
+   the checkout to SSH, as in step 6 of [First boot](#first-boot).
+5. In a new terminal, `mise install`.
+6. `git clone git@github.com:Furyfree/ai-workflow.git ~/Projects/ai-workflow`,
+   then in it `python3 install.py` for agent rules and skills; its
+   development shell is Linux-only.
+
+A Mac moving from mac-setup already has Homebrew, Nix and the clone, so the
+script skips those. Afterwards, remove its old host and standalone Home
+Manager's packages: `rm -r ~/Projects/nix/hosts/macos-personal` (or
+`macos-work`) and `nix profile remove home-manager-path`.
+
+### By hand
+
+Every Mac:
+
+- Battery: System Settings → Battery, ⓘ beside Charging: charge limit 80 %,
+  Optimized Battery Charging off.
+- App Management for Terminal.app only. Upgrade apps there with
+  `brew upgrade`, plus `--greedy` for Office.
+- Sign-ins: Microsoft 365, Spotify, Signal, ChatGPT, Claude, JetBrains and
+  Brave Origin's licence.
+- Permissions: Accessibility and Menu Bar Layout Access for Thaw,
+  Accessibility for Tinycast, Screen Recording for OBS and Calendars for
+  Itsycal.
+- Tinycast: start at login, then Settings → Backup → Settings File → Import,
+  so the linked `~/.config/tinycast/settings.json` applies.
+- Spaces: in Mission Control (Hyper+M), add desktops until each display has
+  five, for Hyper+1–5.
+- Thaw: start at login; show Wi-Fi, battery, Itsycal and Control Center, and
+  hide the other icons and the clock.
+- Vorssaint, CodexBar and Itsycal: quit and reopen them after a switch to
+  load their settings. CodexBar's Keychain prompts and OpenRouter key, the
+  calendars Itsycal shows, and launch at login for both.
+- JetBrains Toolbox autostart off, Spotify's login item off, Brave Origin as
+  the default browser, and Finder's sidebar favourites.
+
+Personal Mac: Discord's sign-in, Screen Recording and keyboard access for
+push-to-talk; Tailscale's network extension, VPN configuration and sign-in.
+
+Work Mac: work apps from your own notes, the work Git identity in
+`~/.config/git/local`, and the work accounts.

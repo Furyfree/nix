@@ -4,18 +4,37 @@
     "key": "ctrl+alt+shift+j",
     "command": "workbench.action.terminal.toggleTerminal"
   },
-  // Match Zed's dock keys: left panel, right sidebar and outline.
+  // Match Zed's dock keys: left panel, right sidebar and outline. Zed uses
+  // ctrl on Linux and cmd on macOS.
   {
     "key": "ctrl+b",
-    "command": "workbench.action.toggleAuxiliaryBar"
+    "command": "workbench.action.toggleAuxiliaryBar",
+    "when": "isLinux"
+  },
+  {
+    "key": "cmd+b",
+    "command": "workbench.action.toggleAuxiliaryBar",
+    "when": "isMac"
   },
   {
     "key": "ctrl+alt+b",
-    "command": "workbench.action.toggleSidebarVisibility"
+    "command": "workbench.action.toggleSidebarVisibility",
+    "when": "isLinux"
+  },
+  {
+    "key": "cmd+alt+b",
+    "command": "workbench.action.toggleSidebarVisibility",
+    "when": "isMac"
   },
   {
     "key": "ctrl+shift+b",
-    "command": "outline.focus"
+    "command": "outline.focus",
+    "when": "isLinux"
+  },
+  {
+    "key": "cmd+shift+b",
+    "command": "outline.focus",
+    "when": "isMac"
   },
   {
     "key": "ctrl+alt+g",

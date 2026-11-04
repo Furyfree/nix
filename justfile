@@ -2,7 +2,7 @@ default:
     @just --list
 
 # Run local checks without installing or activating a system
-check: check-lua check-hyprland lint typecheck test eval
+check: check-lua check-hyprland lint typecheck test eval eval-macos
 
 # Parse all native Lua configuration without executing it
 check-lua:
@@ -52,6 +52,31 @@ format:
 # Evaluate configurations without building or deploying a system
 eval:
     nix --extra-experimental-features 'nix-command flakes' flake check --no-build --no-write-lock-file path:.
+
+# Evaluate each Mac profile from a temporary checkout with a placeholder user;
+# the Mac host has no output here without its ignored local/user.nix
+eval-macos:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    temporary=$(mktemp -d)
+    trap 'rm -rf -- "$temporary"' EXIT
+    # Tracked and new files; ignored machine data stays out.
+    git ls-files -z --cached --others --exclude-standard |
+        while IFS= read -r -d '' file; do
+            # Files deleted but not yet committed are still listed.
+            if [[ -e $file ]]; then
+                cp --parents -- "$file" "$temporary"
+            fi
+        done
+    mkdir -p "$temporary/hosts/macos/local"
+    for profile in personal work; do
+        printf '{ imports = [ ../../../darwin/%s.nix ]; system.primaryUser = "alice"; }\n' "$profile" \
+            >"$temporary/hosts/macos/local/user.nix"
+        printf 'macos (%s): ' "$profile"
+        nix --extra-experimental-features 'nix-command flakes' eval --no-write-lock-file --raw \
+            "path:$temporary#darwinConfigurations.macos.system.drvPath"
+        echo
+    done
 
 # Build the installer ISO through the ignored result symlink
 build-iso:

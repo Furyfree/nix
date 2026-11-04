@@ -6,10 +6,10 @@ preferences and generation rollback.
 
 My Linux workstations run NixOS with integrated Home Manager. Extend compatible
 user configuration through Home Manager to macOS and WSL, one tool at a time.
-macOS runs standalone Home Manager on the personal Mac; WSL is a future target,
-not working support today. mac-setup holds every macOS instruction and the open
-macOS work, this repository's part included: keep the Home Manager code here
-and only point to mac-setup in these docs.
+Every Mac gets nix-darwin with Home Manager from the one `macos` host, not yet
+switched on a real Mac. WSL and Windows are future targets. `docs/PLAN.md`
+moves the Mac and Windows setup here from mac-setup and win-setup, which stay
+in use until then.
 
 ## What must not break
 
@@ -22,11 +22,14 @@ and only point to mac-setup in these docs.
   Builds and configuration evaluation must not activate a system.
 - Keep secrets, credentials and private machine records out of this public repo.
   Use safe examples in documentation and tests.
+- "Work" may name the work Mac and its SSH key set, never the employer, its
+  apps, VPN, servers or Git identity.
 
 ## Approach
 
-Use pinned upstream NixOS/Home Manager modules and native tools. This is a
-personal workstation configuration, not another provisioning framework.
+Use pinned upstream NixOS, nix-darwin and Home Manager modules and native
+tools. This is a personal workstation configuration, not another provisioning
+framework.
 Edit configuration in this repository and deploy through Git and a rebuild
 from the machine's checkout. Use SSH for read-only
 inspection and approved deployment/rebuild commands, never direct configuration
@@ -37,6 +40,9 @@ patches on machines.
 - `flake.nix`: inputs, system outputs and development tools.
 - `system.nix`, `components/`: shared system settings; import new components
   through `system.nix`.
+- `darwin/`: nix-darwin for every Mac. `default.nix` is the base,
+  `common.nix` the shared Homebrew apps and tools, and `personal.nix` or
+  `work.nix` the profile a Mac's `local/user.nix` imports.
 - `home/`, `configs/`: Home Manager integration and links versus native
   application preferences. `common.nix` holds what every platform shares,
   `linux.nix` and `darwin.nix` the platform parts, and `ssh.nix` the
@@ -44,12 +50,13 @@ patches on machines.
   1Password documents, never here. Keep the checkout at `~/Projects/nix` for
   these links.
 - `hosts/`: tracked host exceptions; ignored `hosts/<host>/local/` holds detected
-  hardware and installation data, and on macOS the account in `user.nix`.
+  hardware and installation data, and on macOS `user.nix` with the account
+  and profile.
   Shared policy belongs above it.
 - `configs/hypr/hosts/<host>.lua`: per-host monitors, workspaces and keys,
   linked as `~/.config/hypr/host.lua` by `hosts/<host>/home.nix`.
-- `INSTALLATION.md`: NixOS install steps; update it with installer or
-  first-boot changes. The Macs' steps live in mac-setup.
+- `INSTALLATION.md`: NixOS install steps and the Mac's `local/user.nix`;
+  update it with installer or first-boot changes.
 - `scripts/install.py`: installer launcher; `scripts/nixos_setup/` holds the
   wizard, storage, configuration, credential and installation modules.
 - `tests/`, `justfile`: installer behavior checks, one file per module, and

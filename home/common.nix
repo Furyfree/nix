@@ -12,12 +12,32 @@ let
   link =
     path:
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
-  # Merges that only make sense on Linux: Noctalia's AI usage widget, and gh
-  # opening the browser through UWSM.
+  # Merges that only make sense on Linux: Noctalia's AI usage widget, gh
+  # opening the browser through UWSM, Codex's Linux desktop tools, and the
+  # agents only Linux installs.
   linuxSettings = lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
     merge ${config.xdg.configHome}/ai-usagebar/config.toml ${../configs/ai-usagebar/config.toml} toml
     merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/linux.yml} yaml
+    merge ${config.home.homeDirectory}/.codex/config.toml ${../configs/codex/linux.toml} toml
+    merge ${config.home.homeDirectory}/.grok/config.toml ${../configs/grok/config.toml} toml
+    merge ${config.xdg.configHome}/opencode/opencode.jsonc ${../configs/opencode/opencode.json} json
+    merge ${config.home.homeDirectory}/.pi/agent/settings.json ${../configs/pi/settings.json} json
+    merge ${config.home.homeDirectory}/.pi/agent/mcp.json ${../configs/pi/mcp.json} json
   '';
+  # VSCodium on the Mac: the shared settings with GitHub Dark, since Noctalia's
+  # theme colors exist only on Linux. Merged like Zed's, so settings changed in
+  # VSCodium's window stay on that Mac.
+  darwinSettings =
+    let
+      settings = "${config.home.homeDirectory}/Library/Application Support/VSCodium/User/settings.json";
+      theme = pkgs.writeText "vscodium-macos.json" (
+        builtins.toJSON { "workbench.colorTheme" = "GitHub Dark"; }
+      );
+    in
+    lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
+      merge "${settings}" ${../configs/vscodium/settings.json} json
+      merge "${settings}" ${theme} json
+    '';
 in
 {
   imports = [ ./ssh.nix ];
@@ -83,27 +103,32 @@ in
   # Agents and gh rewrite their own settings; set only the keys in
   # configs/<tool> and keep everything else. Files Yq cannot parse, such as
   # commented JSON, stay as they are.
-  home.activation.toolSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    merge() {
-      local target=$1 patch=$2 format=$3 merged
-      # Yq reads an empty file as nothing, so start those from the patch too.
-      if [[ ! -s $target ]]; then
-        run install -D -m 0600 "$patch" "$target"
-      elif merged=$(${lib.getExe pkgs.yq-go} ea -p "$format" -o "$format" \
-        'select(fi == 0) * select(fi == 1)' "$target" "$patch"); then
-        # Rewrite in place to keep the file's owner and mode.
-        [[ -v DRY_RUN ]] || printf '%s\n' "$merged" >"$target"
-      else
-        warnEcho "Skipping $target: Yq cannot merge it."
-      fi
-    }
-    merge ${config.home.homeDirectory}/.claude/settings.json ${../configs/claude/settings.json} json
-    merge ${config.home.homeDirectory}/.codex/config.toml ${../configs/codex/config.toml} toml
-    merge ${config.home.homeDirectory}/.grok/config.toml ${../configs/grok/config.toml} toml
-    merge ${config.xdg.configHome}/opencode/opencode.jsonc ${../configs/opencode/opencode.json} json
-    merge ${config.home.homeDirectory}/.pi/agent/settings.json ${../configs/pi/settings.json} json
-    merge ${config.home.homeDirectory}/.pi/agent/mcp.json ${../configs/pi/mcp.json} json
-    merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/config.yml} yaml
-    ${linuxSettings}
-  '';
+  # After linkGeneration removes links it no longer manages, so a merge never
+  # writes through an old link into the checkout.
+  home.activation.toolSettings =
+    lib.hm.dag.entryAfter
+      [
+        "writeBoundary"
+        "linkGeneration"
+      ]
+      ''
+        merge() {
+          local target=$1 patch=$2 format=$3 merged
+          # Yq reads an empty file as nothing, so start those from the patch too.
+          if [[ ! -s $target ]]; then
+            run install -D -m 0600 "$patch" "$target"
+          elif merged=$(${lib.getExe pkgs.yq-go} ea -p "$format" -o "$format" \
+            'select(fi == 0) * select(fi == 1)' "$target" "$patch"); then
+            # Rewrite in place to keep the file's owner and mode.
+            [[ -v DRY_RUN ]] || printf '%s\n' "$merged" >"$target"
+          else
+            warnEcho "Skipping $target: Yq cannot merge it."
+          fi
+        }
+        merge ${config.home.homeDirectory}/.claude/settings.json ${../configs/claude/settings.json} json
+        merge ${config.home.homeDirectory}/.codex/config.toml ${../configs/codex/config.toml} toml
+        merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/config.yml} yaml
+        ${linuxSettings}
+        ${darwinSettings}
+      '';
 }

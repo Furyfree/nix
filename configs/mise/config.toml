@@ -1,39 +1,21 @@
+# Every machine. conf.d/ adds more by machine: runtimes.toml on Linux and the
+# personal Mac, agents.toml on Linux and the work Mac, linux-tools.toml on
+# Linux.
 [tools]
-# Current LTS families; resolve the latest patch within each family.
-dotnet = "10"
-go = "latest"
-java = "corretto-25"
+# Runs the npm tools below.
 node = "lts"
-rust = { version = "stable", components = "rust-analyzer" }
-uv = "latest"
-
-# Agent CLIs; ai-workflow links their shared rules and skills.
-"npm:@openai/codex" = "latest"
-"npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = ["@anthropic-ai/claude-code"] }
-antigravity-cli = "latest"
-"npm:@xai-official/grok" = "latest"
-"npm:@opencode/cli" = { version = "latest", allow_builds = ["@opencode/cli"], allow_low_downloads = true }
-# Pi installs its packages with Node; the override pins a fixed transitive dependency.
-pi = { version = "latest", depends = ["node"], postinstall = """
-pi install npm:pi-terminal-math &&
-npm --prefix "$HOME/.pi/agent/npm" pkg set 'overrides.@xmldom/xmldom=0.9.12' &&
-npm --prefix "$HOME/.pi/agent/npm" install --ignore-scripts --legacy-peer-deps
-""" }
-herdr = "latest"
 
 # ACP adapters for Obsidian's Agent Client; OpenCode and Grok speak ACP natively.
 "npm:@agentclientprotocol/claude-agent-acp" = "latest"
 "npm:@agentclientprotocol/codex-acp" = "latest"
-"npm:pi-acp" = "latest"
 
 # Agentic helpers
 "npm:@llamaindex/liteparse" = "latest"
+# Upstream publishes bare binaries; no registry entry.
+"github:lightpanda-io/browser" = { version = "latest", bin = "lightpanda" }
 
 # Language helpers
 "npm:markdownlint-cli" = "latest"
-"go:golang.org/x/tools/gopls" = "latest"
-staticcheck = "latest"
-golangci-lint = "latest"
 ruff = "latest"
 stylua = "latest"
 ty = "latest"
@@ -49,8 +31,12 @@ delta = "latest"
 # Deja autosuggestions; enable together with [plugins.deja] in sheldon/plugins.toml.
 # "github:Giammarco-Ferranti/deja" = "latest"
 
+[env]
+# Lightpanda sends usage telemetry unless this is set.
+LIGHTPANDA_DISABLE_TELEMETRY = "true"
+
 [settings]
-# Nix installs and updates Mise; Mise installs the tools above.
+# Nix or Homebrew installs and updates Mise; Mise installs the tools above.
 system_deps = "warn"
 # nix-ld runs the prebuilt release; Mise compiles on NixOS by default.
 node.compile = false

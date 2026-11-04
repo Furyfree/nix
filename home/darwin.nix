@@ -1,7 +1,7 @@
-# Standalone Home Manager settings for macOS. Swift mac-setup installs the apps
-# and command-line tools (INSTALLATION.md lists them) and owns system settings;
-# this links the shared configs, maps them to macOS paths and installs only
-# nixd, which Homebrew lacks. Builds on common.nix.
+# Home Manager settings for macOS, run by nix-darwin. darwin/ installs the apps
+# and command-line tools through Homebrew and owns system settings; this links
+# the shared configs, maps them to macOS paths and sets the Mac apps' own
+# settings. Builds on common.nix.
 {
   config,
   lib,
@@ -108,7 +108,7 @@ in
   };
 
   programs.zed-editor = {
-    # Zed comes from mac-setup; Home Manager only merges its settings.
+    # Zed comes from Homebrew; Home Manager only merges its settings.
     package = null;
     # The shared themes come from Noctalia, which only Linux has.
     userSettings = {
@@ -122,7 +122,7 @@ in
   };
 
   targets.darwin = {
-    # mac-setup installs every app, so Home Manager has none to copy into
+    # Homebrew installs every app, so Home Manager has none to copy into
     # ~/Applications and needs no App Management check.
     copyApps.enable = false;
 
@@ -155,9 +155,9 @@ in
           # Lid-closed mode needs a sudoers rule, which the Macs go without.
           clamshellPreferred = false;
 
-          # Shortcuts as "modifiers:key code": ⇧⌘3, ⇧⌘4 and ⇧⌘5 as in macOS, whose
-          # own mac-setup turns off; Hyper+S for the shelf, Hyper+K for Keep Awake,
-          # ⌘Tab and ⌘< for the switcher.
+          # Shortcuts as "modifiers:key code": ⇧⌘3, ⇧⌘4 and ⇧⌘5 as in macOS, which
+          # darwin/ frees by turning macOS's own off; Hyper+S for the shelf, Hyper+K
+          # for Keep Awake, ⌘Tab and ⌘< for the switcher.
           screenshotFullScreenShortcut = "shift+command:20";
           screenshotFullScreenShortcutEnabled = true;
           screenshotShortcut = "shift+command:21";
@@ -218,11 +218,7 @@ in
   };
 
   home = {
-    # Usernames come from the host's ignored local/user.nix.
-    homeDirectory = lib.mkDefault "/Users/${config.home.username}";
-
-    # Homebrew has no nixd, which Zed and Neovim use for Nix files, so it is the
-    # one tool Nix installs on the Mac.
+    # Homebrew has no nixd, which Zed and Neovim use for Nix files.
     packages = [ pkgs.nixd ];
 
     # CodexBar's config.json also holds keys and token accounts, so it is never
@@ -250,10 +246,10 @@ in
       # The shared SSH config uses the Linux socket path.
       ".1password/agent.sock".source = config.lib.file.mkOutOfStoreSymlink onePasswordAgent;
     }
-    # VSCodium keeps its settings under Application Support on macOS.
+    # VSCodium keeps its files under Application Support on macOS; common.nix
+    # merges its settings, which take the Mac's theme.
     // lib.mapAttrs (_: name: { source = link "vscodium/${name}"; }) {
       "Library/Application Support/VSCodium/product.json" = "product.json";
-      "Library/Application Support/VSCodium/User/settings.json" = "settings.json";
       "Library/Application Support/VSCodium/User/keybindings.json" = "keybindings.json";
     };
   };

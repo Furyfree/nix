@@ -2,9 +2,9 @@
 
 NixOS with integrated Home Manager for my workstations: `desktop`, `laptop` and
 the `nixos-test` machine. To set up a machine, follow
-[INSTALLATION.md](INSTALLATION.md). The Macs use the standalone Home Manager
-outputs here, and my private mac-setup repository documents their setup and
-daily use.
+[INSTALLATION.md](INSTALLATION.md). Every Mac uses nix-darwin with Home Manager
+from the `macos` host; its setup steps arrive with phase 1 of
+[docs/PLAN.md](docs/PLAN.md).
 
 ## Daily use
 
@@ -24,6 +24,22 @@ fup                # install firmware updates
 pull-projects      # fast-forward every clean repo in ~/Projects
 ```
 
+On a Mac:
+
+```sh
+nswitch            # build, show changes, ask, then switch; installs missing apps
+nupdate [INPUT]    # update pinned inputs, run nix flake check, then nswitch
+ninfo              # list nix-darwin generations
+nrollback N        # switch back to generation N; apps and macOS settings stay
+nclean             # remove old generations; keeps the newest 10
+nsearch QUERY      # search packages and options
+mup                # upgrade Mise tools; mise install after a switch
+brew upgrade       # in Terminal.app: upgrade apps; add --greedy for Office
+pull-projects      # fast-forward every clean repo in ~/Projects
+```
+
+macOS updates come from Software Update, not `fup`.
+
 The aliases run `nix-workstation`, linked from `configs/bin`;
 `nix-workstation --help` lists its commands and `nix-workstation COMMAND --help`
 explains one. On a machine built before the script existed, the link and
@@ -33,8 +49,9 @@ aliases appear after one switch run from the checkout:
 ~/Projects/nix/configs/bin/nix-workstation switch
 ```
 
-Roll back with `nh os rollback`, or pick an older generation in the boot menu.
-Rollback restores the system, not files in your home folder.
+Roll back with `nh os rollback`, or pick an older generation in the boot menu;
+on a Mac, with `nrollback N`. Rollback restores the system, not files in your
+home folder.
 
 ## Develop
 
