@@ -191,7 +191,8 @@ enabled = true
 timeout = 360
 locked_timeout = 60
 action = "screen_off"
-enabled = true
+# Off: Hyprland 0.57.0 sometimes crashes when the monitors turn off.
+enabled = false
 
 [idle.behavior.hibernate]
 timeout = 7200
