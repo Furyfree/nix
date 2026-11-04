@@ -3,8 +3,7 @@
 NixOS with integrated Home Manager for my workstations: `desktop`, `laptop` and
 the `nixos-test` machine. To set up a machine, follow
 [INSTALLATION.md](INSTALLATION.md). Every Mac uses nix-darwin with Home Manager
-from the `macos` host; its setup steps arrive with phase 1 of
-[docs/PLAN.md](docs/PLAN.md).
+from the `macos` host.
 
 ## Daily use
 

@@ -42,7 +42,8 @@ move over.
   personal Mac, agent CLIs on Linux and the work Mac (`configs/mise/conf.d/`).
 - Work Mac: the shared setup and work SSH keys only. Work apps, VPNs and IT
   details never enter this repo.
-- Personal Mac: macOS settings apply to my account only.
+- Personal Mac: the family shares it, so macOS settings apply to my account
+  only.
 
 Rules for AGENTS.md as each part lands: never remove apps (no Homebrew
 cleanup, no winget uninstall); save old settings before the first apply;
@@ -50,14 +51,45 @@ the work Mac never gets what IT manages; FileVault, SIP, Gatekeeper,
 Secure Boot, TPM, Defender, Firewall, UAC and Windows Update stay on;
 BitLocker keys never appear in output or logs.
 
-### 1. Macs (VM, then each Mac)
+### 1. Macs (a VM, then the work Mac)
 
-- Run `darwin/bootstrap.sh` on a throwaway macOS 27 VM, log out, then
-  `nswitch` again: it must change nothing. Check the settings with
-  mac-setup's `TASKS.md`, and move the checks still open into this plan.
-- Then the personal Mac, as `INSTALLATION.md` describes; the work Mac once IT
-  allows Nix and Homebrew.
-- Done when: both Macs switch and the checks pass.
+- Run `darwin/bootstrap.sh` on a throwaway macOS 27 VM, for what the personal
+  Mac already had from mac-setup: the Command Line Tools, Rosetta, Homebrew,
+  Nix and the clone. Then log out and `nswitch`: it must change nothing.
+- The work Mac, once IT allows Nix and Homebrew. Check first which settings
+  IT forces, and keep the apps IT installs, such as 1Password, out of
+  `darwin/common.nix` so Homebrew does not take them over.
+- Done when: the work Mac switches and the checks below pass.
+
+Checks from mac-setup, by hand on a Mac. Record the macOS version in the
+setting or doc each one concerns.
+
+- `.DS_Store`: in Finder, open a folder on a network share and on a USB
+  drive; `ls -a` shows no new `.DS_Store`. Apple documents only the network
+  key.
+- After a logout: dark mode, key repeat and its delay, held keys repeating,
+  no text substitutions, tap to click, natural scrolling, the three-finger
+  swipe, no macOS tiling, and Spaces in a fixed order and separate per
+  display. If tap to click fails, add the `-currentHost` copy of
+  `com.apple.mouse.tapBehavior`.
+- Keyboard Shortcuts in System Settings: nothing ticked but Mission Control
+  and Switch to Desktop 1–9, on Hyper. ⌘Space opens Tinycast, not Spotlight.
+- ⌘M does nothing in Finder, Ghostty, Zed and Discord; their Window menus
+  show ⌃⌥⇧⌘F19 beside Minimer or Minimize.
+- With five desktops per display, Hyper+4 and Hyper+5 switch Spaces (1–3
+  worked on 27.0.1), Hyper+M opens Mission Control and Tinycast's ⌃⌥ keys
+  place windows. A Bluetooth trackpad's three-finger swipe.
+- Vorssaint answers ⇧⌘3, ⇧⌘4, ⇧⌘5, Hyper+E and Hyper+S.
+- A value copied from 1Password's extension in Brave stays out of Tinycast's
+  history.
+- CodexBar's menu bar icon shows while Thaw runs (CodexBar#4506).
+- `op` works through 1Password's app integration, without a CLI sign-in.
+- `nclean` with disposable generations.
+- `brew upgrade` of a cask in Terminal.app keeps its Dock position and
+  permissions.
+- After the next macOS update: the shell still finds Nix, the `_nixbld` users
+  keep IDs 351–382, and Rosetta remains.
+- OBS 33 launches on macOS 27.2.
 
 ### 2. Windows (here, then a VM, then the desktop)
 
@@ -106,14 +138,16 @@ BitLocker keys never appear in output or logs.
 ### 5. Retire the old repos
 
 - Update `AGENTS.md`'s map and the README as each part lands.
-- Archive mac-setup and win-setup with a README pointing here, after
-  phases 1 to 3 run on real machines.
+- Archive mac-setup with a README pointing here: its Mac runs from here, and
+  the work Mac never used it. Archive win-setup once phases 2 and 3 run on
+  real machines.
 
 ### Carried over from mac-setup
 
-- T3 Code: find where it keeps its settings on the Mac; if in
-  `~/.t3/userdata` as on Linux, move its three links from `home/linux.nix`
-  to `home/common.nix`.
+- T3 Code keeps its settings in `~/.t3/userdata` on the Mac too, where
+  `client-settings.json` and `keybindings.json` already exist and would stop
+  Home Manager. Compare them with `configs/t3code/`, then move the three
+  links from `home/linux.nix` to `home/common.nix`.
 
 ### Fallbacks
 

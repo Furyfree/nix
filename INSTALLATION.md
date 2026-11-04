@@ -209,11 +209,6 @@ Every Mac uses the nix-darwin host `macos`. Its ignored
    then in it `python3 install.py` for agent rules and skills; its
    development shell is Linux-only.
 
-A Mac moving from mac-setup already has Homebrew, Nix and the clone, so the
-script skips those. Afterwards, remove its old host and standalone Home
-Manager's packages: `rm -r ~/Projects/nix/hosts/macos-personal` (or
-`macos-work`) and `nix profile remove home-manager-path`.
-
 ### By hand
 
 Every Mac:

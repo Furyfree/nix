@@ -6,10 +6,10 @@ preferences and generation rollback.
 
 My Linux workstations run NixOS with integrated Home Manager. Extend compatible
 user configuration through Home Manager to macOS and WSL, one tool at a time.
-Every Mac gets nix-darwin with Home Manager from the one `macos` host, not yet
-switched on a real Mac. WSL and Windows are future targets. `docs/PLAN.md`
-moves the Mac and Windows setup here from mac-setup and win-setup, which stay
-in use until then.
+Every Mac gets nix-darwin with Home Manager from the one `macos` host; the
+personal Mac runs it and the work Mac waits for IT. WSL and Windows are future
+targets. `docs/PLAN.md` moves the Windows setup here from win-setup, which
+stays in use until then.
 
 ## What must not break
 
