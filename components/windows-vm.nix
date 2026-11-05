@@ -21,6 +21,7 @@ let
       freerdp
       gawk
       gum
+      jq
       systemd
       util-linux
       xmlstarlet

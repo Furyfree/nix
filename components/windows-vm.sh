@@ -224,7 +224,7 @@ EOF
 
 cmd_launch() {
   [[ -r $settings ]] || die "The Windows VM is not installed; run windows-vm install."
-  local keep_alive=false username password started attempt status
+  local keep_alive=false scale username password started attempt status
   [[ ${1-} == --keep-alive ]] && keep_alive=true
   username=$(setting USERNAME)
   password=$(setting PASSWORD)
@@ -238,7 +238,7 @@ cmd_launch() {
   rdp() {
     printf '%s\n' "/u:$username" "/p:$password" /v:127.0.0.1:3389 /cert:ignore "$@" |
       systemd-inhibit --what=sleep --mode=block --who="Windows VM" \
-        --why="The Windows VM window is open" sdl-freerdp /args-from:stdin
+        --why="The Windows VM window is open" xfreerdp /args-from:stdin
   }
 
   systemctl start "$WINDOWS_SERVICE"
@@ -257,11 +257,14 @@ cmd_launch() {
     sleep 2
   done
 
-  # sdl-freerdp is a native Wayland client: Windows gets the panel's full
-  # pixels and the monitor's scale, so it stays sharp and matches other apps.
-  # xfreerdp runs through XWayland, which Hyprland stretches and blurs.
+  # Hyprland gives XWayland apps the real pixels (force_zero_scaling), so
+  # Windows scales itself like the monitor. Outside Hyprland, such as in an
+  # agent's hidden desktop, keep 100%.
+  scale=$(hyprctl monitors -j 2>/dev/null |
+    jq -r '.[] | select(.focused).scale * 100 | round' 2>/dev/null) || scale=100
   local args=(-grab-keyboard /sound /microphone /clipboard /dynamic-resolution
-    /gfx:AVC444 "/title:Windows VM" "/floatbar:sticky:off,default:visible,show:fullscreen" /f)
+    /gfx:AVC444 "/title:Windows VM" "/floatbar:sticky:off,default:visible,show:fullscreen" /f
+    "/scale-desktop:${scale:-100}")
   # Booted is not yet ready for Remote Desktop: retry while FreeRDP cannot
   # connect, but not after a closed window or a rejected login.
   for attempt in {1..30}; do
