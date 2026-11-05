@@ -48,11 +48,11 @@ let
   computer-use-linux =
     let
       pname = "computer-use-linux";
-      version = "0.7.35";
-      server = release pname version pname "sha256-iUQ2j9BVwGl6Ni/fovU574dyoUbKgkbb7kj9PbqRwSU=";
+      version = "0.7.47";
+      server = release pname version pname "sha256-aclY1JTHwHY1YGLfPIQA/DXmwrEOON971+wNIWOwUNI=";
       indicator =
         release pname version "${pname}-indicator"
-          "sha256-Iaa0OLNS14mGjomo1szHUk7LjI7mE1IIa+DEYjtc/z8=";
+          "sha256-6VooPi8MDTDSHJbHXq1KHeaelIPdf2ag/Y1V1hVnTrc=";
     in
     pkgs.stdenv.mkDerivation {
       inherit pname version;
