@@ -170,6 +170,19 @@ in
       fi
     '';
 
+    # Prism picks the bundled Java each instance needs; a chosen Java is a store
+    # path that breaks when Prism updates. Yq would drop the quotes Qt needs, so
+    # change only this line.
+    prismJavaSwitch = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      cfg="${config.xdg.dataHome}/PrismLauncher/prismlauncher.cfg"
+      if [[ ! -e $cfg ]]; then
+        run install -D -m 0644 /dev/stdin "$cfg" <<<$'[General]\nAutomaticJavaSwitch=true'
+      elif ! grep -qx 'AutomaticJavaSwitch=true' "$cfg"; then
+        run sed -i -e '/^AutomaticJavaSwitch=/d' \
+          -e '/^\[General\]$/a AutomaticJavaSwitch=true' "$cfg"
+      fi
+    '';
+
     # The wallpapers repository lives with the other clones so pull-projects
     # updates it; link it where Noctalia looks once it is cloned. Runs before
     # Home Manager creates the user folders, and replaces only an empty folder.
