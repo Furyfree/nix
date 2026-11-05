@@ -85,10 +85,11 @@ hl.window_rule({
     no_blur = true,
 })
 
--- Actual fullscreen content stays opaque, including native-alpha terminals.
+-- Real fullscreen stays opaque, including native-alpha terminals. Not
+-- maximized windows: force_rgbx also turns their menu shadows black.
 hl.window_rule({
     name = "fullscreen-opaque",
-    match = { fullscreen = true },
+    match = { fullscreen_state_internal = 2 },
     opacity = "1.0 override 1.0 override 1.0 override",
     force_rgbx = true,
     no_blur = true,
