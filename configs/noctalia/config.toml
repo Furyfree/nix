@@ -47,7 +47,7 @@ directory = "~/Pictures/Wallpapers"
 [bar.default]
 start = ["workspaces"]
 center = ["clock", "date", "weather", "timer", "notifications"]
-end = ["ai-usage", "tailnet", "recorder", "airpods", "battery", "drives", "tray", "volume", "control-center"]
+end = ["ai-usage", "mimir", "tailnet", "recorder", "airpods", "battery", "drives", "tray", "volume", "control-center"]
 background_opacity = 0.80
 widget_spacing = 10
 font_family = "JetBrainsMono Nerd Font Propo"
@@ -64,6 +64,9 @@ hide_when_empty = false
 type = "felipeartur/ai-usagebar:bar"
 provider_limit = 2
 show_name = true
+
+[widget.mimir]
+type = "alexander/mimir:status"
 
 [widget.tailnet]
 type = "rylos/tailnet:bar"
@@ -207,6 +210,7 @@ enabled = [
     "noctalia/screen_recorder",
     "noctalia/timer",
     "felipeartur/ai-usagebar",
+    "alexander/mimir",
     "harveywuk/airpods",
     "umedbazarov/crashes",
     "tphilippot/git_companion",
@@ -246,6 +250,12 @@ panel_open_near_click = true
 
 [plugin_settings."8bury/mini-docker"]
 manager_position = "auto"
+
+# Chats with the local models from components/local-ai.nix. Tools stay off:
+# small local models call them poorly.
+[plugin_settings."alexander/mimir"]
+api_endpoint = "http://127.0.0.1:8080/v1"
+tool_permission = "off"
 
 [plugin_settings."aristides/udiskie"]
 manager_open_near_click = true
