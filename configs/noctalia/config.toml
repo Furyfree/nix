@@ -251,11 +251,15 @@ panel_open_near_click = true
 [plugin_settings."8bury/mini-docker"]
 manager_position = "auto"
 
-# Chats with the local models from components/local-ai.nix. Tools stay off:
-# small local models call them poorly.
+# Chats with the local models from components/local-ai.nix. Shell commands
+# ask first and the default block list refuses network tools such as curl and
+# ssh; web search stays off, so nothing reaches the internet. Tools must stay
+# on: Mimir's prompt asks for them, and without them the model's calls show
+# up as plain text.
 [plugin_settings."alexander/mimir"]
 api_endpoint = "http://127.0.0.1:8080/v1"
-tool_permission = "off"
+tool_permission = "ask"
+web_search_enabled = false
 
 [plugin_settings."aristides/udiskie"]
 manager_open_near_click = true
