@@ -238,7 +238,7 @@ cmd_launch() {
   rdp() {
     printf '%s\n' "/u:$username" "/p:$password" /v:127.0.0.1:3389 /cert:ignore "$@" |
       systemd-inhibit --what=sleep --mode=block --who="Windows VM" \
-        --why="The Windows VM window is open" xfreerdp /args-from:stdin
+        --why="The Windows VM window is open" sdl-freerdp /args-from:stdin
   }
 
   systemctl start "$WINDOWS_SERVICE"
@@ -257,8 +257,9 @@ cmd_launch() {
     sleep 2
   done
 
-  # No /scale: Hyprland already scales XWayland windows such as xfreerdp, so
-  # Windows gets the monitor's logical size at 100% and matches other apps.
+  # sdl-freerdp is a native Wayland client: Windows gets the panel's full
+  # pixels and the monitor's scale, so it stays sharp and matches other apps.
+  # xfreerdp runs through XWayland, which Hyprland stretches and blurs.
   local args=(-grab-keyboard /sound /microphone /clipboard /dynamic-resolution
     /gfx:AVC444 "/title:Windows VM" "/floatbar:sticky:off,default:visible,show:fullscreen" /f)
   # Booted is not yet ready for Remote Desktop: retry while FreeRDP cannot
