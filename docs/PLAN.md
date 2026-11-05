@@ -2,16 +2,6 @@
 
 Open work only; finished work lives in Git.
 
-## NixOS follow-up
-
-1. Add the OpenRouter key to ai-usagebar's config when wanted.
-2. Retest two Noctalia clipboard bugs from Fedora with sample text. A
-   1Password field pasted into Wi-Fi fields and launcher search must paste the
-   current value and stay out of history (noctalia#4457). It is fixed upstream
-   but not released; retest once a release with the fix reaches nixpkgs
-   (5.4.1 is pinned now). Text copied in Ghostty must paste after Ghostty
-   closes without picking it from history (noctalia#3793).
-
 ## Untested recovery
 
 - Snapshot restore. Test file recovery by changing a file in `/etc` and in `~`,
@@ -21,77 +11,22 @@ Open work only; finished work lives in Git.
   named `root`, update the boot menu from it and reboot. Never format.
 - USB recovery. The standard ISO needs Secure Boot off; decide whether that is
   enough or a signed recovery image is needed.
-- Test installer changes in disposable UEFI VMs with throwaway disks, never on
-  host disks.
 
-## One repo for every machine
+## Windows and WSL
 
-This repo sets up NixOS, the Macs, Windows and WSL. mac-setup is archived;
-win-setup follows once its machines run from here. Only its lists and checks
-move over.
+Both move here from win-setup; only its lists and checks come over.
 
-- Macs: nix-darwin with Home Manager. Homebrew installs apps, fonts and
-  command-line tools; Nix installs only nixd and nh, which Homebrew lacks.
-  A tool added to `components/shell.nix` goes into the shared Homebrew list.
 - Windows: one Python script, `windows/setup.py`, reads `windows/setup.toml`
   (apps and registry values) and uses only the standard library, winget and
   yq. PowerShell only for the bootstrap and short cmdlet calls that get their
   data through environment variables.
 - WSL: NixOS-WSL as another NixOS host. Development happens there.
-- Mise: developer tools on every machine. Runtimes on Linux and the
-  personal Mac, agent CLIs on Linux and the work Mac (`configs/mise/conf.d/`).
-- Work Mac: the shared setup and work SSH keys only. Work apps, VPNs and IT
-  details never enter this repo.
-- Personal Mac: the family shares it, so macOS settings apply to my account
-  only.
 
-Rules for AGENTS.md as each part lands: never remove apps (no Homebrew
-cleanup, no winget uninstall); save old settings before the first apply;
-the work Mac never gets what IT manages; FileVault, SIP, Gatekeeper,
-Secure Boot, TPM, Defender, Firewall, UAC and Windows Update stay on;
-BitLocker keys never appear in output or logs.
+### 1. Windows (here, then a VM, then the desktop)
 
-### 1. The work Mac
-
-- Once IT allows Nix and Homebrew. Check first which settings IT forces, and
-  keep the apps IT installs, such as 1Password, out of `darwin/common.nix` so
-  Homebrew does not take them over.
-- It is the first Mac to run the bootstrap's installs: the Command Line
-  Tools, Rosetta, Homebrew, Nix and the clone. After an error, run it again.
-- Done when: the work Mac switches and the checks below pass.
-
-Checks from mac-setup, by hand on a Mac. Record the macOS version in the
-setting or doc each one concerns.
-
-- `.DS_Store`: in Finder, open a folder on a network share and on a USB
-  drive; `ls -a` shows no new `.DS_Store`. Apple documents only the network
-  key.
-- After a logout: dark mode, key repeat and its delay, held keys repeating,
-  no text substitutions, tap to click, natural scrolling, the three-finger
-  swipe, no macOS tiling, and Spaces in a fixed order and separate per
-  display. If tap to click fails, add the `-currentHost` copy of
-  `com.apple.mouse.tapBehavior`.
-- Keyboard Shortcuts in System Settings: nothing ticked but Mission Control
-  and Switch to Desktop 1–9, on Hyper. ⌘Space opens Tinycast, not Spotlight.
-- ⌘M does nothing in Finder, Ghostty, Zed and Discord; their Window menus
-  show ⌃⌥⇧⌘F19 beside Minimer or Minimize.
-- With five desktops per display, Hyper+4 and Hyper+5 switch Spaces (1–3
-  worked on 27.0.1), Hyper+M opens Mission Control and Tinycast's ⌃⌥ keys
-  place windows. A Bluetooth trackpad's three-finger swipe.
-- Vorssaint answers ⇧⌘3, ⇧⌘4, ⇧⌘5, Hyper+E and Hyper+S.
-- A value copied from 1Password's extension in Brave stays out of Tinycast's
-  history.
-- Personal Mac: CodexBar's menu bar icon shows while Thaw runs (CodexBar#4506).
-- `op` works through 1Password's app integration, without a CLI sign-in.
-- `nclean` with disposable generations.
-- `brew upgrade` of a cask in Terminal.app keeps its Dock position and
-  permissions.
-- After the next macOS update: the shell still finds Nix, the `_nixbld` users
-  keep IDs 351–382, and Rosetta remains.
-- OBS 33 launches on macOS 27.2.
-
-### 2. Windows (here, then a VM, then the desktop)
-
+- Rules for AGENTS.md when it lands: never uninstall apps; save old registry
+  values before the first apply; Secure Boot, TPM, Defender, Firewall, UAC and
+  Windows Update stay on; BitLocker keys never appear in output or logs.
 - `setup.toml`: apps from `Packages.cs` without Chezmoi, fnm, Mise, CMake,
   Ninja and the agent CLIs, plus delta; registry values from `Settings.cs`.
 - `setup.py status` only reads. `setup.py apply`: save old registry values
@@ -109,10 +44,8 @@ setting or doc each one concerns.
 - `windows/bootstrap.ps1`: install Git and uv, clone, run `setup.py apply`
   elevated.
 - `tests/test_windows_setup.py` with fake commands runs in `just check`.
-- Done when: on a Windows 11 VM a second `apply` changes nothing and
-  `status` is clean; then the desktop.
 
-### 3. WSL
+### 2. WSL
 
 - Flake: NixOS-WSL input; `nixosConfigurations.wsl` from
   `hosts/wsl/local/user.nix` (Linux and Windows user). It imports the shell,
@@ -125,23 +58,20 @@ setting or doc each one concerns.
   temporary clone to set my user, restart the distro, clone to
   `~/Projects/nix`, `nswitch`.
 - `just eval-wsl` in `just check`; build only on demand.
-- Done when: `nswitch`, a signed commit, `ssh.exe -T git@github.com`, and
-  VSCodium and Zed connecting all work. Then remove Fedora by hand with
-  `wsl --unregister`, which deletes its data.
+- Afterwards, remove Fedora by hand with `wsl --unregister`, which deletes
+  its data.
 
-### 4. Windows development tools (last)
+### 3. Windows development tools (last)
 
 - Mise and a short tool list on Windows itself, and the agent settings
   merges. Decide the list then.
 
-### 5. Retire the old repos
+### 4. Retire win-setup
 
-- Update `AGENTS.md`'s map and the README as each part lands.
-- Archive win-setup with a README pointing here once phases 2 and 3 run on
-  real machines.
+- Archive it with a README pointing here once phases 1 and 2 run on real
+  machines.
 
 ### Fallbacks
 
-- A macOS update resets `/etc/zshrc`: run `nswitch` again.
 - 1Password misbehaves in WSL: relay its agent with npiperelay and socat.
 - NixOS-WSL disappoints: Ubuntu with standalone Home Manager reuses `home/`.

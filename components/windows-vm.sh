@@ -257,9 +257,8 @@ cmd_launch() {
     sleep 2
   done
 
-  # Hyprland gives XWayland apps the real pixels (force_zero_scaling), so
-  # Windows scales itself like the monitor. Outside Hyprland, such as in an
-  # agent's hidden desktop, keep 100%.
+  # Windows scales itself like the monitor (configs/hypr/conf.d/monitors.lua).
+  # Outside Hyprland, such as in an agent's hidden desktop, keep 100%.
   scale=$(hyprctl monitors -j 2>/dev/null |
     jq -r '.[] | select(.focused).scale * 100 | round' 2>/dev/null) || scale=100
   local args=(-grab-keyboard /sound /microphone /clipboard /dynamic-resolution

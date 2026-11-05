@@ -1,8 +1,8 @@
-# Every shortcut in System Settings → Keyboard → Keyboard Shortcuts on macOS
-# 27.0.1, off so none takes keys that Tinycast or another app needs. Caps Lock's
-# Hyper (⌃⌥⌘) turns Mission Control and Switch to Desktop 1–9 back on, since
-# Tinycast cannot switch Spaces by number. Each switch writes the whole list, so
-# change shortcuts here, not in System Settings.
+# Every shortcut in System Settings → Keyboard → Keyboard Shortcuts, off so
+# none takes keys that Tinycast or another app needs. Caps Lock's Hyper (⌃⌥⌘)
+# turns Mission Control and Switch to Desktop 1–9 back on, since Tinycast
+# cannot switch Spaces by number. Each switch writes the whole list, so change
+# shortcuts here, not in System Settings.
 { lib, ... }:
 
 let

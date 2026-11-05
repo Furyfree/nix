@@ -6,6 +6,7 @@ hl.monitor({
     scale = "auto",
 })
 
--- XWayland apps get the real pixels and scale themselves instead of being
--- stretched blurry; the Windows VM's xfreerdp passes the scale to Windows.
+-- X11 apps get the real pixels instead of being stretched blurry; on a scaled
+-- monitor, those that do not scale themselves look smaller. The Windows VM
+-- passes the scale to Windows.
 hl.config({ xwayland = { force_zero_scaling = true } })

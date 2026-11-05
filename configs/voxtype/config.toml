@@ -11,8 +11,7 @@ device = "default"
 max_duration_secs = 60
 pause_media = true
 
-# The voxtype user unit picks the model per machine: large-v3-turbo on the
-# desktop (RTX 3080, about 1.6 GB), small elsewhere.
+# The voxtype user unit picks the model per machine.
 [whisper]
 mode = "local"
 language = ["en", "da"]

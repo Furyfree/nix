@@ -1,56 +1,36 @@
 # Nix
 
-NixOS with integrated Home Manager for my workstations: `desktop`, `laptop` and
-the `nixos-test` machine. To set up a machine, follow
-[INSTALLATION.md](INSTALLATION.md). Every Mac uses nix-darwin with Home Manager
-from the `macos` host.
+NixOS with integrated Home Manager for my workstations, and nix-darwin with
+Home Manager for the Macs. To set up a machine, follow
+[INSTALLATION.md](INSTALLATION.md).
 
 ## Daily use
 
 The installed checkout lives at `~/Projects/nix`; app configs in `configs/` are
 linked into place, so editing them takes effect without a rebuild. Each host
 builds only from its ignored `hosts/<host>/local/` data, which the installer
-writes, so always use `path:` flakes.
+writes, so always use `path:` flakes. Private shell settings go in
+`~/.config/zsh/local.zsh`, outside the checkout; the shell loads it last.
 
 ```sh
-nswitch            # build, show changes, ask, then switch between Snapper snapshots
-nupdate [INPUT]    # update pinned inputs, run just check, then nswitch
-ninfo              # list system generations
-nclean             # remove old generations; keeps the boot menu's 10
-nsearch QUERY      # search packages and options
-mup                # upgrade Mise tools; mise install after a rebuild
-fup                # install firmware updates
-pull-projects      # fast-forward every clean repo in ~/Projects
-```
-
-On a Mac:
-
-```sh
-nswitch            # build, show changes, ask, then switch; installs missing apps
-nupdate [INPUT]    # update pinned inputs, run nix flake check, then nswitch
-ninfo              # list nix-darwin generations
-nrollback N        # switch back to generation N; apps and macOS settings stay
-nclean             # remove old generations; keeps the newest 10
+nswitch            # build, show changes, ask, then switch
+nupdate [INPUT]    # update pinned inputs, check, then switch
+ninfo              # list generations
+nrollback N        # Mac: switch back to generation N
+nclean             # remove old generations
 nsearch QUERY      # search packages and options
 mup                # upgrade Mise tools; mise install after a switch
-brew upgrade       # in Terminal.app: upgrade apps; add --greedy for Office
+fup                # Linux: install firmware updates
+brew upgrade       # Mac, in Terminal.app: upgrade apps; add --greedy for Office
 pull-projects      # fast-forward every clean repo in ~/Projects
 ```
 
-macOS updates come from Software Update, not `fup`.
+`nix-workstation COMMAND --help` explains each alias. A macOS update can reset
+`/etc/zshrc`; run `nswitch` again.
 
-The aliases run `nix-workstation`, linked from `configs/bin`;
-`nix-workstation --help` lists its commands and `nix-workstation COMMAND --help`
-explains one. On a machine built before the script existed, the link and
-aliases appear after one switch run from the checkout:
-
-```sh
-~/Projects/nix/configs/bin/nix-workstation switch
-```
-
-Roll back with `nh os rollback`, or pick an older generation in the boot menu;
-on a Mac, with `nrollback N`. Rollback restores the system, not files in your
-home folder.
+Roll back with `nh os rollback` or an older generation in the boot menu; on a
+Mac, `nrollback N` leaves apps and macOS settings as they are. Rollback
+restores the system, not files in your home folder.
 
 ## Develop
 
@@ -60,9 +40,7 @@ uv sync --locked
 just check
 ```
 
-`just` lists the commands: `just wizard` previews the installer without
-changes, `just build-iso` and `just burn` make the USB stick, and
-`just format` formats Python and Nix files. Build a host without activating it
-with `nh os build`.
+`just --list` shows the other recipes. Build a host without activating it with
+`nh os build`.
 
 [docs/PLAN.md](docs/PLAN.md) holds the open work.

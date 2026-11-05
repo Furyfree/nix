@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Set up a Mac from this repository, or move one from mac-setup: report its
-# security settings, install the Command Line Tools, Rosetta, Homebrew and Nix,
-# clone this repository, write the Mac's local/user.nix, save the settings it
-# changes and switch to nix-darwin. Each step checks first, so running it again
-# carries on where it stopped. On a new Mac, in Terminal:
+# Set up a Mac from this repository: report its security settings, install the
+# Command Line Tools, Rosetta, Homebrew and Nix, clone this repository, write
+# the Mac's local/user.nix, save the settings it changes and switch to
+# nix-darwin. Each step checks first, so running it again carries on where it
+# stopped. On a new Mac, in Terminal:
 #   curl -fsSL https://raw.githubusercontent.com/Furyfree/nix/main/darwin/bootstrap.sh | bash
 # Written for macOS's own bash 3.2, which runs it there.
 set -euo pipefail

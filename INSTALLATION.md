@@ -35,31 +35,33 @@ on its own disk and gets an entry in the boot menu.
    on by itself. Set a firmware administrator password afterwards.
 2. `tailscale up` to join the tailnet.
 3. `mise install` for the language runtimes and agent CLIs.
-4. Dictation: `voxtype setup --download --model large-v3-turbo` on the desktop,
-   `--model small` elsewhere, then `systemctl --user start voxtype`.
+4. Dictation: `voxtype setup --download --model <model>`, with the model that
+   ends the `ExecStart` line of `systemctl --user cat voxtype`, then
+   `systemctl --user start voxtype`.
 5. 1Password: sign in, then in Settings → Developer turn on the SSH agent and
    the CLI integration.
 6. SSH keys stay in 1Password; these public halves only tell SSH which key a
-   host gets, and the profile's private document lists its hosts. The SSH
-   config comes from `configs/ssh/personal.conf` or `work.conf`, by the host's
-   profile. Personal machines:
+   host gets, and the profile's private document lists its hosts. Every
+   machine:
 
    ```bash
    op item get n6imsp5vfs5nmlt5rmxgs6zdci --fields "label=public key" >~/.ssh/github.pub
-   op item get 3ppqekfxnmjtg2iapnr5d7gewi --fields "label=public key" >~/.ssh/homelab.pub
-   op item get 3psgdyql5u5zlpamsfc4xr7cbu --fields "label=public key" >~/.ssh/personal.pub
-   op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf
    git config --file ~/.config/git/local user.signingkey ~/.ssh/github.pub
    ```
 
-   Work machines (`workstation.sshProfile = "work"` in the host's `home.nix`),
-   also setting the work commit email:
+   Personal machines:
 
    ```bash
-   op item get n6imsp5vfs5nmlt5rmxgs6zdci --fields "label=public key" >~/.ssh/github.pub
+   op item get 3ppqekfxnmjtg2iapnr5d7gewi --fields "label=public key" >~/.ssh/homelab.pub
+   op item get 3psgdyql5u5zlpamsfc4xr7cbu --fields "label=public key" >~/.ssh/personal.pub
+   op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf
+   ```
+
+   Work machines, with the work commit email:
+
+   ```bash
    op item get cwlhpt5lcyn3dsuyx4wyms2ama --fields "label=public key" >~/.ssh/work.pub
    op document get npl7xfsvir6kbq7jvptugkczhm --out-file ~/.ssh/local.conf
-   git config --file ~/.config/git/local user.signingkey ~/.ssh/github.pub
    git config --file ~/.config/git/local user.email <work email>
    ```
 
@@ -70,12 +72,8 @@ on its own disk and gets an entry in the boot menu.
    then `sudo systemctl restart home-manager-$USER.service` to link it into
    `~/Pictures/Wallpapers`; `nswitch` skips that when nothing else changed.
 8. `git clone git@github.com:Furyfree/ai-workflow.git ~/Projects/ai-workflow`,
-   then in it `nix develop -c just install` for agent rules and skills.
+   then install its agent rules and skills as its README says.
 9. `dtu-eduroam <1Password item>` for DTU Wi-Fi; laptop: `fprintd-enroll`.
-10. Local models download on first use; fetch them now instead, one at a
-    time, and follow `journalctl -fu llama-cpp` until each has loaded:
-    `curl -d '{"model":"qwen3.6-35b-a3b"}' http://127.0.0.1:8080/models/load`,
-    then `gemma-4-e4b`.
 
 ## Accounts and apps
 
@@ -182,12 +180,8 @@ Every Mac uses the nix-darwin host `macos`. Its ignored
 
 ### Set up a Mac
 
-Private shell settings go in `~/.config/zsh/local.zsh`, which the shell loads
-last. Moving one of my own Macs: first add any hosts from the old
-`~/.ssh/config` to the personal 1Password document, because step 4
-overwrites `~/.ssh/local.conf` with that document. The switch renames each
-file it replaces to `*.before-home-manager`, and stops if that backup already
-exists.
+The switch renames each file it replaces to `*.before-home-manager`, and
+stops if that backup already exists.
 
 1. In Setup Assistant, create your administrator account and turn on
    FileVault; store its recovery key in 1Password from another device. Then
@@ -199,22 +193,17 @@ exists.
      https://raw.githubusercontent.com/Furyfree/nix/main/darwin/bootstrap.sh | bash
    ```
 
-   It reports FileVault, SIP, Gatekeeper, the firewall and device management
-   without changing them. Then it installs the Command Line Tools, Rosetta,
-   Homebrew and Nix, clones this repository, asks which Mac this is and
-   writes `local/user.nix`. It saves the settings it changes to
-   `~/.local/state/nix-workstation/macos-before/` (restore one with
-   `defaults import DOMAIN FILE`), renames the shell and Nix files in `/etc`
-   to `*.before-nix-darwin` and switches. Some apps ask for your password.
-   After an error, run it again; it carries on.
+   It installs what the Mac needs, asks which Mac this is and switches. It
+   saves the settings it changes to
+   `~/.local/state/nix-workstation/macos-before/`; restore one with
+   `defaults import DOMAIN FILE`. After an error, run it again; it carries on.
 3. Log out and back in, for the settings that wait for it.
 4. 1Password: sign in, then in Settings → Developer turn on the SSH agent and
    the CLI integration. Fetch the SSH files, run `gh auth login` and switch
    the checkout to SSH, as in step 6 of [First boot](#first-boot).
 5. In a new terminal, `mise install`.
-6. `git clone git@github.com:Furyfree/ai-workflow.git ~/Projects/ai-workflow`,
-   then in it `python3 install.py` for agent rules and skills; its
-   development shell is Linux-only.
+6. ai-workflow as in step 8 of [First boot](#first-boot), with
+   `python3 install.py`: its development shell is Linux-only.
 
 ### By hand
 
@@ -222,8 +211,7 @@ Every Mac:
 
 - Battery: System Settings → Battery, ⓘ beside Charging: charge limit 80 %,
   Optimized Battery Charging off.
-- App Management for Terminal.app only. Upgrade apps there with
-  `brew upgrade`, plus `--greedy` for Office.
+- App Management for Terminal.app only, for `brew upgrade`.
 - Sign-ins: Microsoft 365, Spotify, Signal, ChatGPT, Claude, JetBrains and
   Brave Origin's licence.
 - Permissions: Accessibility and Menu Bar Layout Access for Thaw,

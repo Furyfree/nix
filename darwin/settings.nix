@@ -1,6 +1,5 @@
-# macOS settings for my account, as mac-setup wrote them on macOS 27.0.1, and
-# matching Linux where it has an equivalent. Each switch writes them; most take
-# effect then, the rest after a logout.
+# macOS settings for my account, matching Linux where it has an equivalent.
+# Each switch writes them; most take effect then, the rest after a logout.
 { lib, ... }:
 
 let
@@ -72,9 +71,9 @@ in
       };
 
       # ⌘M never minimises. Turning off Minimize in shortcuts.nix still left ⌘M
-      # minimising Finder windows on macOS 27.0.1, so the Minimize item in every
-      # app gets ⌃⌥⇧⌘F19 instead, as App Shortcuts in System Settings does. No
-      # Mac keyboard has F19, so Caps Lock's Hyper chord cannot reach it either.
+      # minimising Finder windows, so the Minimize item in every app gets
+      # ⌃⌥⇧⌘F19 instead, as App Shortcuts in System Settings does. No Mac
+      # keyboard has F19, so Caps Lock's Hyper chord cannot reach it either.
       # Danish menu title first, English for apps without Danish. Each switch
       # writes the whole list, so add App Shortcuts for all apps here.
       NSGlobalDomain.NSUserKeyEquivalents = lib.genAttrs [ "Minimer" "Minimize" ] (_: "@~^$" + f19);
