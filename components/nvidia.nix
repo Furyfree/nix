@@ -14,4 +14,7 @@
     # Its X11 settings app does little on Wayland.
     nvidiaSettings = false;
   };
+
+  # btop finds the driver's GPU library only when built with CUDA support.
+  nixpkgs.overlays = [ (_: prev: { btop = prev.btop.override { cudaSupport = true; }; }) ];
 }
