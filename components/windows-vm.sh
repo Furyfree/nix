@@ -257,17 +257,14 @@ cmd_launch() {
     sleep 2
   done
 
-  # Outside Hyprland, such as in an agent's hidden desktop, keep FreeRDP's
-  # default scale.
+  # Hyprland gives XWayland apps the real pixels (force_zero_scaling), so
+  # Windows scales itself like the monitor. Outside Hyprland, such as in an
+  # agent's hidden desktop, keep 100%.
   scale=$(hyprctl monitors -j 2>/dev/null |
-    jq -r '.[] | select(.focused).scale * 100 | floor' 2>/dev/null) || scale=100
+    jq -r '.[] | select(.focused).scale * 100 | round' 2>/dev/null) || scale=100
   local args=(-grab-keyboard /sound /microphone /clipboard /dynamic-resolution
-    /gfx:AVC444 "/title:Windows VM" "/floatbar:sticky:off,default:visible,show:fullscreen" /f)
-  if ((scale >= 170)); then
-    args+=(/scale:180)
-  elif ((scale >= 130)); then
-    args+=(/scale:140)
-  fi
+    /gfx:AVC444 "/title:Windows VM" "/floatbar:sticky:off,default:visible,show:fullscreen" /f
+    "/scale-desktop:${scale:-100}")
   # Booted is not yet ready for Remote Desktop: retry while FreeRDP cannot
   # connect, but not after a closed window or a rejected login.
   for attempt in {1..30}; do
