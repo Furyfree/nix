@@ -13,6 +13,7 @@
 
 let
   inherit (config.services.llama-cpp.settings) host port;
+  url = "http://${host}:${toString port}";
   # Enough room for coding agents; fit offloads weights rather than shrink it.
   context = 65536;
 
@@ -56,7 +57,7 @@ let
     builtins.toJSON {
       npm = "@ai-sdk/openai-compatible";
       name = "llama.cpp";
-      options.baseURL = "http://${host}:${toString port}/v1";
+      options.baseURL = "${url}/v1";
       models = lib.mapAttrs (_: model: {
         inherit (model) name;
         limit = {
@@ -66,6 +67,15 @@ let
       }) models;
     }
   );
+
+  # Chat in the terminal through the server, which loads the model you pick
+  # with its settings above, rather than a second copy in llama-cli.
+  llamaChat = pkgs.writeShellApplication {
+    name = "llama-chat";
+    text = ''
+      exec ${lib.getExe' config.services.llama-cpp.package "llama-cli"} --server-base ${url} "$@"
+    '';
+  };
 in
 {
   services.llama-cpp = {
@@ -93,6 +103,12 @@ in
       cors-origins = "localhost";
     };
   };
+
+  # The same build for llama-cli and the other tools.
+  environment.systemPackages = [
+    config.services.llama-cpp.package
+    llamaChat
+  ];
 
   # The service has no home, so GPU drivers keep compiled shaders here instead
   # of rebuilding them on every model load.

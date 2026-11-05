@@ -128,8 +128,10 @@ cmd_switch() {
 
   description="nswitch $(git -C "$repo" describe --always --dirty 2>/dev/null || true)"
   pre=$(sudo snapper -c root create --type pre --cleanup-algorithm number --print-number --description "$description")
-  # The build above is reused; its diff was already shown.
-  nh os switch --diff never || result=$?
+  # The build above is reused; its diff was already shown. Boot default first,
+  # then activate, as nixos-rebuild does: nh os switch skips the boot default
+  # when any service fails during activation.
+  { nh os boot --diff never && nh os test --diff never; } || result=$?
   if ! sudo snapper -c root create --type post --pre-number "$pre" --cleanup-algorithm number --description "$description"; then
     printf 'nix-workstation: post snapshot failed; pre snapshot is #%s\n' "$pre" >&2
     ((result)) || result=1

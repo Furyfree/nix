@@ -119,6 +119,7 @@
     },
     "default_profile": "ask",
     "enable_feedback": false,
+    "play_sound_when_agent_done": "when_hidden",
     "dock": "left"
   },
   "telemetry": {
