@@ -182,28 +182,12 @@ Every Mac uses the nix-darwin host `macos`. Its ignored
 
 ### Set up a Mac
 
-Before migrating an existing shell, keep private settings in
-`~/.config/zsh/local.zsh`, outside this checkout. The shared interactive shell
-sources it last, only when readable.
-Home Manager manages individual shared files, not the whole zsh directory;
-it leaves this private file alone and never copies it into the Nix store.
-Do not import its contents through Nix. Rename an existing `work.zsh` to
-`local.zsh` and update the old shell's loader before switching.
-
-On macOS, existing files displaced by Home Manager are renamed with the
-`.before-home-manager` suffix. If that backup already exists, review the
-conflict before switching again; do not force an overwrite. The backups are
-not sourced automatically. Test a new terminal before closing your existing
-session.
-
-For existing SSH settings, keep private host entries in `~/.ssh/local.conf`,
-which both shared SSH profiles include before their defaults. If that file
-does not exist, copy your existing `~/.ssh/config` there before switching;
-otherwise merge the entries into it. Home Manager replaces `~/.ssh/config`
-with the selected profile and backs up the old file as above; it does not
-manage `local.conf`, public key files or known hosts. Do not copy private host
-entries into this repository. Existing `Include` directives must not point
-back to `~/.ssh/config` or `~/.ssh/local.conf`, which would recurse.
+Private shell settings go in `~/.config/zsh/local.zsh`, which the shell loads
+last. Moving one of my own Macs: first add any hosts from the old
+`~/.ssh/config` to the personal 1Password document, because step 4
+overwrites `~/.ssh/local.conf` with that document. The switch renames each
+file it replaces to `*.before-home-manager`, and stops if that backup already
+exists.
 
 1. In Setup Assistant, create your administrator account and turn on
    FileVault; store its recovery key in 1Password from another device. Then

@@ -16,8 +16,6 @@ require("./conf.d/workspace-layouts.lua")
 require("./conf.d/decoration.lua")
 require("./conf.d/animations.lua")
 require("./conf.d/window-rules.lua")
--- enableoverview: off with components/scrolloverview.nix in system.nix; the plugin crashes Hyprland.
--- require("./conf.d/overview.lua")
 require("./conf.d/autostart.lua")
 require("./conf.d/keybinds.lua")
 

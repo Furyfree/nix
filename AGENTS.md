@@ -45,10 +45,10 @@ patches on machines.
   `work.nix` the profile a Mac's `local/user.nix` imports.
 - `home/`, `configs/`: Home Manager integration and links versus native
   application preferences. `common.nix` holds what every platform shares,
-  `linux.nix` and `darwin.nix` the platform parts, and `ssh.nix` the
-  personal or work SSH key set a host picks. SSH hosts stay in private
-  1Password documents, never here. Keep the checkout at `~/Projects/nix` for
-  these links.
+  `linux.nix` and `darwin.nix` the platform parts, `darwin-personal.nix` the
+  personal Mac's CodexBar, and `ssh.nix` the personal or work SSH key set a
+  host picks. SSH hosts stay in private 1Password documents, never here. Keep
+  the checkout at `~/Projects/nix` for these links.
 - `hosts/`: tracked host exceptions; ignored `hosts/<host>/local/` holds detected
   hardware and installation data, and on macOS `user.nix` with the account
   and profile.

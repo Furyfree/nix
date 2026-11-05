@@ -287,7 +287,7 @@ for _, binding in ipairs({
     )
 end
 
--- NuPhy top row without Fn: F3 (overview) is in overview.lua, F5 dictation, F6 moon.
+-- NuPhy top row without Fn: F5 dictation, F6 moon.
 hl.bind(
     "XF86VoiceCommand",
     hl.dsp.exec_cmd("noctalia msg mic-mute"),

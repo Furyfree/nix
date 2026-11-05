@@ -16,9 +16,6 @@
     ./components/hyprland-noctalia.nix
     ./components/networking.nix
     ./components/printing.nix
-    # enableoverview: off; the plugin crashes Hyprland, lags behind Hyprland
-    # releases and is rarely used. Also off in configs/hypr/hyprland.lua.
-    # ./components/scrolloverview.nix
     ./components/services.nix
     ./components/shell.nix
     ./components/snapper.nix

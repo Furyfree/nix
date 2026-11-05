@@ -11,9 +11,6 @@ result-*
 # Installer-generated machine data; use path: flakes to include it locally.
 hosts/*/local/
 
-# Private shell overrides belong in ~/.config/zsh, never in the public repo.
-configs/zsh/local.zsh
-
 # Python development environments and caches
 .venv/
 .ruff_cache/

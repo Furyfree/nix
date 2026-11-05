@@ -89,7 +89,6 @@ in
           "hypr/conf.d/decoration.lua"
           "hypr/conf.d/animations.lua"
           "hypr/conf.d/window-rules.lua"
-          "hypr/conf.d/overview.lua"
           "hypr/conf.d/autostart.lua"
           "hypr/conf.d/keybinds.lua"
           "uwsm/env"

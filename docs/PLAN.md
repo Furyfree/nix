@@ -9,7 +9,7 @@ Open work only; finished work lives in Git.
    1Password field pasted into Wi-Fi fields and launcher search must paste the
    current value and stay out of history (noctalia#4457). It is fixed upstream
    but not released; retest once a release with the fix reaches nixpkgs
-   (5.4.0 is pinned now). Text copied in Ghostty must paste after Ghostty
+   (5.4.1 is pinned now). Text copied in Ghostty must paste after Ghostty
    closes without picking it from history (noctalia#3793).
 
 ## Untested recovery
@@ -26,8 +26,8 @@ Open work only; finished work lives in Git.
 
 ## One repo for every machine
 
-This repo sets up NixOS, the Macs, Windows and WSL. mac-setup and win-setup
-are archived once their machines run from here; only their lists and checks
+This repo sets up NixOS, the Macs, Windows and WSL. mac-setup is archived;
+win-setup follows once its machines run from here. Only its lists and checks
 move over.
 
 - Macs: nix-darwin with Home Manager. Homebrew installs apps, fonts and
