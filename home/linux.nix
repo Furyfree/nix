@@ -27,7 +27,6 @@ in
       lib.mapAttrs'
         (name: package: lib.nameValuePair "applications/${name}" { source = hidden package name; })
         {
-          "btop.desktop" = pkgs.btop;
           "nvim.desktop" = pkgs.neovim;
           "yazi.desktop" = pkgs.yazi;
           "mpv.desktop" = pkgs.mpv;
@@ -59,6 +58,12 @@ in
         name = "Google Maps";
         exec = "launch focus-webapp https://www.google.com/maps";
         icon = "webapp-google-maps";
+      };
+      # Replaces the package's entry; window rules float and centre it.
+      btop = {
+        name = "btop";
+        exec = "launch tui btop";
+        icon = "com.github.stsdc.monitor";
       };
       # Watch, pause or help an agent in its hidden desktop.
       agent-workspace = {

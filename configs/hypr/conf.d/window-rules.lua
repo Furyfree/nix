@@ -17,6 +17,12 @@ hl.window_rule({
     tag = "+centered-floating",
 })
 hl.window_rule({
+    name = "btop",
+    -- launch tui btop names its Ghostty window this class.
+    match = { class = "^launch\\.tui\\.btop$" },
+    tag = "+centered-floating",
+})
+hl.window_rule({
     name = "steam-settings-and-friends",
     -- Steam gives these and its main window the same class and window type.
     -- Keep the app match and narrow it to these two initial titles.
