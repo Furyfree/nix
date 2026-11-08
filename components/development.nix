@@ -14,8 +14,10 @@
     # C compiler and linker for Rust, cgo and Neovim's tree-sitter parsers.
     gcc
     tree-sitter
-    # Language servers tied to Nix and the C toolchain; Mise installs the rest.
+    # Language servers tied to Nix and the C toolchain, and Metals, which Mise
+    # has no entry for; Mise installs the rest.
     nixd
     clang-tools
+    metals
   ];
 }

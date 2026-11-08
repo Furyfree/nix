@@ -108,6 +108,12 @@ hl.bind(
     focus_or_launch("com.anthropic.Claude", "uwsm-app -- claude-desktop"),
     { description = "Focus or open Claude" }
 )
+-- Does nothing on hosts without components/local-ai.nix.
+hl.bind(
+    mainMod .. " + SHIFT + A",
+    hl.dsp.exec_cmd("uwsm-app -- llama-cpp.desktop"),
+    { description = "Focus or open the llama.cpp WebUI" }
+)
 hl.bind(
     mainMod .. " + W",
     hl.dsp.window.close(),

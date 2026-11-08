@@ -119,6 +119,18 @@ in
     (
       { config, lib, ... }:
       {
+        # The server's WebUI as an app; the icon is llama.cpp's own (MIT).
+        xdg.dataFile."icons/hicolor/scalable/apps/webapp-llama-cpp.svg".source =
+          ../configs/icons/webapp-llama-cpp.svg;
+        xdg.desktopEntries.llama-cpp = {
+          name = "llama.cpp WebUI";
+          genericName = "Local AI chat";
+          exec = "launch focus-webapp ${url}/";
+          icon = "webapp-llama-cpp";
+          # The launcher scores each word on its own.
+          settings.Keywords = "AI;LLM;chat;WebUI;llama ui;llama cpp;local;models";
+        };
+
         home.activation.opencodeLocalModels = lib.hm.dag.entryAfter [ "toolSettings" ] ''
           file=${config.xdg.configHome}/opencode/opencode.jsonc
           if [[ -s $file ]]; then
