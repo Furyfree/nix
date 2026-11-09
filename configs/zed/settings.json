@@ -120,7 +120,11 @@
     "default_profile": "ask",
     "enable_feedback": false,
     "play_sound_when_agent_done": "when_hidden",
-    "dock": "left"
+    "dock": "left",
+    "commit_message_model": {
+      "provider": "zed.dev",
+      "model": "claude-haiku-4-5"
+    }
   },
   "telemetry": {
     "diagnostics": false,

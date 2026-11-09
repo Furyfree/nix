@@ -164,6 +164,17 @@ in
     ".local/bin/launch".source = link "bin/launch";
   };
 
+  # Zed's registry Grok starts its bin with Node, but Grok's npm install swaps
+  # that bin for the native binary; start mise's grok directly instead.
+  programs.zed-editor.userSettings.agent_servers.Grok = {
+    type = "custom";
+    command = "grok";
+    args = [
+      "agent"
+      "stdio"
+    ];
+  };
+
   home.activation = {
     # Opt out of Toolbox's default autostart before its first launch, then leave
     # the setting to Toolbox.

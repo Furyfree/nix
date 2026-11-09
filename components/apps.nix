@@ -38,5 +38,21 @@ in
     fastmail-desktop
     woeusb
     jetbrains-toolbox
+    surfer
+  ];
+
+  # Surfer's package ships no menu entry; the icon is upstream's own (EUPL-1.2).
+  home-manager.sharedModules = [
+    {
+      xdg.dataFile."icons/hicolor/scalable/apps/surfer.svg".source =
+        "${pkgs.surfer.src}/surfer/assets/logo-small.svg";
+      xdg.desktopEntries.surfer = {
+        name = "Surfer";
+        genericName = "Waveform viewer";
+        exec = "surfer %f";
+        icon = "surfer";
+        settings.Keywords = "VCD;waveform;Chisel;Verilog";
+      };
+    }
   ];
 }
