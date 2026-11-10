@@ -131,6 +131,31 @@ in
           settings.Keywords = "AI;LLM;chat;WebUI;llama ui;llama cpp;local;models";
         };
 
+        # Zed's agent on the local model, kept to the open project: file tools
+        # only, so no terminal, web, skill loading, subagents or MCP servers.
+        programs.zed-editor.userSettings = {
+          language_models."llama.cpp".api_url = url;
+          agent.profiles.local = {
+            name = "Local";
+            default_model = {
+              provider = "llama.cpp";
+              model = "qwen3.6-35b-a3b";
+            };
+            enable_all_context_servers = false;
+            context_servers = { };
+            tools = lib.genAttrs [
+              "read_file"
+              "list_directory"
+              "find_path"
+              "grep"
+              "edit_file"
+              "write_file"
+              "create_directory"
+              "diagnostics"
+            ] (_: true);
+          };
+        };
+
         home.activation.opencodeLocalModels = lib.hm.dag.entryAfter [ "toolSettings" ] ''
           file=${config.xdg.configHome}/opencode/opencode.jsonc
           if [[ -s $file ]]; then
