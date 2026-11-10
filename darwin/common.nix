@@ -3,18 +3,11 @@ _:
 
 {
   homebrew = {
-    taps = [
-      {
-        name = "abue-ammar/tinycast";
-        trusted = true;
-      }
-    ];
-
     casks = [
       # Window management, launcher and menu bar
       "thaw@beta" # Thaw 3: the only version for macOS 27
       "vorssaint"
-      "abue-ammar/tinycast/tinycast"
+      "tinycast"
       "itsycal" # 0.27 or later on 27
 
       # Terminal, editors and development
