@@ -10,10 +10,11 @@
     ./components/cli.nix
     ./components/computer-use.nix
     ./components/craft-suite.nix
+    ./components/desktop.nix
     ./components/development.nix
     ./components/devices.nix
     ./components/editors.nix
-    ./components/hyprland-noctalia.nix
+    ./components/hyprland.nix
     ./components/networking.nix
     ./components/printing.nix
     ./components/services.nix

@@ -1,5 +1,5 @@
--- Desktop monitors and workspaces; hosts/desktop/home.nix links this file to
--- ~/.config/hypr/host.lua.
+-- Desktop monitors and workspaces; home/hyprland.nix links this file to
+-- ~/.config/hypr/host.lua on the host named desktop.
 
 -- BenQ XL2720Z is the main display; ZOWIE XL LCD is to its right. Matched by
 -- description, so swapping cables keeps the layout. The firmware, Limine and

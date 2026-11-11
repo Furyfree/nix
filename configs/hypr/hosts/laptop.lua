@@ -1,5 +1,5 @@
--- Laptop monitors; hosts/laptop/home.nix links this file to
--- ~/.config/hypr/host.lua.
+-- Laptop monitors; home/hyprland.nix links this file to
+-- ~/.config/hypr/host.lua on the host named laptop.
 
 -- The 2880x1800 internal panel uses a 1920x1200 logical workspace.
 hl.monitor({

@@ -6,7 +6,7 @@ pcall(require, "./conf.d/key-promoter.lua")
 require("./conf.d/window-actions.lua")
 require("./conf.d/input.lua")
 require("./conf.d/monitors.lua")
--- Per-machine monitors and workspaces, linked by hosts/<host>/home.nix.
+-- Per-machine monitors and workspaces, linked by home/hyprland.nix.
 if package.searchpath("host", package.path) then
     require("host")
 end

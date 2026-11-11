@@ -1,5 +1,6 @@
-# Home Manager settings for the NixOS desktop: Hyprland, Noctalia, GTK and Qt,
-# launcher entries and Linux-only tools. Builds on common.nix.
+# Home Manager settings for the NixOS desktop: Noctalia, GTK and Qt, launcher
+# entries and Linux-only tools. Builds on common.nix; the compositor's links
+# come from its component.
 {
   config,
   lib,
@@ -84,20 +85,7 @@ in
     configFile =
       lib.genAttrs
         [
-          "hypr/hyprland.lua"
-          "hypr/conf.d/window-actions.lua"
-          "hypr/conf.d/input.lua"
-          "hypr/conf.d/monitors.lua"
-          "hypr/conf.d/layout.lua"
-          "hypr/conf.d/workspaces.lua"
-          "hypr/conf.d/workspace-layouts.lua"
-          "hypr/conf.d/decoration.lua"
-          "hypr/conf.d/animations.lua"
-          "hypr/conf.d/window-rules.lua"
-          "hypr/conf.d/autostart.lua"
-          "hypr/conf.d/keybinds.lua"
           "uwsm/env"
-          "uwsm/env-hyprland"
           "zsh/conf.d/noctalia.zsh"
           "noctalia/config.toml"
           "noctalia/vscodium.toml"
@@ -119,9 +107,6 @@ in
           source = link name;
         })
       // {
-        # Key Promoter snippet, as a live checkout link; hyprland.lua loads it first.
-        "hypr/conf.d/key-promoter.lua".source =
-          config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/noctalia-key-promoter/key-promoter/hypr/key-promoter.lua";
         "gtk-3.0/settings.ini".source = link "gtk/gtk-3.0/settings.ini";
         "gtk-4.0/settings.ini".source = link "gtk/gtk-4.0/settings.ini";
         # File manager sidebar; bookmarks need absolute paths.

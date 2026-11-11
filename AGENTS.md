@@ -56,7 +56,7 @@ Docs and comments state no current versions or status; open work lives in
   and profile.
   Shared policy belongs above it.
 - `configs/hypr/hosts/<host>.lua`: per-host monitors, workspaces and keys,
-  linked as `~/.config/hypr/host.lua` by `hosts/<host>/home.nix`.
+  linked as `~/.config/hypr/host.lua` by `home/hyprland.nix` after the hostname.
 - `INSTALLATION.md`: NixOS install steps and the Mac's `local/user.nix`;
   update it with installer or first-boot changes.
 - `scripts/install.py`: installer launcher; `scripts/nixos_setup/` holds its
