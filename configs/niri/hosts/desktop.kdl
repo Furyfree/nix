@@ -1,0 +1,34 @@
+// Desktop monitors and keyboard; home/niri.nix links this file to
+// ~/.config/niri/host.kdl on the host named desktop.
+
+// BenQ XL2720Z is the main display; ZOWIE XL LCD is to its right. Matched by
+// make, model and serial, so swapping cables keeps the layout. The firmware,
+// Limine and the unlock prompt use the RTX 3080's first DisplayPort, so the
+// BenQ goes there. Without a refresh rate, Niri picks the highest.
+output "BNQ BenQ XL2720Z SCE00737SL0" {
+    mode "1920x1080"
+    scale 1
+    position x=0 y=0
+    focus-at-startup
+}
+output "BNQ ZOWIE XL LCD 95H03263SL0" {
+    mode "1920x1080"
+    scale 1
+    position x=1920 y=0
+}
+
+// The NuPhy has US keycaps; AltGr+a/o/' types å/ø/æ as Option does on macOS.
+input {
+    keyboard {
+        xkb {
+            layout "us"
+            variant "mac"
+        }
+    }
+}
+
+// US has no unshifted Plus key; Equal widens, and Shift+Equal makes taller.
+binds {
+    Mod+Equal hotkey-overlay-title="Widen window" { set-column-width "+50"; }
+    Mod+Shift+Equal hotkey-overlay-title="Taller window" { set-window-height "+50"; }
+}

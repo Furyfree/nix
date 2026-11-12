@@ -1,32 +1,18 @@
-// Niri configuration. UWSM prepares the session environment before Niri
-// starts.
+// Load the Niri configuration files from conf.d.
 
-// Noctalia's colours. With the include already here, Noctalia does not add
-// one to this checkout file.
+// UWSM prepares the session environment before starting Niri.
+include "conf.d/input.kdl"
+include "conf.d/monitors.kdl"
+include "conf.d/layout.kdl"
+include "conf.d/decoration.kdl"
+include "conf.d/window-rules.kdl"
+include "conf.d/autostart.kdl"
+include "conf.d/keybinds.kdl"
+
+// Noctalia owns the generated palette. First login works before it exists,
+// and with the include already here, Noctalia does not add one to this file.
 include optional=true "noctalia.kdl"
 
-input {
-    keyboard {
-        xkb {
-            layout "dk"
-        }
-        numlock
-    }
-}
-
-// UWSM passes Niri's cursor to the session, so it matches configs/uwsm/env.
-cursor {
-    xcursor-theme "Bibata-Modern-Ice"
-    xcursor-size 24
-}
-
-binds {
-    Mod+Return hotkey-overlay-title="Open Ghostty terminal" { spawn "uwsm-app" "--" "ghostty" "+new-window"; }
-    Mod+Space hotkey-overlay-title="Open Noctalia launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
-    Mod+W hotkey-overlay-title="Close focused window" { close-window; }
-    Mod+Shift+L hotkey-overlay-title="Open Noctalia session menu" { spawn "noctalia" "msg" "panel-toggle" "session"; }
-}
-
-// Per-machine monitors and keys, linked by home/niri.nix. Last, so it
-// overrides the shared settings above.
+// Per-machine monitors and keys, linked by home/niri.nix. Last, because an
+// include overrides only what comes before it.
 include optional=true "host.kdl"

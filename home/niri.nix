@@ -17,22 +17,36 @@ let
   noctalia = builtins.fromTOML (builtins.readFile ../configs/noctalia/config.toml);
 in
 {
-  xdg.configFile = {
-    # Files, not the folder: Noctalia writes noctalia.kdl beside them.
-    "niri/config.kdl".source = link "niri/config.kdl";
-    # Noctalia reads this after config.toml. Its plugin list replaces the
-    # earlier one, so it is config.toml's list without the Hyprland-only
-    # plugins; a change there reaches Niri at the next rebuild.
-    "noctalia/niri.toml".source = (pkgs.formats.toml { }).generate "noctalia-niri.toml" {
-      plugins.enabled = lib.subtractLists [
-        "furyfree/key-promoter"
-        "profidev/hypr-screen-mirror"
-      ] noctalia.plugins.enabled;
-      # Off in config.toml for Hyprland's crash (#6), which Niri does not have.
-      idle.behavior.screen-off.enabled = true;
+  # Files, not the folder: Noctalia writes noctalia.kdl beside them.
+  xdg.configFile =
+    lib.genAttrs
+      [
+        "niri/config.kdl"
+        "niri/conf.d/input.kdl"
+        "niri/conf.d/monitors.kdl"
+        "niri/conf.d/layout.kdl"
+        "niri/conf.d/decoration.kdl"
+        "niri/conf.d/window-rules.kdl"
+        "niri/conf.d/autostart.kdl"
+        "niri/conf.d/keybinds.kdl"
+      ]
+      (name: {
+        source = link name;
+      })
+    // {
+      # Noctalia reads this after config.toml. Its plugin list replaces the
+      # earlier one, so it is config.toml's list without the Hyprland-only
+      # plugins; a change there reaches Niri at the next rebuild.
+      "noctalia/niri.toml".source = (pkgs.formats.toml { }).generate "noctalia-niri.toml" {
+        plugins.enabled = lib.subtractLists [
+          "furyfree/key-promoter"
+          "profidev/hypr-screen-mirror"
+        ] noctalia.plugins.enabled;
+        # Off in config.toml for Hyprland's crash (#6), which Niri does not have.
+        idle.behavior.screen-off.enabled = true;
+      };
+    }
+    // lib.optionalAttrs (builtins.pathExists ../configs/${host}) {
+      "niri/host.kdl".source = link host;
     };
-  }
-  // lib.optionalAttrs (builtins.pathExists ../configs/${host}) {
-    "niri/host.kdl".source = link host;
-  };
 }

@@ -1,0 +1,12 @@
+// Laptop monitor and keys; home/niri.nix links this file to
+// ~/.config/niri/host.kdl on the host named laptop.
+
+// The 2880x1800 internal panel uses a 1920x1200 logical workspace.
+output "eDP-1" {
+    scale 1.5
+}
+
+// Keep the laptop awake with the lid closed, for example on a dock.
+binds {
+    Mod+Ctrl+L hotkey-overlay-title="Toggle Lid Guard" { spawn "noctalia" "msg" "plugin" "8bury/lid-guard:lid-guard-service" "all" "toggle"; }
+}

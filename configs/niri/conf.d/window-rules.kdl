@@ -1,0 +1,75 @@
+// Window and layer rules for applications and Noctalia surfaces.
+
+// New floating windows open centred; these keep the app's width and get a
+// fixed height.
+window-rule {
+    match app-id=r#"^com\.onepassword\.OnePassword$"#
+    match app-id=r#"^com\.mitchellh\.ghostty\.presentation$"#
+    // launch tui btop names its Ghostty window this app ID.
+    match app-id=r#"^launch\.tui\.btop$"#
+    // Steam gives these and its main window the same app ID and window type.
+    match app-id=r#"^steam$"# title=r#"^(Steam Settings|Friends List)$"#
+    // Settings shares the vault window's app ID; its title names the vault.
+    match app-id=r#"^md\.obsidian\.Obsidian$"# title=r#"^Settings - .* - Obsidian .*$"#
+    open-floating true
+    default-window-height {
+        fixed 700
+    }
+}
+
+// Every JetBrains IDE shares this app ID prefix and titles its welcome frame
+// "Welcome to ...". Opening a project disposes this frame and opens the
+// project in a separate window, which stays tiled.
+window-rule {
+    match app-id=r#"^jetbrains-.*$"# title=r#"^Welcome to .*$"#
+    open-floating true
+    default-column-width {
+        fixed 900
+    }
+    default-window-height {
+        fixed 700
+    }
+}
+
+// Keep Noctalia settings separate from the scrolling columns.
+window-rule {
+    match app-id=r#"^dev\.noctalia\.Noctalia$"#
+    open-floating true
+    default-column-width {
+        fixed 1080
+    }
+    default-window-height {
+        fixed 920
+    }
+}
+
+// These apps expose background alpha while keeping their content opaque.
+window-rule {
+    match app-id=r#"^com\.mitchellh\.ghostty(\.presentation)?$"#
+    match app-id=r#"^dev\.noctalia\.Noctalia$"#
+    opacity 0.98
+}
+window-rule {
+    match app-id=r#"^com\.mitchellh\.ghostty(\.presentation)?$"# is-active=true
+    match app-id=r#"^dev\.noctalia\.Noctalia$"# is-active=true
+    opacity 1.0
+}
+
+// Proton gives games without an app ID this shared one; retail and Classic
+// share the title. Add verified games here to start fullscreen and opaque.
+window-rule {
+    match app-id=r#"^steam_app_default$"# title=r#"^World of Warcraft$"#
+    open-fullscreen true
+    opacity 1.0
+    background-effect {
+        blur false
+    }
+}
+
+// Blur Noctalia's visible surfaces.
+layer-rule {
+    match namespace=r#"^noctalia-(bar-.+|notification|dock|panel|attached-panel|osd|window-switcher)$"#
+    background-effect {
+        blur true
+    }
+}

@@ -1,0 +1,159 @@
+// Keyboard and mouse bindings for applications, windows, and workspaces.
+// Mod is Super. Super+drag moves and Super+right-drag resizes windows.
+
+// Noctalia's cheatsheet (Super+Escape) lists the binds instead.
+hotkey-overlay {
+    skip-at-startup
+}
+
+// Alt+Tab recalls a workspace and Super+Tab opens Noctalia's window picker,
+// so Niri's recent-windows switcher gets no binds.
+recent-windows {
+    binds {
+    }
+}
+
+binds {
+    // 1. Applications and panels
+    Mod+Return hotkey-overlay-title="Open Ghostty terminal" { spawn "uwsm-app" "--" "ghostty" "+new-window"; }
+    Mod+Shift+B hotkey-overlay-title="Open Brave browser" { spawn "uwsm-app" "--" "brave-origin"; }
+    // Native activation targets the main window; Quick Access shares its app ID.
+    Mod+Shift+P hotkey-overlay-title="Focus or open 1Password" { spawn "uwsm-app" "--" "1password"; }
+    Ctrl+Shift+Space hotkey-overlay-title="Open 1Password Quick Access" { spawn "uwsm-app" "--" "1password" "--quick-access"; }
+    Mod+Shift+F hotkey-overlay-title="Open file manager" { spawn "uwsm-app" "--" "nautilus"; }
+    Mod+Alt+F hotkey-overlay-title="Open file manager in the terminal's folder" { spawn "launch" "nautilus-cwd"; }
+    Mod+Alt+Return hotkey-overlay-title="Open floating terminal" { spawn "launch" "floating-terminal"; }
+    // Focus the most recently used window of the app, even on another workspace.
+    Mod+Shift+O hotkey-overlay-title="Focus or open Obsidian" { spawn "launch" "focus" "md.obsidian.Obsidian" "uwsm-app" "--" "obsidian"; }
+    Mod+Shift+D hotkey-overlay-title="Focus or open Discord in Vesktop" { spawn "launch" "focus" "vesktop" "uwsm-app" "--" "vesktop"; }
+    Mod+Shift+G hotkey-overlay-title="Focus or open Signal" { spawn "launch" "focus" "signal" "uwsm-app" "--" "signal-desktop"; }
+    Mod+Shift+E hotkey-overlay-title="Focus or open Fastmail" { spawn "launch" "focus" "com.fastmail.Fastmail" "uwsm-app" "--" "fastmail"; }
+    Mod+Shift+Z hotkey-overlay-title="Open Zed" { spawn "uwsm-app" "--" "zeditor"; }
+    Mod+Shift+V hotkey-overlay-title="Open VSCodium" { spawn "uwsm-app" "--" "codium"; }
+    Mod+Shift+T hotkey-overlay-title="Focus or open T3 Code" { spawn "launch" "focus" "t3code" "uwsm-app" "--" "t3code-desktop"; }
+    Mod+Shift+C hotkey-overlay-title="Focus or open Claude" { spawn "launch" "focus" "com.anthropic.Claude" "uwsm-app" "--" "claude-desktop"; }
+    // Does nothing on hosts without components/local-ai.nix.
+    Mod+Shift+A hotkey-overlay-title="Focus or open the llama.cpp WebUI" { spawn "uwsm-app" "--" "llama-cpp.desktop"; }
+    Mod+W hotkey-overlay-title="Close focused window" { close-window; }
+    // Floating keeps the tiled size; give it the centred-floating size instead.
+    Mod+Q hotkey-overlay-title="Toggle floating window" { spawn-sh "niri msg action toggle-window-floating && niri msg --json focused-window | jq -e .is_floating >/dev/null && niri msg action set-window-width 900 && niri msg action set-window-height 700 && niri msg action center-window"; }
+    Mod+Space hotkey-overlay-title="Open Noctalia launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
+    Mod+V hotkey-overlay-title="Open clipboard history" { spawn "noctalia" "msg" "panel-toggle" "clipboard"; }
+    Mod+Shift+N hotkey-overlay-title="Open notification centre" { spawn "noctalia" "msg" "panel-toggle" "control-center" "notifications"; }
+    Mod+Comma hotkey-overlay-title="Toggle Noctalia settings" { spawn "noctalia" "msg" "settings-toggle"; }
+    Mod+Shift+W hotkey-overlay-title="Open wallpaper browser" { spawn "noctalia" "msg" "panel-toggle" "wallpaper"; }
+    Mod+Ctrl+C hotkey-overlay-title="Open crash history and diagnostics" { spawn "noctalia" "msg" "panel-toggle" "umedbazarov/crashes:panel"; }
+    Mod+Escape hotkey-overlay-title="Open keybind cheatsheet" { spawn "noctalia" "msg" "panel-toggle" "kenn/keybind-cheatsheet:cheatsheet"; }
+
+    // 2. Noctalia tools
+    // Screen mirroring (Super+Ctrl+M) is Hyprland only; Lid Guard
+    // (Super+Ctrl+L) is in the laptop's host file.
+    Mod+Ctrl+G hotkey-overlay-title="Open Git Companion" { spawn "noctalia" "msg" "panel-toggle" "tphilippot/git_companion:main"; }
+    Mod+Ctrl+D hotkey-overlay-title="Open Docker manager" { spawn "noctalia" "msg" "panel-toggle" "8bury/mini-docker:manager"; }
+    Mod+Ctrl+P hotkey-overlay-title="Open port manager" { spawn "noctalia" "msg" "panel-toggle" "rxtsel/portctl:panel"; }
+    Mod+Ctrl+N hotkey-overlay-title="Open notes" { spawn "noctalia" "msg" "panel-toggle" "noctalia/notes:panel"; }
+    Mod+Ctrl+S hotkey-overlay-title="Open SSH launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher" "/ssh "; }
+    // Terminal tools in their own window; a second press focuses it.
+    Mod+Ctrl+B hotkey-overlay-title="Open btop" { spawn "launch" "tui" "btop"; }
+    Mod+Ctrl+Y hotkey-overlay-title="Open Yazi" { spawn "launch" "tui" "yazi"; }
+
+    // 3. Column size and fullscreen
+    Mod+R hotkey-overlay-title="Cycle column width" { switch-preset-column-width; }
+    Mod+C hotkey-overlay-title="Center column" { center-column; }
+    Mod+F hotkey-overlay-title="Half/full column width" { maximize-column; }
+    Mod+Shift+Return hotkey-overlay-title="Toggle fullscreen" { fullscreen-window; }
+    // Danish Minus/Plus keys; Shift adjusts height. Hold to repeat.
+    Mod+Minus hotkey-overlay-title="Narrow window" { set-column-width "-50"; }
+    Mod+Plus hotkey-overlay-title="Widen window" { set-column-width "+50"; }
+    Mod+Shift+Minus hotkey-overlay-title="Shorten window" { set-window-height "-50"; }
+    Mod+Shift+Plus hotkey-overlay-title="Taller window" { set-window-height "+50"; }
+    Mod+Alt+Left hotkey-overlay-title="Join/separate window toward left" { consume-or-expel-window-left; }
+    Mod+Alt+Right hotkey-overlay-title="Join/separate window toward right" { consume-or-expel-window-right; }
+
+    // 4. Session, overview and screenshots
+    Mod+L hotkey-overlay-title="Lock session" { spawn "noctalia" "msg" "session" "lock"; }
+    Mod+Shift+L hotkey-overlay-title="Open Noctalia session menu" { spawn "noctalia" "msg" "panel-toggle" "session"; }
+    // Noctalia handles Tab/Shift+Tab navigation while its picker is open.
+    Mod+Tab hotkey-overlay-title="Open Noctalia window picker" { spawn "noctalia" "msg" "window-switcher"; }
+    Alt+Tab hotkey-overlay-title="Return to last workspace on this monitor" { focus-workspace-previous; }
+    Mod+O hotkey-overlay-title="Toggle overview" { toggle-overview; }
+    Mod+Shift+S hotkey-overlay-title="Capture screen region" { spawn "noctalia" "msg" "screenshot-region"; }
+    Print hotkey-overlay-title="Capture screen region" { spawn "noctalia" "msg" "screenshot-region"; }
+    Shift+Print hotkey-overlay-title="Capture current monitor" { spawn "noctalia" "msg" "screenshot-fullscreen"; }
+
+    // 5. Sound and brightness
+    XF86AudioRaiseVolume allow-when-locked=true hotkey-overlay-title="Increase volume" { spawn "noctalia" "msg" "volume-up"; }
+    XF86AudioLowerVolume allow-when-locked=true hotkey-overlay-title="Decrease volume" { spawn "noctalia" "msg" "volume-down"; }
+    XF86MonBrightnessUp allow-when-locked=true hotkey-overlay-title="Increase brightness" { spawn "noctalia" "msg" "brightness-up"; }
+    XF86MonBrightnessDown allow-when-locked=true hotkey-overlay-title="Decrease brightness" { spawn "noctalia" "msg" "brightness-down"; }
+    XF86AudioMute allow-when-locked=true repeat=false hotkey-overlay-title="Toggle speaker mute" { spawn "noctalia" "msg" "volume-mute"; }
+    XF86AudioMicMute allow-when-locked=true repeat=false hotkey-overlay-title="Toggle microphone mute" { spawn "noctalia" "msg" "mic-mute"; }
+    XF86AudioPrev allow-when-locked=true repeat=false hotkey-overlay-title="Previous track" { spawn "noctalia" "msg" "media" "previous"; }
+    XF86AudioPlay allow-when-locked=true repeat=false hotkey-overlay-title="Play/pause" { spawn "noctalia" "msg" "media" "toggle"; }
+    XF86AudioNext allow-when-locked=true repeat=false hotkey-overlay-title="Next track" { spawn "noctalia" "msg" "media" "next"; }
+    // NuPhy top row without Fn: F5 dictation, F6 moon.
+    XF86VoiceCommand allow-when-locked=true repeat=false hotkey-overlay-title="NuPhy F5: toggle microphone mute" { spawn "noctalia" "msg" "mic-mute"; }
+    XF86DoNotDisturb allow-when-locked=true repeat=false hotkey-overlay-title="NuPhy F6: toggle Do Not Disturb" { spawn "noctalia" "msg" "notification-dnd-toggle"; }
+    // Dictation: the Voxtype daemon only listens for its native recording
+    // commands, so the compositor owns the shortcut. Toggle avoids the
+    // press/release race of push-to-talk; cancel discards a wrong take before
+    // it is typed into the focused window.
+    Mod+D repeat=false hotkey-overlay-title="Dictation: start or stop recording" { spawn "voxtype" "record" "toggle"; }
+    Mod+Shift+Escape repeat=false hotkey-overlay-title="Dictation: cancel recording" { spawn "voxtype" "record" "cancel"; }
+
+    // 6. Window and monitor navigation
+    // Super+arrows focuses windows; Ctrl focuses monitors and moves the pointer.
+    // Shift moves windows; Shift+Ctrl moves windows between monitors.
+    Mod+Left hotkey-overlay-title="Focus window left" { focus-column-left; }
+    Mod+Right hotkey-overlay-title="Focus window right" { focus-column-right; }
+    Mod+Up hotkey-overlay-title="Focus window up" { focus-window-up; }
+    Mod+Down hotkey-overlay-title="Focus window down" { focus-window-down; }
+    Mod+Ctrl+Left hotkey-overlay-title="Focus monitor and pointer left" { focus-monitor-left; }
+    Mod+Ctrl+Right hotkey-overlay-title="Focus monitor and pointer right" { focus-monitor-right; }
+    Mod+Ctrl+Up hotkey-overlay-title="Focus monitor and pointer up" { focus-monitor-up; }
+    Mod+Ctrl+Down hotkey-overlay-title="Focus monitor and pointer down" { focus-monitor-down; }
+    Mod+Shift+Left hotkey-overlay-title="Move window left" { move-column-left; }
+    Mod+Shift+Right hotkey-overlay-title="Move window right" { move-column-right; }
+    Mod+Shift+Up hotkey-overlay-title="Move window up" { move-window-up; }
+    Mod+Shift+Down hotkey-overlay-title="Move window down" { move-window-down; }
+    Mod+Shift+Ctrl+Left hotkey-overlay-title="Move window to monitor left" { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+Right hotkey-overlay-title="Move window to monitor right" { move-column-to-monitor-right; }
+    Mod+Shift+Ctrl+Up hotkey-overlay-title="Move window to monitor up" { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+Down hotkey-overlay-title="Move window to monitor down" { move-column-to-monitor-down; }
+
+    // 7. Workspaces
+    // Alt+Up/Down steps through workspaces; Shift carries the focused window.
+    Mod+Alt+Up hotkey-overlay-title="Switch workspace up on this monitor" { focus-workspace-up; }
+    Mod+Alt+Down hotkey-overlay-title="Switch workspace down on this monitor" { focus-workspace-down; }
+    Mod+Shift+Alt+Up hotkey-overlay-title="Move window to workspace up and follow" { move-column-to-workspace-up; }
+    Mod+Shift+Alt+Down hotkey-overlay-title="Move window to workspace down and follow" { move-column-to-workspace-down; }
+    Mod+1 hotkey-overlay-title="Switch to local workspace 1" { focus-workspace 1; }
+    Mod+2 hotkey-overlay-title="Switch to local workspace 2" { focus-workspace 2; }
+    Mod+3 hotkey-overlay-title="Switch to local workspace 3" { focus-workspace 3; }
+    Mod+4 hotkey-overlay-title="Switch to local workspace 4" { focus-workspace 4; }
+    Mod+5 hotkey-overlay-title="Switch to local workspace 5" { focus-workspace 5; }
+    Mod+6 hotkey-overlay-title="Switch to local workspace 6" { focus-workspace 6; }
+    Mod+7 hotkey-overlay-title="Switch to local workspace 7" { focus-workspace 7; }
+    Mod+8 hotkey-overlay-title="Switch to local workspace 8" { focus-workspace 8; }
+    Mod+9 hotkey-overlay-title="Switch to local workspace 9" { focus-workspace 9; }
+    Mod+0 hotkey-overlay-title="Switch to local workspace 10" { focus-workspace 10; }
+    Mod+Shift+1 hotkey-overlay-title="Move window to local workspace 1" { move-column-to-workspace 1; }
+    Mod+Shift+2 hotkey-overlay-title="Move window to local workspace 2" { move-column-to-workspace 2; }
+    Mod+Shift+3 hotkey-overlay-title="Move window to local workspace 3" { move-column-to-workspace 3; }
+    Mod+Shift+4 hotkey-overlay-title="Move window to local workspace 4" { move-column-to-workspace 4; }
+    Mod+Shift+5 hotkey-overlay-title="Move window to local workspace 5" { move-column-to-workspace 5; }
+    Mod+Shift+6 hotkey-overlay-title="Move window to local workspace 6" { move-column-to-workspace 6; }
+    Mod+Shift+7 hotkey-overlay-title="Move window to local workspace 7" { move-column-to-workspace 7; }
+    Mod+Shift+8 hotkey-overlay-title="Move window to local workspace 8" { move-column-to-workspace 8; }
+    Mod+Shift+9 hotkey-overlay-title="Move window to local workspace 9" { move-column-to-workspace 9; }
+    Mod+Shift+0 hotkey-overlay-title="Move window to local workspace 10" { move-column-to-workspace 10; }
+
+    // 8. Mouse controls
+    // Super+wheel steps workspaces; Shift carries the window; Ctrl focuses monitors.
+    Mod+WheelScrollUp cooldown-ms=150 hotkey-overlay-title="Switch workspace up on this monitor" { focus-workspace-up; }
+    Mod+WheelScrollDown cooldown-ms=150 hotkey-overlay-title="Switch workspace down on this monitor" { focus-workspace-down; }
+    Mod+Shift+WheelScrollUp cooldown-ms=150 hotkey-overlay-title="Move window to workspace up and follow" { move-column-to-workspace-up; }
+    Mod+Shift+WheelScrollDown cooldown-ms=150 hotkey-overlay-title="Move window to workspace down and follow" { move-column-to-workspace-down; }
+    Mod+Ctrl+WheelScrollUp cooldown-ms=150 hotkey-overlay-title="Focus monitor left" { focus-monitor-left; }
+    Mod+Ctrl+WheelScrollDown cooldown-ms=150 hotkey-overlay-title="Focus monitor right" { focus-monitor-right; }
+}

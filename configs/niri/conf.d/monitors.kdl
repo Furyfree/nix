@@ -1,0 +1,6 @@
+// Unlisted outputs keep their preferred mode and automatic position and
+// scale, which is Niri's default.
+
+// X11 apps run through xwayland-satellite, which Niri starts itself. Hyprland
+// instead keeps them unscaled with force_zero_scaling, and the Windows VM
+// passes the scale to Windows.

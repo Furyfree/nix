@@ -1,0 +1,14 @@
+// Scrolling columns at half width, with the same width presets as Hyprland.
+
+layout {
+    default-column-width {
+        proportion 0.5
+    }
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+    // A lone column sits in the middle instead of at the left edge.
+    always-center-single-column
+}

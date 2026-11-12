@@ -1,0 +1,39 @@
+// Gaps, borders, rounding, opacity, blur, and shadows.
+
+layout {
+    // One size for gaps between windows and at the screen edges.
+    gaps 6
+
+    // A thin border instead of Niri's wider focus ring; Noctalia colours both.
+    focus-ring {
+        off
+    }
+    border {
+        on
+        width 2
+    }
+
+    // Small, soft shadows give overlapping windows some separation.
+    shadow {
+        on
+        softness 10
+        color "#00000040"
+    }
+}
+
+// Subtle whole-window fade with blur behind it; native translucent apps
+// override this in window-rules.kdl.
+window-rule {
+    geometry-corner-radius 12
+    clip-to-geometry true
+    // Otherwise the border shows through semitransparent windows.
+    draw-border-with-background false
+    opacity 0.95
+    background-effect {
+        blur true
+    }
+}
+window-rule {
+    match is-active=true
+    opacity 0.97
+}

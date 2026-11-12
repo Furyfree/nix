@@ -1,0 +1,31 @@
+// Keyboard, mouse, touchpad, and cursor settings.
+
+input {
+    // Danish layout, Num Lock, and responsive key repeat.
+    keyboard {
+        xkb {
+            layout "dk"
+        }
+        numlock
+        repeat-rate 40
+        repeat-delay 250
+    }
+
+    // Scroll content directly and use finger count for physical clicks.
+    touchpad {
+        tap
+        natural-scroll
+        click-method "clickfinger"
+        dwt
+    }
+
+    // Focus follows the pointer, and the pointer follows keyboard focus.
+    focus-follows-mouse
+    warp-mouse-to-focus
+}
+
+// UWSM passes Niri's cursor to the session, so it matches configs/uwsm/env.
+cursor {
+    xcursor-theme "Bibata-Modern-Ice"
+    xcursor-size 24
+}
