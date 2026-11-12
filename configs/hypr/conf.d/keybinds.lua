@@ -7,30 +7,6 @@ local window_actions = assert(package.loaded["./conf.d/window-actions.lua"])
 -- Keep directional focus and swaps on this monitor; move between monitors explicitly.
 hl.config({ binds = { window_direction_monitor_fallback = false } })
 
--- Focus the most recently used app window, even on another workspace.
--- Match exact compositor classes; launcher names and desktop metadata can differ.
-local function focus_or_launch(class, command, alternate_class)
-    return function()
-        local target
-        local newest = math.huge
-        for _, window in ipairs(hl.get_windows({ mapped = true })) do
-            if (window.class == class or window.class == alternate_class) and not window.hidden then
-                local rank = window.focus_history_id
-                if rank < 0 then rank = math.huge end
-                if not target or rank < newest then
-                    target = window
-                    newest = rank
-                end
-            end
-        end
-        if target then
-            if not target.active then hl.dispatch(hl.dsp.focus({ window = target })) end
-        else
-            hl.exec_cmd(command)
-        end
-    end
-end
-
 -- 1. Applications and panels
 hl.bind(
     mainMod .. " + Return",
@@ -68,24 +44,25 @@ hl.bind(
     hl.dsp.exec_cmd("launch floating-terminal"),
     { description = "Open floating terminal" }
 )
+-- Focus the most recently used app window, even on another workspace.
 hl.bind(
     mainMod .. " + SHIFT + O",
-    focus_or_launch("md.obsidian.Obsidian", "uwsm-app -- obsidian"),
+    hl.dsp.exec_cmd("launch focus md.obsidian.Obsidian uwsm-app -- obsidian"),
     { description = "Focus or open Obsidian" }
 )
 hl.bind(
     mainMod .. " + SHIFT + D",
-    focus_or_launch("vesktop", "uwsm-app -- vesktop", "Vesktop"),
+    hl.dsp.exec_cmd("launch focus vesktop uwsm-app -- vesktop"),
     { description = "Focus or open Discord in Vesktop" }
 )
 hl.bind(
     mainMod .. " + SHIFT + G",
-    focus_or_launch("signal", "uwsm-app -- signal-desktop"),
+    hl.dsp.exec_cmd("launch focus signal uwsm-app -- signal-desktop"),
     { description = "Focus or open Signal" }
 )
 hl.bind(
     mainMod .. " + SHIFT + E",
-    focus_or_launch("com.fastmail.Fastmail", "uwsm-app -- fastmail"),
+    hl.dsp.exec_cmd("launch focus com.fastmail.Fastmail uwsm-app -- fastmail"),
     { description = "Focus or open Fastmail" }
 )
 hl.bind(
@@ -100,12 +77,12 @@ hl.bind(
 )
 hl.bind(
     mainMod .. " + SHIFT + T",
-    focus_or_launch("t3code", "uwsm-app -- t3code-desktop"),
+    hl.dsp.exec_cmd("launch focus com.t3tools.T3Code uwsm-app -- t3code-desktop"),
     { description = "Focus or open T3 Code" }
 )
 hl.bind(
     mainMod .. " + SHIFT + C",
-    focus_or_launch("com.anthropic.Claude", "uwsm-app -- claude-desktop"),
+    hl.dsp.exec_cmd("launch focus com.anthropic.Claude uwsm-app -- claude-desktop"),
     { description = "Focus or open Claude" }
 )
 -- Does nothing on hosts without components/local-ai.nix.

@@ -257,10 +257,16 @@ cmd_launch() {
     sleep 2
   done
 
-  # Windows scales itself like the monitor (configs/hypr/conf.d/monitors.lua).
-  # Outside Hyprland, such as in an agent's hidden desktop, keep 100%.
-  scale=$(hyprctl monitors -j 2>/dev/null |
-    jq -r '.[] | select(.focused).scale * 100 | round' 2>/dev/null) || scale=100
+  # Windows scales itself like the monitor (configs/hypr/conf.d/monitors.lua,
+  # configs/niri/conf.d/monitors.kdl). Outside Hyprland and Niri, such as in
+  # an agent's hidden desktop, keep 100%.
+  if [[ -n ${NIRI_SOCKET-} ]]; then
+    scale=$(niri msg --json focused-output 2>/dev/null |
+      jq -r '.logical.scale * 100 | round' 2>/dev/null) || scale=100
+  else
+    scale=$(hyprctl monitors -j 2>/dev/null |
+      jq -r '.[] | select(.focused).scale * 100 | round' 2>/dev/null) || scale=100
+  fi
   local args=(-grab-keyboard /sound /microphone /clipboard /dynamic-resolution
     /gfx:AVC444 "/title:Windows VM" "/floatbar:sticky:off,default:visible,show:fullscreen" /f
     "/scale-desktop:${scale:-100}")

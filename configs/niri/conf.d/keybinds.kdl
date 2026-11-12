@@ -30,7 +30,7 @@ binds {
     Mod+Shift+E hotkey-overlay-title="Focus or open Fastmail" { spawn "launch" "focus" "com.fastmail.Fastmail" "uwsm-app" "--" "fastmail"; }
     Mod+Shift+Z hotkey-overlay-title="Open Zed" { spawn "uwsm-app" "--" "zeditor"; }
     Mod+Shift+V hotkey-overlay-title="Open VSCodium" { spawn "uwsm-app" "--" "codium"; }
-    Mod+Shift+T hotkey-overlay-title="Focus or open T3 Code" { spawn "launch" "focus" "t3code" "uwsm-app" "--" "t3code-desktop"; }
+    Mod+Shift+T hotkey-overlay-title="Focus or open T3 Code" { spawn "launch" "focus" "com.t3tools.T3Code" "uwsm-app" "--" "t3code-desktop"; }
     Mod+Shift+C hotkey-overlay-title="Focus or open Claude" { spawn "launch" "focus" "com.anthropic.Claude" "uwsm-app" "--" "claude-desktop"; }
     // Does nothing on hosts without components/local-ai.nix.
     Mod+Shift+A hotkey-overlay-title="Focus or open the llama.cpp WebUI" { spawn "uwsm-app" "--" "llama-cpp.desktop"; }

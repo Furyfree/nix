@@ -66,8 +66,8 @@ let
       # Opened at run time to check that text fits the keymap.
       runtimeDependencies = [ pkgs.libxkbcommon ];
 
-      # The server finds the on-screen indicator next to itself. hyprctl comes
-      # from the Hyprland session. complete_interaction tells me with a
+      # The server finds the on-screen indicator next to itself. hyprctl or
+      # niri comes from the session. complete_interaction tells me with a
       # notification when an agent has finished, since the indicator hides
       # between actions.
       installPhase = ''
