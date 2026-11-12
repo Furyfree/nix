@@ -16,6 +16,8 @@ let
   url = "http://${host}:${toString port}";
   # Enough room for coding agents; fit offloads weights rather than shrink it.
   context = 65536;
+  # The model Zed's Local agent profile picks.
+  agentModel = "qwen3.6-35b-a3b";
 
   # The model IDs that clients request, each with its llama.cpp settings and
   # the name and longest answer OpenCode uses. Unsloth Dynamic 4-bit quants
@@ -26,7 +28,7 @@ let
     # active parameters for coding and agents. Qwen's settings for coding;
     # agents keep earlier reasoning, which fixes truncated tool calls and lets
     # the prompt cache be reused.
-    "qwen3.6-35b-a3b" = {
+    ${agentModel} = {
       name = "Qwen3.6 35B-A3B";
       output = 32768;
       settings = {
@@ -134,12 +136,16 @@ in
         # Zed's agent on the local model, kept to the open project: file tools
         # only, so no terminal, web, skill loading, subagents or MCP servers.
         programs.zed-editor.userSettings = {
-          language_models."llama.cpp".api_url = url;
+          language_models."llama.cpp" = {
+            api_url = url;
+            # Zed cannot ask an unloaded model and would assume more.
+            context_window = context;
+          };
           agent.profiles.local = {
             name = "Local";
             default_model = {
               provider = "llama.cpp";
-              model = "qwen3.6-35b-a3b";
+              model = agentModel;
             };
             enable_all_context_servers = false;
             context_servers = { };
