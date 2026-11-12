@@ -24,8 +24,8 @@ export GROK_SHELL=/run/current-system/sw/bin/bash
 # leaves it unset, so the handler would start bare Electron.
 export T3CODE_DESKTOP_LAUNCHER_PATH=/run/current-system/sw/bin/t3code-desktop
 
-# Prefer native Wayland, with X11 as a fallback.
-export GDK_BACKEND='wayland,x11,*'
+# Prefer native Wayland, with X11 as a fallback. GTK does so by itself;
+# env-hyprland forces it there only.
 export QT_QPA_PLATFORM='wayland;xcb'
 export ELECTRON_OZONE_PLATFORM_HINT=auto
 # nixpkgs wrappers (Spotify, Obsidian, Vesktop, VSCodium) run natively on

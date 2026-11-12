@@ -1,3 +1,9 @@
-# Hyprland's own cursor; the shared session settings are in env.
+# Hyprland's own settings; the shared session settings are in env.
+
+# Prefer native Wayland in GTK, with X11 as a fallback. Not in env: under Niri
+# it turns off the GNOME portal's screen sharing (Niri's wiki, Important
+# Software).
+export GDK_BACKEND='wayland,x11,*'
+
 export HYPRCURSOR_THEME=Bibata-Modern-Ice
 export HYPRCURSOR_SIZE=24
