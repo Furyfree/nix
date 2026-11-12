@@ -35,8 +35,7 @@ binds {
     // Does nothing on hosts without components/local-ai.nix.
     Mod+Shift+A hotkey-overlay-title="Focus or open the llama.cpp WebUI" { spawn "uwsm-app" "--" "llama-cpp.desktop"; }
     Mod+W hotkey-overlay-title="Close focused window" { close-window; }
-    // Floating keeps the tiled size; give it the centred-floating size instead.
-    Mod+Q hotkey-overlay-title="Toggle floating window" { spawn-sh "niri msg action toggle-window-floating && niri msg --json focused-window | jq -e .is_floating >/dev/null && niri msg action set-window-width 900 && niri msg action set-window-height 700 && niri msg action center-window"; }
+    Mod+Q hotkey-overlay-title="Toggle floating window" { spawn "launch" "float"; }
     Mod+Space hotkey-overlay-title="Open Noctalia launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
     Mod+V hotkey-overlay-title="Open clipboard history" { spawn "noctalia" "msg" "panel-toggle" "clipboard"; }
     Mod+Shift+N hotkey-overlay-title="Open notification centre" { spawn "noctalia" "msg" "panel-toggle" "control-center" "notifications"; }
