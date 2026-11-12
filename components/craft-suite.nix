@@ -70,26 +70,26 @@ in
   environment.systemPackages = map mkCraftApp [
     {
       pname = "filmcraft";
-      version = "0.17.1";
-      hash = "sha256-OXrp/s5VmzeGO0sHavRqY7bkOHw194Fwnk760U/nHr4=";
+      version = "0.20.1";
+      hash = "sha256-Pk/qPLjUc+aPGJoKh5K6RhYPq1B62rOriSAHP9QfJPo=";
       description = "Video editor";
     }
     {
       pname = "effectcraft";
-      version = "0.21.1";
-      hash = "sha256-7DmvpR+wosC1iowRAjJeI1UBb+dUVj0kB1+imz4cUxU=";
+      version = "0.24.1";
+      hash = "sha256-XOA5NpAUQif6kYboIwitY4pu9tn5dsmW5tA7W1G2Wns=";
       description = "Motion graphics and compositing";
     }
     {
       pname = "soundcraft";
-      version = "0.17.1";
-      hash = "sha256-56wUC7n9aa3k3QJkOvjl1MFKXILNZwsgMOUmiP67PLQ=";
+      version = "0.20.1";
+      hash = "sha256-yu/PhcTxE4cX1ZLTHOW+B/L8phbsNtY/rGdgze++KKk=";
       description = "Audio editor and mixer";
     }
     {
       pname = "photocraft";
-      version = "0.20.2";
-      hash = "sha256-CeAT1o2DE+sLHNbyRhL1tf0NmT//46fBLOzf5c0TGkY=";
+      version = "0.23.1";
+      hash = "sha256-Q4Ou9noHzDcK0lCm7WABUgXT5sRj+vP/Sw9nuBeMz8g=";
       description = "Raster image editor";
     }
   ];

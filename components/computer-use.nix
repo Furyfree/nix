@@ -48,11 +48,11 @@ let
   computer-use-linux =
     let
       pname = "computer-use-linux";
-      version = "0.7.47";
-      server = release pname version pname "sha256-aclY1JTHwHY1YGLfPIQA/DXmwrEOON971+wNIWOwUNI=";
+      version = "0.7.52";
+      server = release pname version pname "sha256-7/7tRSFMftkYkEe55oq0bHujlC4ulwGsa4481hNKqJU=";
       indicator =
         release pname version "${pname}-indicator"
-          "sha256-6VooPi8MDTDSHJbHXq1KHeaelIPdf2ag/Y1V1hVnTrc=";
+          "sha256-YGIp7pqLu96gvP4Y5widoOF3wyVBgamw/IVZpfb5psE=";
     in
     pkgs.stdenv.mkDerivation {
       inherit pname version;
@@ -96,11 +96,11 @@ let
   agent-workspace-linux =
     let
       pname = "agent-workspace-linux";
-      version = "0.6.3";
+      version = "0.6.4";
     in
     pkgs.stdenv.mkDerivation {
       inherit pname version;
-      src = release pname version pname "sha256-Zm0AO38Xr3/2h5hCzWjteCd5psqCBMiYUYVxhHDP9Js=";
+      src = release pname version pname "sha256-2RklPmNUC1fG59VmzXRoBUOYH995BS8Ak2fsPiZ9uBs=";
       dontUnpack = true;
 
       nativeBuildInputs = with pkgs; [
