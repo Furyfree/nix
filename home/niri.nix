@@ -46,6 +46,9 @@ in
         theme.templates.builtin_ids = lib.remove "hyprland" noctalia.theme.templates.builtin_ids;
         # Off in config.toml for Hyprland's crash (#6), which Niri does not have.
         idle.behavior.screen-off.enabled = true;
+        # Number workspaces by their place on the monitor, 1 to 5 on each, as
+        # Hyprland's names do; the host files' workspace names are internal.
+        widget.workspaces.label_source = "id";
       };
     }
     // lib.optionalAttrs (builtins.pathExists ../configs/${host}) {
