@@ -134,7 +134,9 @@ in
         };
 
         # Zed's agent on the local model, kept to the open project: file tools
-        # only, so no terminal, web, skill loading, subagents or MCP servers.
+        # and a terminal whose commands Zed's sandbox keeps off the internet
+        # and writing only in the project, for Python and dotnet. No web,
+        # skill loading, subagents or MCP servers.
         programs.zed-editor.userSettings = {
           language_models."llama.cpp" = {
             api_url = url;
@@ -156,6 +158,7 @@ in
               "grep"
               "edit_file"
               "write_file"
+              "terminal"
               "create_directory"
               "diagnostics"
             ] (_: true);
