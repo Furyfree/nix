@@ -23,13 +23,15 @@
     }:
     let
       # A host builds only from its ignored local/ data, which the installer
-      # writes; without it, the host has no output.
+      # writes; without it, the host has no output. An optional
+      # local/desktop.nix picks the compositor.
       mkHost =
         name:
         let
           host = ./hosts + "/${name}";
           localHardware = host + "/local/hardware-configuration.nix";
           localInstallation = host + "/local/installation.nix";
+          localDesktop = host + "/local/desktop.nix";
           installation =
             if builtins.pathExists localHardware && builtins.pathExists localInstallation then
               localInstallation
@@ -49,7 +51,8 @@
                     home-manager.useGlobalPkgs = true;
                     home-manager.useUserPackages = true;
                   }
-                ];
+                ]
+                ++ nixpkgs.lib.optional (builtins.pathExists localDesktop) localDesktop;
               }
             );
           };
@@ -74,6 +77,7 @@
             basedpyright
             lua5_5
             hyprland
+            niri
             nixfmt
             statix
             deadnix

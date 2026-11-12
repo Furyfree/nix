@@ -52,11 +52,12 @@ Docs and comments state no current versions or status; open work lives in
   parts beside it. SSH hosts stay in private 1Password documents, never here.
   Keep the checkout at `~/Projects/nix` for these links.
 - `hosts/`: tracked host exceptions; ignored `hosts/<host>/local/` holds detected
-  hardware and installation data, and on macOS `user.nix` with the account
-  and profile.
+  hardware and installation data, on NixOS an optional `desktop.nix` that
+  picks the compositor, and on macOS `user.nix` with the account and profile.
   Shared policy belongs above it.
-- `configs/hypr/hosts/<host>.lua`: per-host monitors, workspaces and keys,
-  linked as `~/.config/hypr/host.lua` by `home/hyprland.nix` after the hostname.
+- `configs/hypr/hosts/<host>.lua`, `configs/niri/hosts/<host>.kdl`: per-host
+  monitors, workspaces and keys, linked as `host.lua` or `host.kdl` by
+  `home/hyprland.nix` or `home/niri.nix` after the hostname.
 - `INSTALLATION.md`: NixOS install steps and the Mac's `local/user.nix`;
   update it with installer or first-boot changes.
 - `scripts/install.py`: installer launcher; `scripts/nixos_setup/` holds its

@@ -23,7 +23,10 @@ let
 in
 {
   options.workstation.desktop = lib.mkOption {
-    type = lib.types.enum [ "hyprland" ];
+    type = lib.types.enum [
+      "hyprland"
+      "niri"
+    ];
     default = "hyprland";
     description = "Compositor this machine runs under Noctalia; components/<desktop>.nix sets it up.";
   };

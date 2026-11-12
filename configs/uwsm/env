@@ -20,3 +20,18 @@ unset uwsm_mise_data uwsm_directory
 # Agents write bash, so run their commands in bash; .zshenv sets the same.
 export CLAUDE_CODE_SHELL=/run/current-system/sw/bin/bash
 export GROK_SHELL=/run/current-system/sw/bin/bash
+
+# Prefer native Wayland, with X11 as a fallback.
+export GDK_BACKEND='wayland,x11,*'
+export QT_QPA_PLATFORM='wayland;xcb'
+export ELECTRON_OZONE_PLATFORM_HINT=auto
+# nixpkgs wrappers (Spotify, Obsidian, Vesktop, VSCodium) run natively on
+# Wayland only with this; otherwise they scale blurrily through XWayland.
+export NIXOS_OZONE_WL=1
+export GTK_IM_MODULE=simple
+
+# qt6ct also accepts qt5ct, allowing both Qt generations to load their plugin.
+export QT_QPA_PLATFORMTHEME=qt5ct
+
+export XCURSOR_THEME=Bibata-Modern-Ice
+export XCURSOR_SIZE=24

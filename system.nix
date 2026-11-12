@@ -16,6 +16,7 @@
     ./components/editors.nix
     ./components/hyprland.nix
     ./components/networking.nix
+    ./components/niri.nix
     ./components/printing.nix
     ./components/services.nix
     ./components/shell.nix

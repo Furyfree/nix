@@ -2,7 +2,7 @@ default:
     @just --list
 
 # Run local checks without installing or activating a system
-check: check-lua check-hyprland lint typecheck test eval eval-macos
+check: check-lua check-hyprland check-niri lint typecheck test eval eval-macos
 
 # Parse all native Lua configuration without executing it
 check-lua:
@@ -31,6 +31,22 @@ check-hyprland:
         Hyprland --verify-config --config "$copy/hyprland.lua"
     done
 
+# Validate Niri settings without starting a desktop
+check-niri:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    shopt -s nullglob
+    temporary=$(mktemp -d)
+    trap 'rm -rf -- "$temporary"' EXIT
+    niri validate --config configs/niri/config.kdl
+    # Each host file loads as ~/.config/niri/host.kdl next to the shared file.
+    for host in configs/niri/hosts/*.kdl; do
+        copy="$temporary/niri-${host##*/}"
+        cp -r configs/niri "$copy"
+        cp "$host" "$copy/host.kdl"
+        niri validate --config "$copy/config.kdl"
+    done
+
 lint:
     uv run --locked ruff check scripts tests
     uv run --locked ruff format --check scripts tests
@@ -49,9 +65,37 @@ format:
     uv run --locked ruff format scripts tests
     find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path './hosts/*/local/*' -exec nixfmt {} +
 
-# Evaluate configurations without building or deploying a system
+# Evaluate configurations without building or deploying a system, and each
+# NixOS host with every other compositor it can pick
 eval:
+    #!/usr/bin/env bash
+    set -euo pipefail
     nix --extra-experimental-features 'nix-command flakes' flake check --no-build --no-write-lock-file path:.
+    nix --extra-experimental-features 'nix-command flakes' eval --no-write-lock-file --raw \
+        path:.#nixosConfigurations --apply '
+        hosts:
+        let
+          other = name: desktop:
+            let
+              host = hosts.${name}.extendModules {
+                modules = [ ({ lib, ... }: { workstation.desktop = lib.mkForce desktop; }) ];
+              };
+            in
+            "${name} (${desktop}): ${host.config.system.build.toplevel.drvPath}\n";
+          evaluate = name:
+            let
+              inherit (hosts.${name}) config options;
+            in
+            map (other name) (
+              builtins.filter (desktop: desktop != config.workstation.desktop)
+                options.workstation.desktop.type.functor.payload.values
+            );
+        in
+        builtins.concatStringsSep "" (
+          builtins.concatMap evaluate (
+            builtins.filter (name: hosts.${name}.options ? workstation) (builtins.attrNames hosts)
+          )
+        )'
 
 # Evaluate each Mac profile from a temporary checkout with a placeholder user;
 # the Mac host has no output here without its ignored local/user.nix
