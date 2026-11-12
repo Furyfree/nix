@@ -34,14 +34,16 @@ in
         source = link name;
       })
     // {
-      # Noctalia reads this after config.toml. Its plugin list replaces the
-      # earlier one, so it is config.toml's list without the Hyprland-only
-      # plugins; a change there reaches Niri at the next rebuild.
+      # Noctalia reads this after config.toml. Its lists replace the earlier
+      # ones, so they are config.toml's without the Hyprland-only plugins and
+      # Hyprland's colour template; a change there reaches Niri at the next
+      # rebuild.
       "noctalia/niri.toml".source = (pkgs.formats.toml { }).generate "noctalia-niri.toml" {
         plugins.enabled = lib.subtractLists [
           "furyfree/key-promoter"
           "profidev/hypr-screen-mirror"
         ] noctalia.plugins.enabled;
+        theme.templates.builtin_ids = lib.remove "hyprland" noctalia.theme.templates.builtin_ids;
         # Off in config.toml for Hyprland's crash (#6), which Niri does not have.
         idle.behavior.screen-off.enabled = true;
       };

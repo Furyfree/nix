@@ -1,5 +1,8 @@
 // Gaps, borders, rounding, opacity, blur, and shadows.
 
+// Ask apps to drop their own title bars, as Hyprland does.
+prefer-no-csd
+
 layout {
     // One size for gaps between windows and at the screen edges.
     gaps 6

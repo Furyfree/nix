@@ -24,6 +24,14 @@ input {
     warp-mouse-to-focus
 }
 
+// The overview opens from Super+O and a four-finger swipe, not the top-left
+// screen corner.
+gestures {
+    hot-corners {
+        off
+    }
+}
+
 // UWSM passes Niri's cursor to the session, so it matches configs/uwsm/env.
 cursor {
     xcursor-theme "Bibata-Modern-Ice"

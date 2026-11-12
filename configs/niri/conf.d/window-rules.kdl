@@ -1,5 +1,11 @@
 // Window and layer rules for applications and Noctalia surfaces.
 
+// Apps that remember being maximized, such as Files and Signal, open as a
+// column with gaps like other windows, not maximized to the screen edges.
+window-rule {
+    open-maximized-to-edges false
+}
+
 // New floating windows open centred; these keep the app's width and get a
 // fixed height.
 window-rule {

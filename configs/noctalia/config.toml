@@ -12,6 +12,7 @@ pure_black_dark = false
 enable_builtin_templates = true
 enable_community_templates = true
 # Ghostty uses the user template below instead of its config-rewriting builtin.
+# home/hyprland.nix and home/niri.nix each drop the other compositor's.
 builtin_ids = ["btop", "gtk3", "gtk4", "hyprland", "kcolorscheme", "niri", "qt"]
 community_ids = [
     "claude-code",
@@ -240,8 +241,8 @@ location = "https://github.com/Furyfree/noctalia-key-promoter"
 
 [plugin_settings."umedbazarov/crashes"]
 terminal_cmd = "ghostty --class=com.mitchellh.ghostty.presentation -e"
-agent_cmd = "codex"
-agent_order = "codex, claude, grok, opencode"
+agent_cmd = "claude"
+agent_order = "claude, codex, grok, opencode"
 panel_open_near_click = true
 
 [plugin_settings."8bury/mini-docker"]
