@@ -66,6 +66,7 @@ if command -v nix-workstation >/dev/null 2>&1; then
   alias nrollback='nix-workstation rollback'
   alias nclean='nix-workstation clean'
   alias nsearch='nix-workstation search'
+  alias ndesktop='nix-workstation desktop'
   alias mup='nix-workstation mise'
   alias fup='nix-workstation firmware'
 fi

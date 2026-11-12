@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Rebuild, update and maintain this workstation: NixOS on Linux, nix-darwin on
 # macOS. aliases.zsh adds nswitch, nupdate, ninfo, nrollback, nclean, nsearch,
-# mup and fup.
+# ndesktop, mup and fup.
 set -euo pipefail
 
 # path: includes the ignored machine data in hosts/<host>/local/.
@@ -73,6 +73,19 @@ Search nixpkgs packages, NixOS and Home Manager options, or nixpkgs pull
 requests and issues (nh search). nh search --help lists its options.
 EOF
       ;;
+    desktop)
+      cat <<'EOF'
+usage: nix-workstation desktop [NAME]   (alias: ndesktop)
+
+Without NAME, show the compositor this machine has chosen and the one
+running now. With NAME, such as niri or hyprland, save it as the machine's
+choice in hosts/<host>/local/desktop.nix, build and show the package
+changes, then ask before adding it to the boot menu. A yes takes Snapper
+snapshots around it, as switch does, then offers to reboot; the running
+session stays as it is until then. A failed build or a no puts the old
+choice back. Linux only.
+EOF
+      ;;
     mise)
       cat <<'EOF'
 usage: nix-workstation mise   (alias: mup)
@@ -100,6 +113,7 @@ Commands (alias):
   rollback (nrollback) GEN     macOS: switch to an earlier generation
   clean (nclean)               remove old generations; keeps the newest 10
   search (nsearch) QUERY...    search packages and options
+  desktop (ndesktop) [NAME]    show or pick the compositor for the next boot
   mise (mup)                   upgrade Mise tools
   firmware (fup)               install firmware updates
 
@@ -119,24 +133,85 @@ die() {
   exit 1
 }
 
-# A failed or declined build leaves no snapshots behind.
+# A failed or declined build leaves no snapshots behind. With "boot", the build
+# only becomes the boot default; LABEL starts the snapshot description.
+booted=false
 cmd_switch() {
-  local answer description pre result=0
+  local mode=${1-switch} label=${2-nswitch} answer description pre result=0
   nh os build
-  read -rp 'Switch? [y/N] ' answer
+  if [[ $mode == boot ]]; then
+    read -rp 'Boot into it next time? [y/N] ' answer
+  else
+    read -rp 'Switch? [y/N] ' answer
+  fi
   [[ $answer == [yY]* ]] || die 'not switched'
 
-  description="nswitch $(git -C "$repo" describe --always --dirty 2>/dev/null || true)"
+  description="$label $(git -C "$repo" describe --always --dirty 2>/dev/null || true)"
   pre=$(sudo snapper -c root create --type pre --cleanup-algorithm number --print-number --description "$description")
   # The build above is reused; its diff was already shown. Boot default first,
   # then activate, as nixos-rebuild does: nh os switch skips the boot default
   # when any service fails during activation.
-  { nh os boot --diff never && nh os test --diff never; } || result=$?
+  if nh os boot --diff never; then
+    booted=true
+    if [[ $mode != boot ]]; then
+      nh os test --diff never || result=$?
+    fi
+  else
+    result=$?
+  fi
   if ! sudo snapper -c root create --type post --pre-number "$pre" --cleanup-algorithm number --description "$description"; then
     printf 'nix-workstation: post snapshot failed; pre snapshot is #%s\n' "$pre" >&2
     ((result)) || result=1
   fi
   return "$result"
+}
+
+# The choice lives in the ignored hosts/<host>/local/desktop.nix; without it,
+# components/desktop.nix's default applies. Only the next boot changes:
+# activating now would remove the running compositor from under the session.
+cmd_desktop() {
+  local host state current answer
+  host=$(uname -n)
+  desktop_file=$repo/hosts/$host/local/desktop.nix
+  [[ -d ${desktop_file%/*} ]] || die "hosts/$host/local is missing"
+  state=$(nix eval --json "$NH_FLAKE#nixosConfigurations.$host" --apply '
+    host: {
+      current = host.config.workstation.desktop;
+      names = host.options.workstation.desktop.type.functor.payload.values;
+    }')
+  current=$(jq -r .current <<<"$state")
+  if (($# == 0)); then
+    printf 'Chosen: %s\nRunning: %s\n' "$current" "${XDG_CURRENT_DESKTOP:-none}"
+    return
+  fi
+  jq -e --arg name "$1" '.names | index($name)' <<<"$state" >/dev/null ||
+    die "$1 is not a compositor; choose one of: $(jq -r '.names | join(", ")' <<<"$state")"
+  if [[ $1 == "$current" ]]; then
+    printf '%s is already chosen.\n' "$1"
+    return
+  fi
+
+  desktop_old=
+  [[ -e $desktop_file ]] && desktop_old=$(<"$desktop_file")
+  trap restore_desktop EXIT
+  printf '{ workstation.desktop = "%s"; }\n' "$1" >"$desktop_file"
+  cmd_switch boot "ndesktop $1"
+  trap - EXIT
+  read -rp 'Reboot now? [y/N] ' answer
+  if [[ $answer == [yY]* ]]; then
+    systemctl reboot
+  fi
+}
+
+# Put the old choice back unless the new one reached the boot menu.
+restore_desktop() {
+  $booted && return
+  if [[ -n $desktop_old ]]; then
+    printf '%s\n' "$desktop_old" >"$desktop_file"
+  else
+    rm -f -- "$desktop_file"
+  fi
+  printf 'nix-workstation: kept the previous compositor\n' >&2
 }
 
 # nh shows the changes and asks; it runs the activation through sudo.
@@ -191,12 +266,14 @@ case $command in
           sudo darwin-rebuild --switch-generation "$1"
           ;;
         firmware) die 'macOS updates come from Software Update' ;;
+        desktop) die 'the compositor choice is Linux only' ;;
         *) usage ;;
       esac
     else
       case $command in
         switch) (($# == 0)) || usage switch; cmd_switch ;;
         info) nh os info "$@" ;;
+        desktop) (($# <= 1)) || usage desktop; cmd_desktop "$@" ;;
         rollback) die 'on Linux, roll back from the boot menu or a Snapper snapshot' ;;
         # --force: a plain refresh fails when the metadata is recent.
         firmware) (($# == 0)) || usage firmware; fwupdmgr refresh --force && fwupdmgr update ;;
