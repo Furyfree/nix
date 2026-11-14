@@ -23,7 +23,6 @@ window-rule {
 
 // These keep the app's width and get a fixed height.
 window-rule {
-    match app-id=r#"^com\.onepassword\.OnePassword$"#
     // Steam gives these and its main window the same app ID and window type.
     match app-id=r#"^steam$"# title=r#"^(Steam Settings|Friends List)$"#
     // Settings shares the vault window's app ID; its title names the vault.
@@ -34,10 +33,18 @@ window-rule {
     }
 }
 
-// Every JetBrains IDE shares this app ID prefix and titles its welcome frame
-// "Welcome to ...". Opening a project disposes this frame and opens the
-// project in a separate window, which stays tiled.
+// These get a fixed size.
 window-rule {
+    // Given a height alone, 1Password opens at its remembered size, which can
+    // fill the screen. Quick Access shares the app ID and keeps its own size.
+    match app-id=r#"^com\.onepassword\.OnePassword$"#
+    exclude app-id=r#"^com\.onepassword\.OnePassword$"# title=r#"^Quick Access"#
+    // GTK's file chooser gets its parent window after Niri picks its size, so
+    // without this it floats at the size of a tiled column.
+    match app-id=r#"^xdg-desktop-portal-gtk$"#
+    // Every JetBrains IDE shares this app ID prefix and titles its welcome
+    // frame "Welcome to ...". Opening a project disposes this frame and opens
+    // the project in a separate window, which stays tiled.
     match app-id=r#"^jetbrains-.*$"# title=r#"^Welcome to .*$"#
     open-floating true
     default-column-width {

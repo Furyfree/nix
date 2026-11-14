@@ -36,6 +36,11 @@ from the machine's checkout. Use SSH for read-only
 inspection and approved deployment/rebuild commands, never direct configuration
 patches on machines.
 
+Hyprland and Niri share one desktop. Change and check the running one
+(`$XDG_CURRENT_DESKTOP`) first, then ask whether to port the change to the
+other. Port it when the other has a direct equivalent; when it needs testing
+there, open an issue titled after that compositor.
+
 Each fact lives once: in config or code where it can, with docs pointing to it.
 Docs and comments state no current versions or status; open work lives in
 `docs/PLAN.md` or GitHub issues, and a workaround links its issue.
