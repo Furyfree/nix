@@ -2,7 +2,7 @@ default:
     @just --list
 
 # Run local checks without installing or activating a system
-check: check-lua check-hyprland check-niri lint typecheck test eval eval-macos
+check: check-lua check-hyprland check-niri check-powershell lint typecheck test eval eval-macos
 
 # Parse all native Lua configuration without executing it
 check-lua:
@@ -46,6 +46,27 @@ check-niri:
         cp "$host" "$copy/host.kdl"
         niri validate --config "$copy/config.kdl"
     done
+
+# Parse the Windows scripts without running them, and load each Windows profile
+# and the layers and registry files it names
+[extension: '.ps1']
+check-powershell:
+    #!/usr/bin/env pwsh
+    $ErrorActionPreference = 'Stop'
+    foreach ($script in Get-ChildItem windows, configs -Recurse -Filter *.ps1) {
+        $errors = $null
+        $null = [System.Management.Automation.Language.Parser]::ParseFile($script.FullName, [ref]$null, [ref]$errors)
+        if ($errors) { throw "$($script): $($errors[0])" }
+    }
+    foreach ($file in Get-ChildItem windows/profiles -Filter *.psd1) {
+        $layer = Import-PowerShellDataFile $file.FullName
+        foreach ($name in $layer.Include) {
+            if (-not (Test-Path "windows/profiles/$name.psd1")) { throw "$($file.Name): no layer $name" }
+        }
+        foreach ($name in $layer.Registry) {
+            if (-not (Test-Path "windows/registry/$name")) { throw "$($file.Name): no registry file $name" }
+        }
+    }
 
 lint:
     uv run --locked ruff check scripts tests
