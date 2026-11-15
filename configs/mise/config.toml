@@ -1,6 +1,6 @@
-# Every machine. conf.d/ adds more by machine: runtimes.toml on Linux and the
-# personal Mac, agents.toml on Linux and the work Mac, linux-tools.toml on
-# Linux.
+# Every machine. conf.d/ adds more by machine: runtimes.toml on Linux, the
+# personal Mac and Windows, agents.toml on Linux, the work Mac and Windows,
+# linux-tools.toml on Linux, windows-tools.toml on Windows.
 [tools]
 # Runs the npm tools below.
 node = "lts"
@@ -11,8 +11,8 @@ node = "lts"
 
 # Agentic helpers
 "npm:@llamaindex/liteparse" = "latest"
-# Upstream publishes bare binaries; no registry entry.
-"github:lightpanda-io/browser" = { version = "latest", bin = "lightpanda" }
+# Upstream publishes bare binaries, none for Windows; no registry entry.
+"github:lightpanda-io/browser" = { version = "latest", bin = "lightpanda", os = ["linux", "macos"] }
 
 # Language helpers
 "npm:markdownlint-cli" = "latest"
@@ -36,7 +36,8 @@ delta = "latest"
 LIGHTPANDA_DISABLE_TELEMETRY = "true"
 
 [settings]
-# Nix or Homebrew installs and updates Mise; Mise installs the tools above.
+# Nix, Homebrew or winget installs and updates Mise; Mise installs the
+# tools above.
 system_deps = "warn"
 # nix-ld runs the prebuilt release; Mise compiles on NixOS by default.
 node.compile = false
