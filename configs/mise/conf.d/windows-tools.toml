@@ -1,23 +1,29 @@
-# Windows CLI tools; Nix installs them on Linux and Homebrew on the Mac.
+# Windows CLI tools that Nix installs on Linux; winget lags behind upstream.
+# winget keeps 7-Zip, since Mise's is the 32-bit 7za without RAR, and FFmpeg,
+# since Mise's is a conda environment with Python.
 [tools]
 starship = "latest"
-zoxide = "latest"
 fzf = "latest"
+zoxide = "latest"
+gh = "latest"
 bat = "latest"
 eza = "latest"
+yazi = "latest"
 fd = "latest"
 ripgrep = "latest"
-yazi = "latest"
-duf = "latest"
-gh = "latest"
-lazygit = "latest"
-gitleaks = "latest"
-jq = "latest"
-yq = "latest"
-just = "latest"
-typst = "latest"
-neovim = "latest"
 fastfetch = "latest"
 tealdeer = "latest"
+just = "latest"
+lazygit = "latest"
+yq = "latest"
+# Conda package; pdftotext and the other Poppler tools.
+poppler = "latest"
+imagemagick = "latest"
+yt-dlp = "latest"
+typst = "latest"
+duf = "latest"
 # Builds with cargo, which links with the Visual Studio C++ Build Tools.
 tokei = "latest"
+gitleaks = "latest"
+neovim = "latest"
+tree-sitter = "latest"
