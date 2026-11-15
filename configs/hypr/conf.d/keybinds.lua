@@ -31,12 +31,13 @@ hl.bind(
 )
 hl.bind(
     mainMod .. " + SHIFT + F",
-    hl.dsp.exec_cmd("uwsm-app -- nautilus"),
+    -- hl.dsp.exec_cmd("uwsm-app -- nautilus"),
+    hl.dsp.exec_cmd("uwsm-app -- strata"),
     { description = "Open file manager" }
 )
 hl.bind(
     mainMod .. " + ALT + F",
-    hl.dsp.exec_cmd("launch nautilus-cwd"),
+    hl.dsp.exec_cmd("launch files-cwd"),
     { description = "Open file manager in the terminal's folder" }
 )
 hl.bind(

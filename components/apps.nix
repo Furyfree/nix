@@ -15,14 +15,14 @@ in
   };
 
   services = {
-    # Phones (MTP), network shares (SMB) and trash for Nautilus.
+    # Phones (MTP), network shares (SMB) and trash for the file manager.
     gvfs.enable = true;
-    # Nautilus previews with Space.
-    gnome.sushi.enable = true;
+    # Nautilus previews with Space; Strata replaces Nautilus (#18).
+    # gnome.sushi.enable = true;
   };
 
   environment.systemPackages = with pkgs; [
-    nautilus
+    # nautilus
     loupe
     celluloid
     mpv

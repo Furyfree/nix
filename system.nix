@@ -21,6 +21,7 @@
     ./components/services.nix
     ./components/shell.nix
     ./components/snapper.nix
+    ./components/strata.nix
     ./components/virtualization.nix
     ./components/voxtype.nix
     ./components/windows-vm.nix

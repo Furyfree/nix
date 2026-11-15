@@ -20,8 +20,9 @@ binds {
     // Native activation targets the main window; Quick Access shares its app ID.
     Mod+Shift+P hotkey-overlay-title="Focus or open 1Password" { spawn "uwsm-app" "--" "1password"; }
     Ctrl+Shift+Space hotkey-overlay-title="Open 1Password Quick Access" { spawn "uwsm-app" "--" "1password" "--quick-access"; }
-    Mod+Shift+F hotkey-overlay-title="Open file manager" { spawn "uwsm-app" "--" "nautilus"; }
-    Mod+Alt+F hotkey-overlay-title="Open file manager in the terminal's folder" { spawn "launch" "nautilus-cwd"; }
+    // Mod+Shift+F hotkey-overlay-title="Open file manager" { spawn "uwsm-app" "--" "nautilus"; }
+    Mod+Shift+F hotkey-overlay-title="Open file manager" { spawn "uwsm-app" "--" "strata"; }
+    Mod+Alt+F hotkey-overlay-title="Open file manager in the terminal's folder" { spawn "launch" "files-cwd"; }
     Mod+Alt+Return hotkey-overlay-title="Open floating terminal" { spawn "launch" "floating-terminal"; }
     // Focus the most recently used window of the app, even on another workspace.
     Mod+Shift+O hotkey-overlay-title="Focus or open Obsidian" { spawn "launch" "focus" "md.obsidian.Obsidian" "uwsm-app" "--" "obsidian"; }

@@ -42,6 +42,13 @@ input_path = "templates/ghostty/ghostty"
 output_path = "$XDG_CONFIG_HOME/ghostty/themes/noctalia"
 post_hook = "bash '{{ config_dir }}/templates/ghostty/reload.sh'"
 
+# Strata ignores GTK themes; it reloads this file live once "Noctalia" is
+# picked in Settings → Appearance.
+[theme.templates.user.strata]
+enabled = true
+input_path = "templates/strata.toml"
+output_path = "$XDG_CONFIG_HOME/strata/themes/noctalia.toml"
+
 [wallpaper]
 directory = "~/Pictures/Wallpapers"
 

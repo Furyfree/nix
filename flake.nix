@@ -11,10 +11,16 @@
       url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Built against our nixpkgs, so it loads the desktop's own GLib modules
+    # (gvfs, dconf).
+    strata = {
+      url = "github:lgse/strata";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    {
+    inputs@{
       self,
       nixpkgs,
       home-manager,
@@ -43,6 +49,7 @@
           {
             ${name} = builtins.seq installation (
               nixpkgs.lib.nixosSystem {
+                specialArgs = { inherit inputs; };
                 modules = [
                   (host + "/configuration.nix")
                   home-manager.nixosModules.home-manager
