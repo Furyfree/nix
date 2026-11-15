@@ -77,6 +77,8 @@
         pkgs.mkShellNoCC {
           UV_PYTHON = "${pkgs.python3}/bin/python3";
           UV_PYTHON_DOWNLOADS = "never";
+          # pwsh reports usage on start unless this is set.
+          POWERSHELL_TELEMETRY_OPTOUT = "1";
           packages = with pkgs; [
             python3
             uv
@@ -91,6 +93,7 @@
             caligula
             util-linux
             openssh
+            powershell
           ];
         };
 

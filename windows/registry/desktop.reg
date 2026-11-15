@@ -1,0 +1,11 @@
+Windows Registry Editor Version 5.00
+
+; The desktop dual-boots NixOS, which keeps the hardware clock in UTC and needs
+; Windows shut down fully. Both apply from the next boot.
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation]
+"RealTimeIsUniversal"=dword:00000001
+
+; No Fast Startup, which hibernates Windows instead of shutting it down
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Power]
+"HiberbootEnabled"=dword:00000000
