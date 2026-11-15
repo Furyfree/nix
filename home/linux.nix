@@ -200,6 +200,21 @@ in
         fi
       fi
     '';
+
+    # Strata saves its settings only through links its user owns, not through
+    # Home Manager's link into the store, so link the file straight to the
+    # checkout. A settings file already there is kept as settings.toml.backup.
+    strataSettingsLink = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      tracked="${config.home.homeDirectory}/Projects/nix/configs/strata/settings.toml"
+      link="${config.xdg.configHome}/strata/settings.toml"
+      if [[ ! -L $link ]]; then
+        if [[ -e $link ]]; then
+          run mv --backup=numbered "$link" "$link.backup"
+        fi
+        run mkdir -p "$(dirname "$link")"
+        run ln -s "$tracked" "$link"
+      fi
+    '';
   };
 
   dconf.settings =

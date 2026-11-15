@@ -71,6 +71,12 @@ if command -v nix-workstation >/dev/null 2>&1; then
   alias fup='nix-workstation firmware'
 fi
 
+# Rewrite every app's colours from Noctalia's current palette, such as
+# Strata's theme on a new machine.
+if command -v noctalia >/dev/null 2>&1; then
+  alias recolor='noctalia msg templates-apply'
+fi
+
 # Nixpkgs' 7-Zip only installs 7zz; keep the usual 7z name.
 if ! command -v 7z >/dev/null 2>&1 && command -v 7zz >/dev/null 2>&1; then
   alias 7z='7zz'
