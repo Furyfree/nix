@@ -20,7 +20,6 @@ binds {
     // Native activation targets the main window; Quick Access shares its app ID.
     Mod+Shift+P hotkey-overlay-title="Focus or open 1Password" { spawn "uwsm-app" "--" "1password"; }
     Ctrl+Shift+Space hotkey-overlay-title="Open 1Password Quick Access" { spawn "uwsm-app" "--" "1password" "--quick-access"; }
-    // Mod+Shift+F hotkey-overlay-title="Open file manager" { spawn "uwsm-app" "--" "nautilus"; }
     Mod+Shift+F hotkey-overlay-title="Open file manager" { spawn "uwsm-app" "--" "strata"; }
     Mod+Alt+F hotkey-overlay-title="Open file manager in the terminal's folder" { spawn "launch" "files-cwd"; }
     Mod+Alt+Return hotkey-overlay-title="Open floating terminal" { spawn "launch" "floating-terminal"; }
