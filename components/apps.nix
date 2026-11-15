@@ -41,6 +41,13 @@ in
     surfer
   ];
 
+  nixpkgs.config.allowUnfreePackages = [
+    "spotify"
+    "obsidian"
+    "fastmail-desktop"
+    "jetbrains-toolbox"
+  ];
+
   # Surfer's package ships no menu entry; the icon is upstream's own (EUPL-1.2).
   home-manager.sharedModules = [
     {

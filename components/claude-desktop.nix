@@ -94,4 +94,5 @@ let
 in
 {
   environment.systemPackages = [ claude-desktop ];
+  nixpkgs.config.allowUnfreePackages = [ "claude-desktop" ];
 }

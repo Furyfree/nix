@@ -10,4 +10,9 @@
       polkitPolicyOwners = builtins.attrNames config.home-manager.users;
     };
   };
+
+  nixpkgs.config.allowUnfreePackages = [
+    "1password"
+    "1password-cli"
+  ];
 }

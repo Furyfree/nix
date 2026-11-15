@@ -23,6 +23,11 @@ in
     "nix-command"
     "flakes"
   ];
+  # Weekly; a Mac has no boot menu, so age alone decides.
+  nix.gc = {
+    automatic = true;
+    options = "--delete-older-than 14d";
+  };
 
   users.users.${user}.home = "/Users/${user}";
 

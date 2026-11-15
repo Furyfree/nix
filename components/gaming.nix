@@ -22,4 +22,10 @@
     # Battle.net through its Wine runner.
     lutris
   ];
+
+  nixpkgs.config.allowUnfreePackages = [
+    "steam"
+    "steam-unwrapped"
+    "wowup-cf"
+  ];
 }

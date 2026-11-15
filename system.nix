@@ -27,9 +27,6 @@
     ./components/windows-vm.nix
   ];
 
-  # Allow closed-source apps such as Spotify, Obsidian, Steam and NVIDIA.
-  nixpkgs.config.allowUnfree = true;
-
   # Wi-Fi, Bluetooth and GPU firmware from linux-firmware.
   hardware.enableRedistributableFirmware = true;
 

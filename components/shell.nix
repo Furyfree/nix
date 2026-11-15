@@ -26,7 +26,15 @@ in
       promptInit = "";
     };
     # NH_FLAKE comes from the user's shell, which knows the checkout path.
-    nh.enable = true;
+    nh = {
+      enable = true;
+      # Weekly; keeps the 10 generations Limine's menu shows and any from the
+      # last two weeks.
+      clean = {
+        enable = true;
+        extraArgs = "--keep 10 --keep-since 14d";
+      };
+    };
     git = {
       enable = true;
       lfs.enable = true;

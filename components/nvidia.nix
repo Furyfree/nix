@@ -17,4 +17,16 @@
 
   # btop finds the driver's GPU library only when built with CUDA support.
   nixpkgs.overlays = [ (_: prev: { btop = prev.btop.override { cudaSupport = true; }; }) ];
+
+  # The driver, and the CUDA parts btop and the desktop's llama.cpp build on.
+  nixpkgs.config.allowUnfreePackages = [
+    "nvidia-x11"
+    "cccl"
+    "cuda_crt"
+    "cuda_cudart"
+    "cuda_nvcc"
+    "cuda_nvrtc"
+    "libcublas"
+    "libnvvm"
+  ];
 }
