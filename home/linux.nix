@@ -215,6 +215,34 @@ in
         run ln -s "$tracked" "$link"
       fi
     '';
+
+    # Newest first where new files land. Strata keeps per-folder sorts as its
+    # own state, so write them only before its first run, then leave the file
+    # to Strata.
+    strataFolderSorts =
+      let
+        views = (pkgs.formats.toml { }).generate "strata-folder-views.toml" {
+          version = 1;
+          folder =
+            map
+              (path: {
+                inherit path;
+                sort = "created";
+                direction = "descending";
+              })
+              [
+                config.xdg.userDirs.download
+                config.xdg.userDirs.extraConfig.SCREENSHOTS
+                config.xdg.userDirs.extraConfig.RECORDINGS
+              ];
+        };
+      in
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        file="${config.xdg.stateHome}/strata/folder-views.toml"
+        if [[ ! -e $file ]]; then
+          run install -D -m 0600 ${views} "$file"
+        fi
+      '';
   };
 
   dconf.settings =
