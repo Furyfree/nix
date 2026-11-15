@@ -1,0 +1,23 @@
+# Windows CLI tools; Nix installs them on Linux and Homebrew on the Mac.
+[tools]
+starship = "latest"
+zoxide = "latest"
+fzf = "latest"
+bat = "latest"
+eza = "latest"
+fd = "latest"
+ripgrep = "latest"
+yazi = "latest"
+duf = "latest"
+gh = "latest"
+lazygit = "latest"
+gitleaks = "latest"
+jq = "latest"
+yq = "latest"
+just = "latest"
+typst = "latest"
+neovim = "latest"
+fastfetch = "latest"
+tealdeer = "latest"
+# Builds with cargo, which links with the Visual Studio C++ Build Tools.
+tokei = "latest"
