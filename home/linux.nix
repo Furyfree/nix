@@ -235,7 +235,6 @@ in
         # Apps list their buttons and fields for computer-use-linux.
         toolkit-accessibility = true;
       };
-      # "org/gnome/nautilus/preferences".show-hidden-files = true;
       "org/gnome/desktop/privacy".remember-recent-files = false;
       "org/gtk/settings/file-chooser" = fileChooser;
       "org/gtk/gtk4/settings/file-chooser" = fileChooser;

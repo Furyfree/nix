@@ -31,7 +31,6 @@ hl.bind(
 )
 hl.bind(
     mainMod .. " + SHIFT + F",
-    -- hl.dsp.exec_cmd("uwsm-app -- nautilus"),
     hl.dsp.exec_cmd("uwsm-app -- strata"),
     { description = "Open file manager" }
 )
