@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
   # The native fastfetch config formats rows with Lua, which nixpkgs leaves out.
@@ -28,11 +28,11 @@ in
     # NH_FLAKE comes from the user's shell, which knows the checkout path.
     nh = {
       enable = true;
-      # Weekly; keeps the 10 generations Limine's menu shows and any from the
-      # last two weeks.
+      # Weekly; keeps the generations Limine's menu shows and any from the last
+      # two weeks.
       clean = {
         enable = true;
-        extraArgs = "--keep 10 --keep-since 14d";
+        extraArgs = "--keep ${toString config.boot.loader.limine.maxGenerations} --keep-since 14d";
       };
     };
     git = {
