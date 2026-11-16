@@ -48,7 +48,7 @@
         '~\.t3\userdata\keybindings.json'                  = 't3code/keybindings.json'
         '~\.ssh\config'                                    = 'ssh/windows.conf'
         '%LOCALAPPDATA%\1Password\config\ssh\agent.toml'   = '1password/ssh/personal.toml'
-        '~\Documents\PowerShell\profile.ps1'               = 'windows/powershell/profile.ps1'
+        '%DOCUMENTS%\PowerShell\profile.ps1'               = 'windows/powershell/profile.ps1'
     }
     Merges     = @{
         # GitHub Dark, as on the Mac; Noctalia's theme exists only on Linux.
