@@ -265,9 +265,10 @@ one with `reg import FILE`.
    again; it carries on. When it installed WSL, restart Windows and run
    `~\Projects\nix\windows\apply.ps1` in PowerShell 7.
 3. vm and desktop: sign in to Tailscale in the window it opens. 1Password:
-   sign in, then in Settings → Developer turn on the SSH agent. In PowerShell 7, fetch the SSH files into `~\.ssh` as in
-   step 6 of [First boot](#first-boot), run `gh auth login` and switch the
-   checkout to SSH.
+   sign in, then in Settings → Developer turn on the SSH agent. In PowerShell
+   7, fetch the SSH files into `~\.ssh` as in step 6 of
+   [First boot](#first-boot), run `gh auth login` and switch the checkout to
+   SSH.
 4. Desktop, in NixOS (`wsl -d NixOS`): `mise install`, the signing key
    for Git, and the checkout over SSH:
 
