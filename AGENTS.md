@@ -5,9 +5,10 @@ Windows where possible. I want repeatable installs and updates, shared desktop
 preferences and generation rollback.
 
 My Linux workstations run NixOS with integrated Home Manager, and every Mac runs
-nix-darwin with Home Manager from the one `macos` host. Extend compatible user
-configuration through Home Manager one tool at a time. `docs/PLAN.md` holds the
-open work.
+nix-darwin with Home Manager from the one `macos` host. Windows runs one
+PowerShell profile, basic, vm or desktop, through winget, Mise and `.reg` files;
+vm and desktop add NixOS in WSL. Extend compatible user configuration through
+Home Manager one tool at a time. `docs/PLAN.md` holds the open work.
 
 ## What must not break
 
@@ -25,6 +26,9 @@ open work.
 - Macs: never remove apps (Homebrew cleanup stays off), save settings before
   the first switch, keep FileVault, SIP, Gatekeeper and the firewall on, and
   leave what IT manages off the work Mac.
+- Windows: never uninstall apps, save registry values before their first
+  import, keep Secure Boot, TPM, Defender, the firewall, UAC and Windows Update
+  on, and keep BitLocker recovery keys out of output and logs.
 
 ## Approach
 
@@ -58,13 +62,21 @@ Docs and comments state no current versions or status; open work lives in
   Keep the checkout at `~/Projects/nix` for these links.
 - `hosts/`: tracked host exceptions; ignored `hosts/<host>/local/` holds detected
   hardware and installation data, on NixOS an optional `desktop.nix` that
-  picks the compositor, and on macOS `user.nix` with the account and profile.
+  picks the compositor, on macOS `user.nix` with the account and profile, in
+  WSL `user.nix` with the account, and on Windows `profile` with its name.
   Shared policy belongs above it.
+- `windows/`: `bootstrap.ps1` prepares a fresh Windows and clones the
+  checkout; `apply.ps1` applies the layers in `profiles/`, whose keys
+  `common.psd1` lists, with the settings in `registry/`. A Windows app or
+  setting goes in the layer that needs it; `configs/windows/` holds the
+  PowerShell, Terminal, WSL and Office files.
+- `hosts/wsl/`, `home/wsl.nix`: NixOS in WSL for vm and desktop; `apply.ps1`
+  installs it.
 - `configs/hypr/hosts/<host>.lua`, `configs/niri/hosts/<host>.kdl`: per-host
   monitors, workspaces and keys, linked as `host.lua` or `host.kdl` by
   `home/hyprland.nix` or `home/niri.nix` after the hostname.
-- `INSTALLATION.md`: NixOS install steps and the Mac's `local/user.nix`;
-  update it with installer or first-boot changes.
+- `INSTALLATION.md`: NixOS install steps, the Mac's `local/user.nix` and the
+  Windows bootstrap; update it with installer or first-boot changes.
 - `scripts/install.py`: installer launcher; `scripts/nixos_setup/` holds its
   modules.
 - `tests/`, `justfile`: installer behavior checks, one file per module, and
@@ -81,6 +93,8 @@ application-data directories or overwrite GUI state while adding app preferences
 ## Verify
 
 Use `nix develop` for tooling. Run focused checks while editing and `just check`
-for the repository gate. Evaluate active flake outputs and build system changes
-without activation. Installation, login, sleep/resume and rollback need machine
-checks; a successful build does not establish those behaviors.
+for the repository gate; it also parses the Windows scripts and profiles.
+Evaluate active flake outputs and build system changes without activation.
+Installation, login, sleep/resume and rollback need machine checks; a successful
+build does not establish those behaviors. Windows changes need Windows: the VM
+from `windows-vm`, which has no WSL2, or the desktop.
