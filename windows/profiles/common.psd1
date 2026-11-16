@@ -6,9 +6,10 @@
 #                   for an installer that refuses to run as administrator
 #   Store           Microsoft Store IDs
 #   Registry        files in windows/registry, imported in order
-#   Links           target = file or folder in configs/; ~ is the home folder
-#                   and %NAME% an environment variable. A real file in the way
-#                   moves to <name>.before-nix-workstation first.
+#   Links           target = file or folder in configs/; ~ is the home folder,
+#                   %DOCUMENTS% the Documents folder and %NAME% an environment
+#                   variable. A real file in the way moves to
+#                   <name>.before-nix-workstation first.
 #   Merges          target = configs/ file or files, for settings apps rewrite:
 #                   Yq sets only their keys, in order
 #   GitWindows      $true writes ~\.config\git\windows, which git/config

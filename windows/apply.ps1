@@ -14,6 +14,9 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot
 $state = Join-Path $env:LOCALAPPDATA 'nix-workstation'
+# Windows' Documents folder, wherever OneDrive or the user moved it; profiles
+# link into it as %DOCUMENTS%.
+$env:DOCUMENTS = [Environment]::GetFolderPath('MyDocuments')
 $failures = [System.Collections.Generic.List[string]]::new()
 $wingetFlags = @('--accept-source-agreements', '--disable-interactivity')
 $installFlags = @('--exact', '--silent', '--no-upgrade', '--accept-package-agreements') + $wingetFlags
@@ -136,17 +139,30 @@ function Invoke-Step([string] $stepName, [scriptblock] $stepBlock) {
 }
 
 function Save-RegistryBackup([string] $file) {
-    # The first time apply touches a key, its old values go to the backup
-    # folder; a key that did not exist gets an empty file.
+    # The first time apply touches a key, a file that undoes it goes to the
+    # backup folder, so reg import restores the key: its old values, and
+    # deletions for the key or the values that did not exist.
     $backup = Join-Path $state 'backup'
     New-Item -ItemType Directory -Force $backup | Out-Null
+    $names = [ordered]@{}
     foreach ($line in Get-Content $file) {
-        if ($line -notmatch '^\[(.+)\]$') { continue }
-        $key = $Matches[1]
+        if ($line -match '^\[(.+)\]$') { $key = $Matches[1]; if (-not $names.Contains($key)) { $names[$key] = @() } }
+        elseif ($line -match '^"(.+?)"=') { $names[$key] += $Matches[1] }
+    }
+    foreach ($key in $names.Keys) {
         $target = Join-Path $backup (($key -replace '[\\/:*?"<>|]', '_') + '.reg')
         if (Test-Path $target) { continue }
         reg export $key $target /y *> $null
-        if ($LASTEXITCODE -ne 0) { Set-Content $target "Windows Registry Editor Version 5.00`r`n`r`n; Absent" }
+        if ($LASTEXITCODE -ne 0) {
+            Set-Content $target "Windows Registry Editor Version 5.00`r`n`r`n[-$key]" -Encoding unicode
+            continue
+        }
+        $old = (Get-Item -LiteralPath "Registry::$key").GetValueNames()
+        $new = @($names[$key] | Where-Object { $old -notcontains $_ })
+        if ($new) {
+            $deletions = @("[$key]") + @(foreach ($name in $new) { "`"$name`"=-" })
+            Set-Content $target ((Get-Content $target -Raw).TrimEnd() + "`r`n`r`n" + ($deletions -join "`r`n")) -Encoding unicode
+        }
     }
 }
 
@@ -438,45 +454,54 @@ elseif ($want.Wsl.Distribution -eq 'Ubuntu') {
 elseif ($want.Wsl.Distribution -eq 'NixOS') {
     Invoke-Step 'NixOS' {
         $env:WSL_UTF8 = '1'
-        # Installed once; nswitch inside NixOS applies later changes.
-        if ((wsl --list --quiet 2> $null) -contains 'NixOS') { return }
         # Linux account names are lowercase letters, digits, - and _.
         $user = $env:USERNAME.ToLower()
         if ($user -notmatch '^[a-z_][a-z0-9_-]*$') { throw "$env:USERNAME is no Linux account name." }
+        $shell = '/run/current-system/sw/bin/sh'
+        # Done once the account has its checkout; nswitch inside NixOS applies
+        # later changes. Until then each run redoes the steps still missing.
+        wsl --distribution NixOS --user $user --exec $shell -c 'test -f ~/Projects/nix/hosts/wsl/local/user.nix' 2> $null
+        if ($LASTEXITCODE -eq 0) { return }
         $url = git -C $root remote get-url origin
         $branch = git -C $root branch --show-current
         if (-not $branch) { $branch = 'main' }
 
-        $image = Join-Path ([IO.Path]::GetTempPath()) 'nixos.wsl'
-        Write-Host 'download NixOS-WSL'
-        Invoke-WebRequest $want.Wsl.Image -OutFile $image
-        if ((Get-FileHash $image).Hash -ne $want.Wsl.Sha256) { throw "$image does not match its checksum." }
-        Write-Host 'install  NixOS'
-        wsl --install --from-file $image --no-launch
-        if ($LASTEXITCODE -ne 0) { throw "wsl --install ($LASTEXITCODE)" }
-        Remove-Item $image
+        if ((wsl --list --quiet 2> $null) -notcontains 'NixOS') {
+            $image = Join-Path ([IO.Path]::GetTempPath()) 'nixos.wsl'
+            Write-Host 'download NixOS-WSL'
+            Invoke-WebRequest $want.Wsl.Image -OutFile $image
+            if ((Get-FileHash $image).Hash -ne $want.Wsl.Sha256) { throw "$image does not match its checksum." }
+            Write-Host 'install  NixOS'
+            wsl --install --from-file $image --no-launch
+            if ($LASTEXITCODE -ne 0) { throw "wsl --install ($LASTEXITCODE)" }
+            Remove-Item $image
+        }
 
         # A login shell, since wsl --exec starts without NixOS' PATH
         function Invoke-NixOS([string] $account, [string] $script, [string[]] $arguments) {
-            wsl --distribution NixOS --user $account --exec /run/current-system/sw/bin/sh -lc $script sh @arguments
+            wsl --distribution NixOS --user $account --exec $shell -lc $script sh @arguments
             if ($LASTEXITCODE -ne 0) { throw "in NixOS as $account ($LASTEXITCODE)" }
         }
         $userNix = "{ wsl.defaultUser = `"$user`"; }"
-        # NixOS-WSL's steps for a new account: build the boot generation as
-        # root, then start it once as root and stop it.
-        Write-Host "build    NixOS for $user"
-        Invoke-NixOS root @'
+        # NixOS-WSL's steps for a new account, until it exists: build the boot
+        # generation as root, then start it once as root and stop it.
+        wsl --distribution NixOS --user $user --exec $shell -c true 2> $null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "build    NixOS for $user"
+            Invoke-NixOS root @'
 export NIX_CONFIG='experimental-features = nix-command flakes'
+rm -rf /tmp/nix &&
 nix run nixpkgs#git -- clone --branch "$1" "$2" /tmp/nix &&
 mkdir -p /tmp/nix/hosts/wsl/local && printf '%s\n' "$3" > /tmp/nix/hosts/wsl/local/user.nix &&
 nixos-rebuild boot --flake path:/tmp/nix#wsl
 '@ @($branch, $url, $userNix)
-        wsl --terminate NixOS
-        Invoke-NixOS root 'true'
-        wsl --terminate NixOS
-        # The checkout in the new account's home, as on Linux
+            wsl --terminate NixOS
+            Invoke-NixOS root 'true'
+            wsl --terminate NixOS
+        }
+        # The checkout in the account's home, as on Linux
         Invoke-NixOS $user @'
-git clone --branch "$1" "$2" ~/Projects/nix &&
+{ [ -d ~/Projects/nix/.git ] || git clone --branch "$1" "$2" ~/Projects/nix; } &&
 mkdir -p ~/Projects/nix/hosts/wsl/local && printf '%s\n' "$3" > ~/Projects/nix/hosts/wsl/local/user.nix
 '@ @($branch, $url, $userNix)
     }
