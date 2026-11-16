@@ -9,6 +9,10 @@
 #   VSCodeExtensions  extension IDs for VS Code
 #   Wsl             Distribution, plus Apt packages for Ubuntu
 #   Power           powercfg values on the active plan, 'SUBGROUP SETTING' = AC
+#   Services        start types, name = 'Manual', 'Automatic' or 'Disabled'
+#   NightLight      $true schedules night light from sunset to sunrise
+#   Wallpaper       a picture under the home folder for the desktop and lock
+#                   screen, set once it exists
 #   BitLocker       $true turns it on with a recovery key file
 @{
     Winget   = @(

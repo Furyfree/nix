@@ -26,9 +26,8 @@ Windows Registry Editor Version 5.00
 "SearchboxTaskbarMode"=dword:00000000
 "BingSearchEnabled"=dword:00000000
 
-; Widgets
-[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Dsh]
-"AllowNewsAndInterests"=dword:00000000
+; Widgets stay: Windows denies their policy, Dsh\AllowNewsAndInterests, to
+; reg.exe and PowerShell even as administrator. The ISO sets it.
 
 ; No Recommended section in Start; the education flag makes Windows apply the
 ; policy outside Enterprise and Education.
