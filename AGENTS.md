@@ -69,7 +69,7 @@ Docs and comments state no current versions or status; open work lives in
   checkout; `apply.ps1` applies the layers in `profiles/`, whose keys
   `common.psd1` lists, with the settings in `registry/`. A Windows app or
   setting goes in the layer that needs it; `configs/windows/` holds the
-  PowerShell, Terminal, WSL and Office files.
+  PowerShell, Terminal, WSL, Office and taskbar files.
 - `hosts/wsl/`, `home/wsl.nix`: NixOS in WSL for desktop; `apply.ps1` installs
   it.
 - `configs/hypr/hosts/<host>.lua`, `configs/niri/hosts/<host>.kdl`: per-host

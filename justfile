@@ -67,7 +67,7 @@ check-powershell:
             if (-not (Test-Path "windows/registry/$name")) { throw "$($file.Name): no registry file $name" }
         }
         $configs = @($layer.Links.Values) + @($layer.Merges.Values | ForEach-Object { $_ }) +
-            @($layer.Extensions.Values | Where-Object { $_ -is [string] })
+            @($layer.Extensions.Values | ForEach-Object { $_ } | Where-Object { $_ -like '*/*' }) + @($layer.Taskbar)
         foreach ($name in $configs | Where-Object { $_ }) {
             if (-not (Test-Path "configs/$name")) { throw "$($file.Name): no configs/$name" }
         }

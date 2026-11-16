@@ -38,3 +38,17 @@ Windows Registry Editor Version 5.00
 "MouseSpeed"="0"
 "MouseThreshold1"="0"
 "MouseThreshold2"="0"
+
+; Launchers start when opened, not at sign-in: off in Settings > Apps >
+; Startup, by each Run entry name, as in personal.reg
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run]
+"Steam"=hex:01,00,00,00,00,00,00,00,00,00,00,00
+"Battle.net"=hex:01,00,00,00,00,00,00,00,00,00,00,00
+"EpicGamesLauncher"=hex:01,00,00,00,00,00,00,00,00,00,00,00
+"RiotClient"=hex:01,00,00,00,00,00,00,00,00,00,00,00
+"Discord"=hex:01,00,00,00,00,00,00,00,00,00,00,00
+
+; Discord's machine-wide installer, which checks each sign-in for a missing
+; Discord
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run32]
+"Discord"=hex:01,00,00,00,00,00,00,00,00,00,00,00

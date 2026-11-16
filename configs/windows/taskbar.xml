@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- desktop's taskbar pins from left to right, for the Start Layout policy
+     that apply.ps1 sets. Windows replaces the pins at the first sign-in after
+     this file changes. PinGeneration lets an unpin stick until it is raised.
+     IDs come from Get-StartApps; apps without one use their Start shortcut. -->
+<LayoutModificationTemplate
+    xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification"
+    xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout"
+    xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout"
+    xmlns:taskbar="http://schemas.microsoft.com/Start/2014/TaskbarLayout"
+    Version="1">
+  <CustomTaskbarLayoutCollection PinListPlacement="Replace">
+    <defaultlayout:TaskbarLayout>
+      <taskbar:TaskbarPinList>
+        <taskbar:DesktopApp DesktopApplicationID="Microsoft.Windows.Explorer" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="com.fastmail.Fastmail" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationLinkPath="%APPDATA%\Microsoft\Windows\Start Menu\Programs\Brave Origin.lnk" PinGeneration="1" />
+        <taskbar:UWA AppUserModelID="Microsoft.WindowsTerminal_8wekyb3d8bbwe!App" PinGeneration="1" />
+        <taskbar:UWA AppUserModelID="Agilebits.1Password_amwd9z03whsfe!Agilebits.OnePassword" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationLinkPath="%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\Battle.net\Battle.net.lnk" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationLinkPath="%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\Epic Games Launcher.lnk" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationLinkPath="%APPDATA%\Microsoft\Windows\Start Menu\Programs\Prism Launcher.lnk" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationLinkPath="%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\Riot Games\Riot Client.lnk" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="com.squirrel.Discord.Discord" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="org.whispersystems.signal-desktop" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationLinkPath="%APPDATA%\Microsoft\Windows\Start Menu\Programs\Spotify.lnk" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="ZedIndustries.Zed" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="VSCodium.VSCodium" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="com.squirrel.AnthropicClaude.claude" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="com.t3tools.t3code" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="com.nvidia.nvapp" PinGeneration="1" />
+      </taskbar:TaskbarPinList>
+    </defaultlayout:TaskbarLayout>
+  </CustomTaskbarLayoutCollection>
+</LayoutModificationTemplate>
