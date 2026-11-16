@@ -139,9 +139,10 @@ function Invoke-Step([string] $stepName, [scriptblock] $stepBlock) {
 }
 
 function Save-RegistryBackup([string] $file) {
-    # The first time apply touches a key, a file that undoes it goes to the
-    # backup folder, so reg import restores the key: its old values, and
-    # deletions for the key or the values that did not exist.
+    # A file per key that undoes apply, so reg import restores the key: the
+    # first time apply touches it, its old values, or the key's deletion when
+    # it did not exist; then deletions for values this file adds, also ones
+    # added to it later.
     $backup = Join-Path $state 'backup'
     New-Item -ItemType Directory -Force $backup | Out-Null
     $names = [ordered]@{}
@@ -151,14 +152,24 @@ function Save-RegistryBackup([string] $file) {
     }
     foreach ($key in $names.Keys) {
         $target = Join-Path $backup (($key -replace '[\\/:*?"<>|]', '_') + '.reg')
-        if (Test-Path $target) { continue }
-        reg export $key $target /y *> $null
-        if ($LASTEXITCODE -ne 0) {
-            Set-Content $target "Windows Registry Editor Version 5.00`r`n`r`n[-$key]" -Encoding unicode
-            continue
+        if (-not (Test-Path $target)) {
+            reg export $key $target /y *> $null
+            if ($LASTEXITCODE -ne 0) {
+                Set-Content $target "Windows Registry Editor Version 5.00`r`n`r`n[-$key]" -Encoding unicode
+                continue
+            }
         }
-        $old = (Get-Item -LiteralPath "Registry::$key").GetValueNames()
-        $new = @($names[$key] | Where-Object { $old -notcontains $_ })
+        if ((Get-Content $target) -contains "[-$key]") { continue }
+        # The values the backup already restores, in this key's own sections;
+        # an export also holds its subkeys.
+        $section = $null
+        $saved = foreach ($line in Get-Content $target) {
+            if ($line -match '^\[(.+)\]$') { $section = $Matches[1] }
+            elseif ($section -eq $key -and $line -match '^"(.+?)"=') { $Matches[1] }
+        }
+        $item = Get-Item -LiteralPath "Registry::$key" -ErrorAction Ignore
+        $old = if ($item) { $item.GetValueNames() } else { @() }
+        $new = @($names[$key] | Where-Object { $saved -notcontains $_ -and $old -notcontains $_ })
         if ($new) {
             $deletions = @("[$key]") + @(foreach ($name in $new) { "`"$name`"=-" })
             Set-Content $target ((Get-Content $target -Raw).TrimEnd() + "`r`n`r`n" + ($deletions -join "`r`n")) -Encoding unicode
