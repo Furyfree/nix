@@ -27,8 +27,10 @@ on its own disk and joins the boot menu at the first `nswitch`.
 ## First boot
 
 1. Secure Boot: in the firmware settings, clear the Secure Boot keys (Setup
-   Mode). In NixOS run `sudo sbctl enroll-keys -m`, which keeps Microsoft's
-   keys for Windows and firmware, then turn Secure Boot back on. `sbctl
+   Mode). In NixOS run `sudo sbctl enroll-keys -m -f`, which keeps Microsoft's
+   and the firmware's own keys for Windows and firmware. Before turning Secure
+   Boot back on, `nix run nixpkgs#mokutil -- --db | grep 'Windows UEFI CA
+   2023'` must find the certificate that signs Windows' boot manager. `sbctl
    status` should show Setup Mode disabled and Secure Boot enabled. On the HP
    laptop, confirm the code that disables Sure Start Secure Boot Keys
    Protection, which otherwise restores HP's keys; HP then turns Secure Boot
@@ -148,7 +150,8 @@ Obsidian's are missing. Run `systemctl --user restart noctalia`, then
   Select Theme, not Default Installation Path): `~/.config/heroic/themes`.
   Restart Heroic, then Select Theme → `matugen`.
 - Lutris: add Battle.net (+ → search Lutris for Battle.net → install), sign
-  in and install World of Warcraft; WowUp manages its addons.
+  in and install World of Warcraft; WowUp manages its addons, and wow-ui in
+  `~/Projects` their settings, as its README says.
 
 ### Projects and homelab
 
@@ -253,7 +256,11 @@ it saves the old values to `%LOCALAPPDATA%\nix-workstation\backup\`; restore
 one with `reg import FILE`.
 
 1. Install Windows, from the Win11 Creator ISO when you have it; without it,
-   the bootstrap runs WinUtil's Standard tweaks. Then update Windows.
+   the bootstrap runs WinUtil's Standard tweaks. On the desktop, unplug the
+   NixOS disk while Windows installs; otherwise Setup puts Windows' boot files
+   on the NixOS EFI partition instead of making its own. Then update Windows
+   and name the PC (System → About) before the bootstrap; the BitLocker key
+   file in step 6 carries the name.
 2. In Windows PowerShell, as yourself:
 
    ```powershell
@@ -263,9 +270,13 @@ one with `reg import FILE`.
    It asks for the profile and for administrator twice: for sudo, Git and
    PowerShell 7, then for the apps, settings and WSL. After an error, run it
    again; it carries on. When it installed WSL, restart Windows and run
-   `~\Projects\nix\windows\apply.ps1` in PowerShell 7.
+   `~\Projects\nix\windows\apply.ps1` in PowerShell 7; on the desktop, that
+   run installs NixOS. The desktop's taskbar pins appear at the next sign-in.
 3. vm and desktop: sign in to Tailscale in the window it opens. 1Password:
-   sign in, then in Settings → Developer turn on the SSH agent. In PowerShell
+   sign in, then in Settings → Developer turn on the SSH agent, and in
+   Settings → Security unlock with Windows Hello, so `op`, SSH and Git signing
+   ask for the Windows PIN instead of the account password; Windows Hello
+   needs a PIN from Settings → Accounts → Sign-in options. In PowerShell
    7, fetch the SSH files into `~\.ssh` as in step 6 of
    [First boot](#first-boot), run `gh auth login` and switch the checkout to
    SSH.
@@ -278,14 +289,35 @@ one with `reg import FILE`.
    git -C ~/Projects/nix remote set-url origin git@github.com:Furyfree/nix.git
    ```
 
-5. Desktop: store the BitLocker recovery key from
+   Then ai-workflow as in step 8 of [First boot](#first-boot); clone the
+   repositories you work on into NixOS' `~/Projects` and run their checks as
+   their READMEs say.
+5. Desktop: open those projects from the editors on Windows. VSCodium: F1 →
+   "Connect to WSL using Distro…" → NixOS; the first time, it installs its
+   server in NixOS. Zed: Ctrl+Shift+P → `projects: open wsl` → NixOS. Then
+   open a folder such as `/home/<you>/Projects/nix`; the editor's terminal
+   runs zsh in NixOS.
+6. Desktop: store the BitLocker recovery key from
    `~\bitlocker-recovery-<computer>.txt` in 1Password from another device.
 
 ### By hand
 
-- Sign-ins: Microsoft 365, Spotify, Signal, ChatGPT, Claude, JetBrains,
-  Tailscale and Brave Origin's licence; on the desktop also Steam,
+- Desktop: the Riot Client, which has no winget package, from a game's
+  installer at <https://www.riotgames.com/>; it then installs League of
+  Legends and VALORANT itself.
+- Desktop: point each game launcher's install folder at the games disk before
+  its first game.
+- Desktop: after World of Warcraft's first login, clone
+  `git@github.com:Furyfree/wow-ui.git` to `~\Projects\wow-ui` and set it up as
+  its README says, so addon settings and keybindings follow you between
+  computers; WowUp installs the addons.
+- Sign-ins: Microsoft 365, Fastmail, Spotify, Signal, ChatGPT, Claude,
+  JetBrains, Tailscale and Brave Origin's licence; on the desktop also Steam,
   Battle.net, Ubisoft Connect, Epic, Riot, Discord and the NVIDIA App.
+- Settings, which Windows keeps out of reach of a `.reg` file: the PC's
+  nearby-sharing name (System → Nearby sharing); Brave Origin as the default
+  browser and PDF reader (Apps → Default apps); on the desktop, each monitor
+  at its highest refresh rate (System → Display → Advanced display).
 - The wallpaper: put `charcoal-amber-mountain-horizon.jpg` in
   `~\Pictures\Wallpapers`; the next `nswitch` sets it for the desktop and the
   lock screen.
