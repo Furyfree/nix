@@ -1,0 +1,10 @@
+{
+  "theme": {
+    "mode": "system",
+    "light": "GitHub Light",
+    "dark": "GitHub Dark"
+  },
+  "auto_install_extensions": {
+    "github-theme": true
+  }
+}

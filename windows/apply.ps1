@@ -53,12 +53,15 @@ foreach ($layer in $layers) {
     }
 }
 foreach ($key in 'Winget', 'Store', 'Registry') { if ($null -eq $want[$key]) { $want[$key] = @() } }
-foreach ($key in 'Links', 'Merges', 'Extensions', 'Power', 'Services', 'Wsl') {
+foreach ($key in 'Links', 'Merges', 'Extensions', 'Power', 'Services', 'Wsl', 'Downloads') {
     if ($null -eq $want[$key]) { $want[$key] = @{} }
 }
 $packages = foreach ($entry in $want.Winget) { if ($entry -is [string]) { @{ Id = $entry } } else { $entry } }
 $wallpaper = if ($want.Wallpaper) { Join-Path $HOME $want.Wallpaper }
 $lockScreenKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP'
+# The Start Layout policy, which only administrators may set, even per user
+$taskbar = if ($want.Taskbar) { [IO.Path]::GetFullPath((Join-Path $root "configs/$($want.Taskbar)")) }
+$taskbarKey = 'HKCU:\Software\Policies\Microsoft\Windows\Explorer'
 
 function Get-Installed {
     $file = Join-Path ([IO.Path]::GetTempPath()) "nix-workstation-$PID.json"
@@ -113,13 +116,17 @@ function Get-AdminWork($installed) {
         BitLocker  = $want.BitLocker -and -not (Test-BitLocker)
         LockScreen = $wallpaper -and (Test-Path $wallpaper) -and
             (Get-ItemProperty $lockScreenKey -ErrorAction Ignore).LockScreenImagePath -ne $wallpaper
+        Taskbar    = $taskbar -and $(
+            $policy = Get-ItemProperty $taskbarKey -ErrorAction Ignore
+            $policy.StartLayoutFile -ne $taskbar -or $policy.LockedStartLayout -ne 1
+        )
         Wsl        = $want.Wsl.Distribution -and -not (Test-Wsl)
     }
 }
 
 function Test-Work($work) {
     $work.Packages -or $work.Store -or $work.Registry -or $work.Power -or $work.Services -or $work.BitLocker -or
-    $work.LockScreen -or $work.Wsl
+    $work.LockScreen -or $work.Taskbar -or $work.Wsl
 }
 
 # winget exit codes for an app that is already there, or there after a restart
@@ -255,6 +262,14 @@ if ($Elevated) {
             Set-ItemProperty $lockScreenKey LockScreenImageStatus 1 -Type DWord
         }
     }
+    if ($work.Taskbar) {
+        Write-Host 'taskbar  pins from the next sign-in'
+        Invoke-Step 'taskbar' {
+            if (-not (Test-Path $taskbarKey)) { New-Item $taskbarKey -Force | Out-Null }
+            Set-ItemProperty $taskbarKey StartLayoutFile $taskbar
+            Set-ItemProperty $taskbarKey LockedStartLayout 1 -Type DWord
+        }
+    }
     if ($work.BitLocker) {
         Write-Host 'enable   BitLocker'
         Invoke-Step 'BitLocker' { Enable-BitLockerWithKey }
@@ -286,6 +301,29 @@ foreach ($package in $packages | Where-Object { $_.User -and $installed -notcont
 # ~ and %NAME% in the profiles' targets
 function Resolve-Target([string] $path) {
     [Environment]::ExpandEnvironmentVariables(($path -replace '^~', $HOME))
+}
+
+# Apps without a winget package, from their publisher, as yourself; each
+# updates itself.
+foreach ($name in $want.Downloads.Keys) {
+    $download = $want.Downloads[$name]
+    if (Test-Path (Resolve-Target $download.Path)) { continue }
+    Invoke-Step "install $name" {
+        Write-Host "install  $name"
+        $installer = Join-Path ([IO.Path]::GetTempPath()) "nix-workstation-$name.exe"
+        Invoke-WebRequest $download.Url -OutFile $installer
+        $signature = Get-AuthenticodeSignature $installer
+        $signer = if ($signature.SignerCertificate) {
+            $signature.SignerCertificate.GetNameInfo([Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false)
+        }
+        if ($signature.Status -ne 'Valid' -or $signer -ne $download.Signer) {
+            Remove-Item $installer
+            throw "the installer is not signed by $($download.Signer)."
+        }
+        $process = Start-Process $installer -ArgumentList $download.Args -Wait -PassThru
+        Remove-Item $installer
+        if ($process.ExitCode -ne 0) { throw "the installer exited with $($process.ExitCode)." }
+    }
 }
 
 # A write under a linked folder lands in what it points to, such as the
@@ -376,13 +414,30 @@ foreach ($target in $want.Merges.Keys) {
 
 foreach ($editor in $want.Extensions.Keys) {
     if (-not (Get-Command $editor -ErrorAction Ignore)) { continue }
-    $list = $want.Extensions[$editor]
-    if ($list -is [string]) { $list = Get-Content (Join-Path $root "configs/$list") }
+    # IDs, and configs/ files of them, which are paths
+    $list = foreach ($item in $want.Extensions[$editor]) {
+        if ($item -like '*/*') { Get-Content (Join-Path $root "configs/$item") } else { $item }
+    }
     $present = & $editor --list-extensions
     foreach ($extension in $list | Where-Object { $present -notcontains $_ }) {
         Write-Host "extend   $extension"
         & $editor --install-extension $extension
         if ($LASTEXITCODE -ne 0) { $failures.Add("$editor extension $extension ($LASTEXITCODE)") }
+    }
+}
+
+if ($want.QuickAccess) {
+    Invoke-Step 'Quick access' {
+        # Pins only, so folders pinned or unpinned by hand stay as they are.
+        $shell = New-Object -ComObject Shell.Application
+        $pinned = @($shell.Namespace('shell:::{679f85cb-0220-4080-b29b-5540cc05aab6}').Items() |
+            Where-Object { $_.ExtendedProperty('System.Home.IsPinned') } | ForEach-Object Path)
+        foreach ($folder in $want.QuickAccess) {
+            $path = Resolve-Target $folder
+            if ($pinned -contains $path) { continue }
+            Write-Host "pin      $folder"
+            $shell.Namespace($path).Self.InvokeVerb('pintohome')
+        }
     }
 }
 

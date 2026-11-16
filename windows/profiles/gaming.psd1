@@ -7,10 +7,8 @@
         'WowUp.CF'
         'Ubisoft.Connect'
         'EpicGames.EpicGamesLauncher'
-        # Each brings the Riot Client; League of Legends' ID picks its server.
-        'RiotGames.LeagueOfLegends.EUW'
-        'RiotGames.LeagueOfLegends.EUNE'
-        'RiotGames.Valorant.EU'
+        # The Riot Client comes by hand (INSTALLATION.md): winget has only
+        # Riot's game installers, which register their game too.
         'Discord.Discord'
         'Microsoft.VCRedist.2015+.x64'
         'Microsoft.VCRedist.2015+.x86'

@@ -1,6 +1,16 @@
 {
   "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
   "warning.confirmCloseAllTabs": false,
+  "disabledProfileSources": [
+    "Windows.Terminal.Azure",
+    "Windows.Terminal.VisualStudio"
+  ],
+  "newTabMenu": [
+    { "type": "profile", "profile": "PowerShell" },
+    { "type": "profile", "profile": "NixOS" },
+    { "type": "profile", "profile": "Windows PowerShell" },
+    { "type": "profile", "profile": "Command Prompt" }
+  ],
   "profiles": {
     "defaults": {
       "font": {
