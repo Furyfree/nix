@@ -16,6 +16,9 @@ pause_media = true
 mode = "local"
 language = ["en", "da"]
 translate = false
+# Load the model per recording in a process that exits after it, so the GPU
+# memory is free between dictations.
+gpu_isolation = true
 
 # Type with wtype, with clipboard fallback.
 [output]

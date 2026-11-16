@@ -12,6 +12,10 @@
     gamescope.enable = true;
   };
 
+  # Linux slows each thread that takes a split lock on Intel CPUs; games under
+  # Proton and the Windows VM take many. SteamOS turns the slowdown off too.
+  boot.kernel.sysctl."kernel.split_lock_mitigate" = 0;
+
   environment.systemPackages = with pkgs; [
     mangohud
     heroic
