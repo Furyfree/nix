@@ -10,6 +10,9 @@ repo=${NH_FLAKE#path:}
 
 darwin=false
 [[ $OSTYPE == darwin* ]] && darwin=true
+# NixOS in WSL: no Snapper, firmware or compositor. WSL sets this variable.
+wsl=false
+[[ -n ${WSL_DISTRO_NAME-} ]] && wsl=true
 
 help() {
   case ${1-} in
@@ -24,6 +27,8 @@ A failed build or a no changes nothing and leaves no snapshots.
 On macOS: build the Mac's nix-darwin configuration, show the changes, ask,
 then switch (nh darwin switch --ask). The switch installs missing Homebrew
 apps and writes the macOS settings.
+
+In WSL: the same without Snapper (nh os switch --ask).
 EOF
       ;;
     update)
@@ -138,6 +143,10 @@ die() {
 booted=false
 cmd_switch() {
   local mode=${1-switch} label=${2-nswitch} answer description pre result=0
+  if $wsl; then
+    nh os switch --ask --hostname wsl
+    return
+  fi
   nh os build
   if [[ $mode == boot ]]; then
     read -rp 'Boot into it next time? [y/N] ' answer
@@ -273,10 +282,21 @@ case $command in
       case $command in
         switch) (($# == 0)) || usage switch; cmd_switch ;;
         info) nh os info "$@" ;;
-        desktop) (($# <= 1)) || usage desktop; cmd_desktop "$@" ;;
-        rollback) die 'on Linux, roll back from the boot menu or a Snapper snapshot' ;;
-        # --force: a plain refresh fails when the metadata is recent.
-        firmware) (($# == 0)) || usage firmware; fwupdmgr refresh --force && fwupdmgr update ;;
+        desktop)
+          $wsl && die 'WSL has no compositor'
+          (($# <= 1)) || usage desktop
+          cmd_desktop "$@"
+          ;;
+        rollback)
+          $wsl && die 'in WSL, roll back with sudo nixos-rebuild switch --rollback'
+          die 'on Linux, roll back from the boot menu or a Snapper snapshot'
+          ;;
+        firmware)
+          $wsl && die 'in WSL, Windows installs the firmware'
+          (($# == 0)) || usage firmware
+          # --force: a plain refresh fails when the metadata is recent.
+          fwupdmgr refresh --force && fwupdmgr update
+          ;;
         *) usage ;;
       esac
     fi

@@ -68,5 +68,10 @@
     Services   = @{ lfsvc = 'Manual' }
     NightLight = $true
     Wallpaper  = 'Pictures\Wallpapers\charcoal-amber-mountain-horizon.jpg'
-    Wsl        = @{ Distribution = 'NixOS' }
+    # NixOS-WSL's release image, checked against its SHA-256 before install
+    Wsl        = @{
+        Distribution = 'NixOS'
+        Image        = 'https://github.com/nix-community/NixOS-WSL/releases/download/2605.7.2/nixos.wsl'
+        Sha256       = 'e7180ad555fdcb8e1e057e2ef056de467603a5e502ff8531053738371be3f6b9'
+    }
 }
