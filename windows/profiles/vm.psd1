@@ -1,5 +1,6 @@
-# My Windows: my apps, Mise for runtimes, languages and CLI tools, and NixOS-WSL.
-# desktop builds on this layer.
+# My Windows: my apps, and Mise for runtimes, languages and CLI tools. Without
+# WSL: this runs in a VM on Linux, which has no WSL2. desktop builds on this
+# layer.
 @{
     Include    = @('common')
     Winget     = @(
@@ -48,7 +49,6 @@
         '~\.ssh\config'                                    = 'ssh/windows.conf'
         '%LOCALAPPDATA%\1Password\config\ssh\agent.toml'   = '1password/ssh/personal.toml'
         '~\Documents\PowerShell\profile.ps1'               = 'windows/powershell/profile.ps1'
-        '~\.wslconfig'                                     = 'windows/wslconfig'
     }
     Merges     = @{
         # GitHub Dark, as on the Mac; Noctalia's theme exists only on Linux.
@@ -68,10 +68,4 @@
     Services   = @{ lfsvc = 'Manual' }
     NightLight = $true
     Wallpaper  = 'Pictures\Wallpapers\charcoal-amber-mountain-horizon.jpg'
-    # NixOS-WSL's release image, checked against its SHA-256 before install
-    Wsl        = @{
-        Distribution = 'NixOS'
-        Image        = 'https://github.com/nix-community/NixOS-WSL/releases/download/2605.7.2/nixos.wsl'
-        Sha256       = 'e7180ad555fdcb8e1e057e2ef056de467603a5e502ff8531053738371be3f6b9'
-    }
 }

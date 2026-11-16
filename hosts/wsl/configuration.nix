@@ -1,4 +1,4 @@
-# NixOS in WSL on the Windows vm and desktop profiles: the shell, CLI and
+# NixOS in WSL on the Windows desktop profile: the shell, CLI and
 # development tools, without boot, desktop or Snapper. windows/apply.ps1 writes
 # the ignored ./local/user.nix with the Windows account's name, e.g.:
 #   { wsl.defaultUser = "alice"; }

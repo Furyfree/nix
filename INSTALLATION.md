@@ -241,9 +241,9 @@ Work Mac: work apps from your own notes, the work Git identity in
 ## Windows
 
 Each Windows machine runs one profile from `windows/profiles/`: `basic`, apps
-and settings for anyone with Ubuntu in WSL; `vm`, my apps and configs with
-NixOS in WSL; or `desktop`, vm with games and the hardware settings. Every
-profile clones this repository to `~\Projects\nix`.
+and settings for anyone with Ubuntu in WSL; `vm`, my apps and configs for a VM
+on Linux, which has no WSL2; or `desktop`, vm with games, the hardware settings
+and NixOS in WSL. Every profile clones this repository to `~\Projects\nix`.
 
 ### Set up Windows
 
@@ -260,15 +260,15 @@ one with `reg import FILE`.
    irm https://raw.githubusercontent.com/Furyfree/nix/main/windows/bootstrap.ps1 | iex
    ```
 
-   It asks for the profile and for administrator twice: for sudo, WSL, Git
-   and PowerShell 7, then for the apps and settings. After an error, run it
-   again; it carries on. When it turned WSL on, restart Windows and run
+   It asks for the profile and for administrator twice: for sudo, Git and
+   PowerShell 7, then for the apps, settings and WSL. After an error, run it
+   again; it carries on. When it installed WSL, restart Windows and run
    `~\Projects\nix\windows\apply.ps1` in PowerShell 7.
 3. vm and desktop: 1Password: sign in, then in Settings → Developer turn on
    the SSH agent. In PowerShell 7, fetch the SSH files into `~\.ssh` as in
    step 6 of [First boot](#first-boot), run `gh auth login` and switch the
    checkout to SSH.
-4. vm and desktop, in NixOS (`wsl -d NixOS`): `mise install`, the signing key
+4. Desktop, in NixOS (`wsl -d NixOS`): `mise install`, the signing key
    for Git, and the checkout over SSH:
 
    ```bash

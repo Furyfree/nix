@@ -90,6 +90,12 @@ function Test-BitLocker {
     $protection -in 1, 3 -and (Test-Path (Join-Path $HOME "bitlocker-recovery-$env:COMPUTERNAME.txt"))
 }
 
+function Test-Wsl {
+    # Windows' own wsl.exe exits with an error until WSL is installed.
+    wsl --status *> $null
+    $LASTEXITCODE -eq 0
+}
+
 # What needs administrator, worked out the same way in both halves
 function Get-AdminWork($installed) {
     @{
@@ -104,12 +110,13 @@ function Get-AdminWork($installed) {
         BitLocker  = $want.BitLocker -and -not (Test-BitLocker)
         LockScreen = $wallpaper -and (Test-Path $wallpaper) -and
             (Get-ItemProperty $lockScreenKey -ErrorAction Ignore).LockScreenImagePath -ne $wallpaper
+        Wsl        = $want.Wsl.Distribution -and -not (Test-Wsl)
     }
 }
 
 function Test-Work($work) {
     $work.Packages -or $work.Store -or $work.Registry -or $work.Power -or $work.Services -or $work.BitLocker -or
-    $work.LockScreen
+    $work.LockScreen -or $work.Wsl
 }
 
 # winget exit codes for an app that is already there, or there after a restart
@@ -224,6 +231,11 @@ if ($Elevated) {
     if ($work.BitLocker) {
         Write-Host 'enable   BitLocker'
         Invoke-Step 'BitLocker' { Enable-BitLockerWithKey }
+    }
+    if ($work.Wsl) {
+        Write-Host 'install  WSL'
+        wsl --install --no-distribution
+        if ($LASTEXITCODE -ne 0) { $failures.Add("wsl --install ($LASTEXITCODE)") }
     }
     foreach ($failure in $failures) { Write-Host "FAIL     $failure" }
     exit [int]($failures.Count -gt 0)
@@ -389,14 +401,18 @@ public static extern bool SystemParametersInfo(uint action, uint param, string v
     }
 }
 
-if ($want.Wsl.Distribution -eq 'Ubuntu') {
+if ($work.Wsl) {
+    # A new WSL works only after a restart; the distribution comes next run.
+    Write-Host 'note     Restart Windows to finish WSL, then run this again.'
+}
+elseif ($want.Wsl.Distribution -eq 'Ubuntu') {
     Invoke-Step 'Ubuntu' {
         $env:WSL_UTF8 = '1'
         # A WSL without distributions exits with an error here too.
         if ((wsl --list --quiet 2> $null) -notcontains 'Ubuntu') {
             Write-Host 'install  Ubuntu'
             wsl --install --distribution Ubuntu --no-launch
-            if ($LASTEXITCODE -ne 0) { throw "wsl --install ($LASTEXITCODE); restart Windows if WSL is new" }
+            if ($LASTEXITCODE -ne 0) { throw "wsl --install ($LASTEXITCODE)" }
             Write-Host 'note     Open Ubuntu from Start to create your Linux user; then run this again.'
         }
         elseif (-not (wsl --distribution Ubuntu --user root --exec getent passwd 1000)) {
@@ -419,8 +435,7 @@ if ($want.Wsl.Distribution -eq 'Ubuntu') {
         }
     }
 }
-
-if ($want.Wsl.Distribution -eq 'NixOS') {
+elseif ($want.Wsl.Distribution -eq 'NixOS') {
     Invoke-Step 'NixOS' {
         $env:WSL_UTF8 = '1'
         # Installed once; nswitch inside NixOS applies later changes.
@@ -438,7 +453,7 @@ if ($want.Wsl.Distribution -eq 'NixOS') {
         if ((Get-FileHash $image).Hash -ne $want.Wsl.Sha256) { throw "$image does not match its checksum." }
         Write-Host 'install  NixOS'
         wsl --install --from-file $image --no-launch
-        if ($LASTEXITCODE -ne 0) { throw "wsl --install ($LASTEXITCODE); restart Windows if WSL is new" }
+        if ($LASTEXITCODE -ne 0) { throw "wsl --install ($LASTEXITCODE)" }
         Remove-Item $image
 
         # A login shell, since wsl --exec starts without NixOS' PATH
