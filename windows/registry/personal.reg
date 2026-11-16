@@ -1,7 +1,7 @@
 Windows Registry Editor Version 5.00
 
-; vm and desktop: my taste on top of common.reg. Night light and the wallpaper
-; need apply.ps1.
+; vm and desktop: my taste on top of common.reg. vm.psd1 asks apply.ps1 for
+; night light and the wallpaper, which a .reg file cannot set.
 
 ; Centred taskbar without animations; snapping without suggestions; no
 ; tracking of recent apps and documents
