@@ -1,4 +1,4 @@
-# ~\.wslconfig on vm and desktop. Mirrored networking gives WSL the host's
+# ~\.wslconfig on desktop. Mirrored networking gives WSL the host's
 # addresses, so localhost, Tailscale and VPNs work the same from both sides.
 [wsl2]
 networkingMode=mirrored

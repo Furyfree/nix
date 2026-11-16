@@ -7,7 +7,7 @@ preferences and generation rollback.
 My Linux workstations run NixOS with integrated Home Manager, and every Mac runs
 nix-darwin with Home Manager from the one `macos` host. Windows runs one
 PowerShell profile, basic, vm or desktop, through winget, Mise and `.reg` files;
-vm and desktop add NixOS in WSL. Extend compatible user configuration through
+desktop adds NixOS in WSL. Extend compatible user configuration through
 Home Manager one tool at a time. `docs/PLAN.md` holds the open work.
 
 ## What must not break
@@ -70,8 +70,8 @@ Docs and comments state no current versions or status; open work lives in
   `common.psd1` lists, with the settings in `registry/`. A Windows app or
   setting goes in the layer that needs it; `configs/windows/` holds the
   PowerShell, Terminal, WSL and Office files.
-- `hosts/wsl/`, `home/wsl.nix`: NixOS in WSL for vm and desktop; `apply.ps1`
-  installs it.
+- `hosts/wsl/`, `home/wsl.nix`: NixOS in WSL for desktop; `apply.ps1` installs
+  it.
 - `configs/hypr/hosts/<host>.lua`, `configs/niri/hosts/<host>.kdl`: per-host
   monitors, workspaces and keys, linked as `host.lua` or `host.kdl` by
   `home/hyprland.nix` or `home/niri.nix` after the hostname.

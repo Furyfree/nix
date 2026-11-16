@@ -5,8 +5,9 @@ Sets up Windows from this repo. Run it as yourself in Windows PowerShell:
     irm https://raw.githubusercontent.com/Furyfree/nix/main/windows/bootstrap.ps1 | iex
 
 It asks for a profile, enables sudo, runs WinUtil's Standard tweaks when the
-Win11 Creator ISO did not install Windows, enables WSL, installs Git and
-PowerShell 7, clones this repo to ~\Projects\nix and runs windows\apply.ps1.
+Win11 Creator ISO did not install Windows, installs Git and PowerShell 7,
+clones this repo to ~\Projects\nix and runs windows\apply.ps1, which installs
+WSL for the profiles that use it.
 #>
 param(
     # The branch to clone, for testing one before it is merged
@@ -31,8 +32,6 @@ param(
         # App Installer registers winget some minutes after the first sign-in.
         Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
     }
-    wsl --status *> $null
-    $wslNew = $LASTEXITCODE -ne 0
 
     # The administrator steps, in their own window behind one UAC prompt
     $steps = @'
@@ -49,8 +48,6 @@ try {
             & ([scriptblock]::Create((Invoke-RestMethod 'https://christitus.com/win'))) -Preset Standard
         }
     }
-    wsl --install --no-distribution
-    if ($LASTEXITCODE -ne 0) { throw 'wsl --install failed.' }
     foreach ($id in 'Git.Git', 'Microsoft.PowerShell') {
         winget install --id $id --exact --silent --no-upgrade --source winget --accept-package-agreements `
             --accept-source-agreements --disable-interactivity
@@ -85,5 +82,4 @@ catch {
     Set-Content (Join-Path $local 'profile') $choice
 
     pwsh -NoProfile -File (Join-Path $repo 'windows\apply.ps1')
-    if ($wslNew) { Write-Host "Restart Windows to finish WSL, then run $repo\windows\apply.ps1 again." }
 }

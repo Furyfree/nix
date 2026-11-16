@@ -73,7 +73,7 @@
       # Mac's profile.
       macUser = ./hosts/macos/local/user.nix;
 
-      # NixOS in WSL on the Windows vm and desktop profiles; it builds once
+      # NixOS in WSL on the Windows desktop profile; it builds once
       # windows/apply.ps1 has written the ignored local/user.nix.
       wslUser = ./hosts/wsl/local/user.nix;
     in
