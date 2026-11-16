@@ -1,6 +1,6 @@
 # A developer's Windows for anyone: good settings and apps from winget, without
-# Mise or my configs, and no checkout. It stands apart from vm, so some tools
-# are in both: here from winget, there from Mise.
+# Mise or my configs. It stands apart from vm, so some tools are in both: here
+# from winget, there from Mise.
 @{
     Include          = @('common')
     Winget           = @(

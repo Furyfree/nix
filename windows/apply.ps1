@@ -5,9 +5,6 @@ first and asks for administrator once, through sudo, only when a machine-wide
 step has work. A second run changes nothing.
 #>
 param(
-    # basic, vm or desktop; without it, the one hosts\windows\local\profile names
-    [Alias('Profile')]
-    [string] $ProfileName,
     # Upgrade winget and Mise packages first
     [switch] $Update,
     # The administrator half, which this script starts through sudo
@@ -27,11 +24,8 @@ if ($admin -ne $Elevated.IsPresent) {
     throw 'Run apply.ps1 as yourself, not as administrator; it asks for administrator itself.'
 }
 
-if (-not $ProfileName) {
-    $file = Join-Path $root 'hosts\windows\local\profile'
-    if (-not (Test-Path $file)) { throw "Pass -Profile basic, vm or desktop, or write it to $file." }
-    $ProfileName = (Get-Content $file -Raw).Trim()
-}
+# bootstrap.ps1 writes basic, vm or desktop here.
+$ProfileName = (Get-Content (Join-Path $root 'hosts\windows\local\profile') -Raw).Trim()
 
 # Each layer once, after the layers it includes. Lists add up, tables merge
 # and single values take the last layer's.
@@ -236,7 +230,7 @@ if ($Elevated) {
 $installed = Get-Installed
 $work = Get-AdminWork $installed
 if ($Update -or (Test-Work $work)) {
-    $arguments = @('-NoProfile', '-File', $PSCommandPath, '-Elevated', '-Profile', $ProfileName)
+    $arguments = @('-NoProfile', '-File', $PSCommandPath, '-Elevated')
     if ($Update) { $arguments += '-Update' }
     sudo pwsh @arguments
     if ($LASTEXITCODE -ne 0) { $failures.Add('the administrator steps; see above') }
