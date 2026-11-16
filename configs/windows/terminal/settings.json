@@ -1,0 +1,41 @@
+{
+  "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+  "confirmCloseAllTabs": false,
+  "profiles": {
+    "defaults": {
+      "font": {
+        "face": "JetBrainsMono Nerd Font Mono"
+      },
+      "colorScheme": "Charcoal Blue",
+      "cursorShape": "filledBox",
+      "padding": "14",
+      "opacity": 80,
+      "useAcrylic": true
+    }
+  },
+  "schemes": [
+    {
+      "name": "Charcoal Blue",
+      "background": "#0d141c",
+      "foreground": "#dde3ee",
+      "cursorColor": "#9dcaff",
+      "selectionBackground": "#00497b",
+      "black": "#0d141c",
+      "red": "#ff729c",
+      "green": "#7fff90",
+      "yellow": "#fff772",
+      "blue": "#82b5f2",
+      "purple": "#224976",
+      "cyan": "#9dcaff",
+      "white": "#eff6ff",
+      "brightBlack": "#999fa5",
+      "brightRed": "#ff9fbb",
+      "brightGreen": "#a5ffb1",
+      "brightYellow": "#fffaa5",
+      "brightBlue": "#abd1ff",
+      "brightPurple": "#bad9ff",
+      "brightCyan": "#d2e7ff",
+      "brightWhite": "#f8fbff"
+    }
+  ]
+}

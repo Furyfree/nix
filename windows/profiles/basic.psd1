@@ -23,7 +23,7 @@
         'Casey.Just'
     )
     Registry         = @('brave.reg')
-    VSCodeExtensions = @('ms-vscode-remote.remote-wsl')
+    Extensions       = @{ code = @('ms-vscode-remote.remote-wsl') }
     Wsl              = @{
         Distribution = 'Ubuntu'
         Apt          = @('build-essential', 'curl', 'unzip')

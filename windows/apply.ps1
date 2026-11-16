@@ -49,8 +49,10 @@ foreach ($layer in $layers) {
         else { $want[$key] = $value }
     }
 }
-foreach ($key in 'Winget', 'Store', 'Registry', 'VSCodeExtensions') { if ($null -eq $want[$key]) { $want[$key] = @() } }
-foreach ($key in 'Power', 'Services', 'Wsl') { if ($null -eq $want[$key]) { $want[$key] = @{} } }
+foreach ($key in 'Winget', 'Store', 'Registry') { if ($null -eq $want[$key]) { $want[$key] = @() } }
+foreach ($key in 'Links', 'Merges', 'Extensions', 'Power', 'Services', 'Wsl') {
+    if ($null -eq $want[$key]) { $want[$key] = @{} }
+}
 $packages = foreach ($entry in $want.Winget) { if ($entry -is [string]) { @{ Id = $entry } } else { $entry } }
 $wallpaper = if ($want.Wallpaper) { Join-Path $HOME $want.Wallpaper }
 $lockScreenKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP'
@@ -242,6 +244,59 @@ foreach ($package in $packages | Where-Object { $_.User -and $installed -notcont
     Install-Package $package.Id @('--source', 'winget')
 }
 
+# ~ and %NAME% in the profiles' targets
+function Resolve-Target([string] $path) {
+    [Environment]::ExpandEnvironmentVariables(($path -replace '^~', $HOME))
+}
+
+# A write under a linked folder lands in what it points to, such as the
+# checkout.
+function Assert-RealFolder([string] $path) {
+    $folder = Get-Item (Split-Path $path) -Force -ErrorAction Ignore
+    if ($folder.LinkType) { throw "$($folder.FullName) is a link; remove it and run this again." }
+}
+
+foreach ($target in $want.Links.Keys) {
+    $path = Resolve-Target $target
+    $source = [IO.Path]::GetFullPath((Join-Path $root "configs/$($want.Links[$target])"))
+    Invoke-Step "link $target" {
+        $item = Get-Item $path -Force -ErrorAction Ignore
+        if ($item.LinkType -and $item.Target -eq $source) { return }
+        Assert-RealFolder $path
+        if ($item.LinkType) { Remove-Item $path -Force }
+        elseif ($item) {
+            $backup = "$path.before-nix-workstation"
+            if (Test-Path $backup) { throw "$backup already exists; move one of them away." }
+            Write-Host "backup   $backup"
+            Move-Item $path $backup
+        }
+        Write-Host "link     $target"
+        New-Item -ItemType Directory -Force (Split-Path $path) | Out-Null
+        New-Item -ItemType SymbolicLink -Path $path -Target $source | Out-Null
+    }
+}
+
+if ($want.GitWindows) {
+    Invoke-Step 'Git settings for Windows' {
+        # Git's own ssh cannot reach 1Password's agent pipe; Windows' ssh can.
+        # winget installs 1Password as an MSIX package with an app alias; its
+        # other installers use the two folders after it.
+        $sign = "$env:LOCALAPPDATA\Microsoft\WindowsApps\op-ssh-sign.exe",
+            "$env:LOCALAPPDATA\1Password\app\8\op-ssh-sign.exe",
+            "$env:ProgramFiles\1Password\app\8\op-ssh-sign.exe" | Where-Object { Test-Path $_ } | Select-Object -First 1
+        if (-not $sign) { throw "1Password's op-ssh-sign.exe is missing." }
+        $file = Join-Path $HOME '.config\git\windows'
+        $text = "# Written by windows/apply.ps1.`n[core]`n`tsshCommand = C:/Windows/System32/OpenSSH/ssh.exe`n" +
+            "[gpg `"ssh`"]`n`tprogram = $($sign.Replace('\', '/'))`n"
+        if ((Get-Content $file -Raw -ErrorAction Ignore) -ne $text) {
+            Write-Host 'write    ~\.config\git\windows'
+            Assert-RealFolder $file
+            New-Item -ItemType Directory -Force (Split-Path $file) | Out-Null
+            Set-Content $file $text -NoNewline
+        }
+    }
+}
+
 if (Get-Command mise -ErrorAction Ignore) {
     if ($Update) {
         Write-Host 'upgrade  mise'
@@ -252,12 +307,43 @@ if (Get-Command mise -ErrorAction Ignore) {
     if ($LASTEXITCODE -ne 0) { $failures.Add("mise install ($LASTEXITCODE)") }
 }
 
-if ($want.VSCodeExtensions -and (Get-Command code -ErrorAction Ignore)) {
-    $extensions = code --list-extensions
-    foreach ($extension in $want.VSCodeExtensions | Where-Object { $extensions -notcontains $_ }) {
+# Apps rewrite these files, so only the repo's keys are set, as on Linux.
+$yq = if ($want.Merges.Count -and (Get-Command mise -ErrorAction Ignore)) { mise which yq 2> $null }
+# Yq writes UTF-8; the console's own code page would mangle other characters.
+$encoding = [Console]::OutputEncoding
+[Console]::OutputEncoding = [Text.Encoding]::UTF8
+foreach ($target in $want.Merges.Keys) {
+    $path = Resolve-Target $target
+    $patches = @(foreach ($patch in $want.Merges[$target]) { Join-Path $root "configs/$patch" })
+    Invoke-Step "merge $target" {
+        if (-not $yq) { throw 'Mise has no yq.' }
+        Assert-RealFolder $path
+        if (-not (Test-Path $path)) {
+            New-Item -ItemType Directory -Force (Split-Path $path) | Out-Null
+            New-Item $path | Out-Null
+        }
+        $format = @{ '.json' = 'json'; '.toml' = 'toml'; '.yml' = 'yaml' }[[IO.Path]::GetExtension($path)]
+        # An empty file is no document to Yq, so the patches alone remain.
+        $merged = & $yq ea -p $format -o $format '. as $item ireduce ({}; . * $item)' $path @patches
+        if ($LASTEXITCODE -ne 0) { Write-Host "skip     $target`: Yq cannot merge it"; return }
+        $merged = $merged -join "`n"
+        if ($merged -ne "$(Get-Content $path -Raw)".TrimEnd()) {
+            Write-Host "merge    $target"
+            Set-Content $path $merged
+        }
+    }
+}
+[Console]::OutputEncoding = $encoding
+
+foreach ($editor in $want.Extensions.Keys) {
+    if (-not (Get-Command $editor -ErrorAction Ignore)) { continue }
+    $list = $want.Extensions[$editor]
+    if ($list -is [string]) { $list = Get-Content (Join-Path $root "configs/$list") }
+    $present = & $editor --list-extensions
+    foreach ($extension in $list | Where-Object { $present -notcontains $_ }) {
         Write-Host "extend   $extension"
-        code --install-extension $extension
-        if ($LASTEXITCODE -ne 0) { $failures.Add("VS Code extension $extension ($LASTEXITCODE)") }
+        & $editor --install-extension $extension
+        if ($LASTEXITCODE -ne 0) { $failures.Add("$editor extension $extension ($LASTEXITCODE)") }
     }
 }
 

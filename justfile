@@ -48,7 +48,7 @@ check-niri:
     done
 
 # Parse the Windows scripts without running them, and load each Windows profile
-# and the layers and registry files it names
+# and the layers, registry files and configs it names
 [extension: '.ps1']
 check-powershell:
     #!/usr/bin/env pwsh
@@ -65,6 +65,11 @@ check-powershell:
         }
         foreach ($name in $layer.Registry) {
             if (-not (Test-Path "windows/registry/$name")) { throw "$($file.Name): no registry file $name" }
+        }
+        $configs = @($layer.Links.Values) + @($layer.Merges.Values | ForEach-Object { $_ }) +
+            @($layer.Extensions.Values | Where-Object { $_ -is [string] })
+        foreach ($name in $configs | Where-Object { $_ }) {
+            if (-not (Test-Path "configs/$name")) { throw "$($file.Name): no configs/$name" }
         }
     }
 

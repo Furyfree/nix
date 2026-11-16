@@ -6,7 +6,14 @@
 #                   for an installer that refuses to run as administrator
 #   Store           Microsoft Store IDs
 #   Registry        files in windows/registry, imported in order
-#   VSCodeExtensions  extension IDs for VS Code
+#   Links           target = file or folder in configs/; ~ is the home folder
+#                   and %NAME% an environment variable. A real file in the way
+#                   moves to <name>.before-nix-workstation first.
+#   Merges          target = configs/ file or files, for settings apps rewrite:
+#                   Yq sets only their keys, in order
+#   GitWindows      $true writes ~\.config\git\windows, which git/config
+#                   includes: Windows' ssh.exe and 1Password's signing program
+#   Extensions      editor command = extension IDs, or a configs/ file of them
 #   Wsl             Distribution, plus Apt packages for Ubuntu
 #   Power           powercfg values on the active plan, 'SUBGROUP SETTING' = AC
 #   Services        start types, name = 'Manual', 'Automatic' or 'Disabled'
