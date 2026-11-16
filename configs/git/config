@@ -74,6 +74,10 @@
 [include]
 	path = ~/.config/git/macos
 
+# Windows-only overrides, written by windows/apply.ps1.
+[include]
+	path = ~/.config/git/windows
+
 # As `git lfs install` writes it, so a project running that changes nothing.
 [filter "lfs"]
 	clean = git-lfs clean -- %f
