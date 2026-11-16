@@ -267,9 +267,11 @@ cmd_launch() {
     scale=$(hyprctl monitors -j 2>/dev/null |
       jq -r '.[] | select(.focused).scale * 100 | round' 2>/dev/null) || scale=100
   fi
+  # /drive brings ~/Windows along as \\tsclient\Shared, so a fresh VM needs no
+  # guest SMB settings for \\host.lan\Data.
   local args=(-grab-keyboard /sound /microphone /clipboard /dynamic-resolution
     /gfx:AVC444 "/title:Windows VM" "/floatbar:sticky:off,default:visible,show:fullscreen" /f
-    "/scale-desktop:${scale:-100}")
+    "/scale-desktop:${scale:-100}" "/drive:Shared,$shared")
   # Booted is not yet ready for Remote Desktop: retry while FreeRDP cannot
   # connect, but not after a closed window or a rejected login.
   for attempt in {1..30}; do
