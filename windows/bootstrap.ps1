@@ -40,7 +40,9 @@ $ErrorActionPreference = 'Stop'
 try {
     sudo config --enable normal
     if ($LASTEXITCODE -ne 0) { throw 'sudo config failed.' }
-    if (-not (Test-Path 'C:\Windows\Setup\Scripts\WinOneShot-PostInstall.ps1')) {
+    # Win11 Creator's post-install script, named after WinOneShot or WinUtil
+    $creator = 'C:\Windows\Setup\Scripts\WinOneShot-PostInstall.ps1', 'C:\Windows\Setup\Scripts\WinUtil-PostInstall.ps1'
+    if ((Test-Path $creator) -notcontains $true) {
         # WinUtil reports its own errors; Stop would end it at the first.
         & {
             $ErrorActionPreference = 'Continue'
