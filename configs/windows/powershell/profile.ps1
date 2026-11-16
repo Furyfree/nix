@@ -1,10 +1,28 @@
 # PowerShell 7's profile on vm and desktop, linked as
 # ~\Documents\PowerShell\profile.ps1: what configs/zsh gives zsh on Linux.
 
+# A tool's init script, saved until the tool's program changes: starting the
+# three programs on every start is slow on Windows.
+function Get-InitScript([string] $tool, [string[]] $arguments) {
+    $program = (Get-Command $tool -CommandType Application -ErrorAction Ignore | Select-Object -First 1).Source
+    if (-not $program) { return }
+    $file = Join-Path $env:LOCALAPPDATA "nix-workstation\init\$tool.ps1"
+    $stamp = "# $program $((Get-Item $program).LastWriteTimeUtc.Ticks)"
+    if ((Get-Content $file -TotalCount 1 -ErrorAction Ignore) -ne $stamp) {
+        New-Item -ItemType Directory -Force (Split-Path $file) | Out-Null
+        @($stamp) + @(& $program @arguments) | Set-Content $file
+    }
+    $file
+}
+
 # Mise first, so the tools below are on PATH.
-if (Get-Command mise -ErrorAction Ignore) { mise activate pwsh | Out-String | Invoke-Expression }
-if (Get-Command starship -ErrorAction Ignore) { starship init powershell | Out-String | Invoke-Expression }
-if (Get-Command zoxide -ErrorAction Ignore) { zoxide init powershell | Out-String | Invoke-Expression }
+$init = Get-InitScript mise activate, pwsh
+if ($init) { . $init }
+$init = Get-InitScript starship init, powershell, '--print-full-init'
+if ($init) { . $init }
+$init = Get-InitScript zoxide init, powershell
+if ($init) { . $init }
+Remove-Variable init
 
 # Listings through eza; ls is PowerShell's alias for Get-ChildItem until removed.
 if (Get-Command eza -ErrorAction Ignore) {
