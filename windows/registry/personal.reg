@@ -96,7 +96,7 @@ Windows Registry Editor Version 5.00
 ; signed in; drivers and other Microsoft products update through their own apps.
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate]
 "TargetReleaseVersion"=dword:00000001
-"TargetReleaseVersionInfo"="25H2"
+"TargetReleaseVersionInfo"="26H2"
 "ProductVersion"="Windows 11"
 "ExcludeWUDriversInQualityUpdate"=dword:00000001
 
