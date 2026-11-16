@@ -2,7 +2,7 @@ default:
     @just --list
 
 # Run local checks without installing or activating a system
-check: check-lua check-hyprland check-niri check-powershell lint typecheck test eval eval-macos
+check: check-lua check-hyprland check-niri check-powershell lint typecheck test eval eval-local
 
 # Parse all native Lua configuration without executing it
 check-lua:
@@ -123,9 +123,10 @@ eval:
           )
         )'
 
-# Evaluate each Mac profile from a temporary checkout with a placeholder user;
-# the Mac host has no output here without its ignored local/user.nix
-eval-macos:
+# Evaluate each Mac profile and NixOS in WSL from a temporary checkout with a
+# placeholder user; neither host has an output here without its ignored
+# local/user.nix
+eval-local:
     #!/usr/bin/env bash
     set -euo pipefail
     temporary=$(mktemp -d)
@@ -147,6 +148,12 @@ eval-macos:
             "path:$temporary#darwinConfigurations.macos.system.drvPath"
         echo
     done
+    mkdir -p "$temporary/hosts/wsl/local"
+    printf '{ wsl.defaultUser = "alice"; }\n' >"$temporary/hosts/wsl/local/user.nix"
+    printf 'wsl: '
+    nix --extra-experimental-features 'nix-command flakes' eval --no-write-lock-file --raw \
+        "path:$temporary#nixosConfigurations.wsl.config.system.build.toplevel.drvPath"
+    echo
 
 # Build the installer ISO through the ignored result symlink
 build-iso:

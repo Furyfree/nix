@@ -14,7 +14,8 @@
 #   GitWindows      $true writes ~\.config\git\windows, which git/config
 #                   includes: Windows' ssh.exe and 1Password's signing program
 #   Extensions      editor command = extension IDs, or a configs/ file of them
-#   Wsl             Distribution, plus Apt packages for Ubuntu
+#   Wsl             Distribution, plus Apt packages for Ubuntu or the Image
+#                   URL and its Sha256 for NixOS
 #   Power           powercfg values on the active plan, 'SUBGROUP SETTING' = AC
 #   Services        start types, name = 'Manual', 'Automatic' or 'Disabled'
 #   NightLight      $true schedules night light from sunset to sunrise

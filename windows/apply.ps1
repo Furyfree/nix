@@ -420,6 +420,53 @@ if ($want.Wsl.Distribution -eq 'Ubuntu') {
     }
 }
 
+if ($want.Wsl.Distribution -eq 'NixOS') {
+    Invoke-Step 'NixOS' {
+        $env:WSL_UTF8 = '1'
+        # Installed once; nswitch inside NixOS applies later changes.
+        if ((wsl --list --quiet 2> $null) -contains 'NixOS') { return }
+        # Linux account names are lowercase letters, digits, - and _.
+        $user = $env:USERNAME.ToLower()
+        if ($user -notmatch '^[a-z_][a-z0-9_-]*$') { throw "$env:USERNAME is no Linux account name." }
+        $url = git -C $root remote get-url origin
+        $branch = git -C $root branch --show-current
+        if (-not $branch) { $branch = 'main' }
+
+        $image = Join-Path ([IO.Path]::GetTempPath()) 'nixos.wsl'
+        Write-Host 'download NixOS-WSL'
+        Invoke-WebRequest $want.Wsl.Image -OutFile $image
+        if ((Get-FileHash $image).Hash -ne $want.Wsl.Sha256) { throw "$image does not match its checksum." }
+        Write-Host 'install  NixOS'
+        wsl --install --from-file $image --no-launch
+        if ($LASTEXITCODE -ne 0) { throw "wsl --install ($LASTEXITCODE); restart Windows if WSL is new" }
+        Remove-Item $image
+
+        # A login shell, since wsl --exec starts without NixOS' PATH
+        function Invoke-NixOS([string] $account, [string] $script, [string[]] $arguments) {
+            wsl --distribution NixOS --user $account --exec /run/current-system/sw/bin/sh -lc $script sh @arguments
+            if ($LASTEXITCODE -ne 0) { throw "in NixOS as $account ($LASTEXITCODE)" }
+        }
+        $userNix = "{ wsl.defaultUser = `"$user`"; }"
+        # NixOS-WSL's steps for a new account: build the boot generation as
+        # root, then start it once as root and stop it.
+        Write-Host "build    NixOS for $user"
+        Invoke-NixOS root @'
+export NIX_CONFIG='experimental-features = nix-command flakes'
+nix run nixpkgs#git -- clone --branch "$1" "$2" /tmp/nix &&
+mkdir -p /tmp/nix/hosts/wsl/local && printf '%s\n' "$3" > /tmp/nix/hosts/wsl/local/user.nix &&
+nixos-rebuild boot --flake path:/tmp/nix#wsl
+'@ @($branch, $url, $userNix)
+        wsl --terminate NixOS
+        Invoke-NixOS root 'true'
+        wsl --terminate NixOS
+        # The checkout in the new account's home, as on Linux
+        Invoke-NixOS $user @'
+git clone --branch "$1" "$2" ~/Projects/nix &&
+mkdir -p ~/Projects/nix/hosts/wsl/local && printf '%s\n' "$3" > ~/Projects/nix/hosts/wsl/local/user.nix
+'@ @($branch, $url, $userNix)
+    }
+}
+
 if ($work.Registry.Count -gt @(Get-RegistryChanges).Count) {
     # The taskbar and Explorer read their settings at start; Windows restarts it.
     Write-Host 'restart  Explorer'
