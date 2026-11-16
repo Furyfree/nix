@@ -26,7 +26,7 @@ lua-language-server = "latest"
 shellcheck = "latest"
 shfmt = "latest"
 taplo = "latest"
-actionlint = "latest"
+jactionlint = "latest"
 delta = "latest"
 # Deja autosuggestions; enable together with [plugins.deja] in sheldon/plugins.toml.
 # "github:Giammarco-Ferranti/deja" = "latest"
