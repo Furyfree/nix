@@ -237,3 +237,54 @@ key and launch at login are configured by hand.
 
 Work Mac: work apps from your own notes, the work Git identity in
 `~/.config/git/local`, and the work accounts.
+
+## Windows
+
+Each Windows machine runs one profile from `windows/profiles/`: `basic`, apps
+and settings for anyone with Ubuntu in WSL; `vm`, my apps and configs with
+NixOS in WSL; or `desktop`, vm with games and the hardware settings. Every
+profile clones this repository to `~\Projects\nix`.
+
+### Set up Windows
+
+`apply.ps1` renames each file it replaces to `*.before-nix-workstation`, and
+stops if that backup already exists. Before it first imports a registry key,
+it saves the old values to `%LOCALAPPDATA%\nix-workstation\backup\`; restore
+one with `reg import FILE`.
+
+1. Install Windows, from the Win11 Creator ISO when you have it; without it,
+   the bootstrap runs WinUtil's Standard tweaks. Then update Windows.
+2. In Windows PowerShell, as yourself:
+
+   ```powershell
+   irm https://raw.githubusercontent.com/Furyfree/nix/main/windows/bootstrap.ps1 | iex
+   ```
+
+   It asks for the profile and for administrator twice: for sudo, WSL, Git
+   and PowerShell 7, then for the apps and settings. After an error, run it
+   again; it carries on. When it turned WSL on, restart Windows and run
+   `~\Projects\nix\windows\apply.ps1` in PowerShell 7.
+3. vm and desktop: 1Password: sign in, then in Settings → Developer turn on
+   the SSH agent. In PowerShell 7, fetch the SSH files into `~\.ssh` as in
+   step 6 of [First boot](#first-boot), run `gh auth login` and switch the
+   checkout to SSH.
+4. vm and desktop, in NixOS (`wsl -d NixOS`): `mise install`, the signing key
+   for Git, and the checkout over SSH:
+
+   ```bash
+   git config --file ~/.config/git/local user.signingkey \
+     "key::$(cat /mnt/c/Users/<you>/.ssh/github.pub)"
+   git -C ~/Projects/nix remote set-url origin git@github.com:Furyfree/nix.git
+   ```
+
+5. Desktop: store the BitLocker recovery key from
+   `~\bitlocker-recovery-<computer>.txt` in 1Password from another device.
+
+### By hand
+
+- Sign-ins: Microsoft 365, Spotify, Signal, ChatGPT, Claude, JetBrains,
+  Tailscale and Brave Origin's licence; on the desktop also Steam,
+  Battle.net, Ubisoft Connect, Epic, Riot, Discord and the NVIDIA App.
+- The wallpaper: put `charcoal-amber-mountain-horizon.jpg` in
+  `~\Pictures\Wallpapers`; the next `nswitch` sets it for the desktop and the
+  lock screen.

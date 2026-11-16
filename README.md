@@ -1,8 +1,8 @@
 # Nix
 
-NixOS with integrated Home Manager for my workstations, and nix-darwin with
-Home Manager for the Macs. To set up a machine, follow
-[INSTALLATION.md](INSTALLATION.md).
+NixOS with integrated Home Manager for my workstations, nix-darwin with Home
+Manager for the Macs, and PowerShell profiles for Windows. To set up a machine,
+follow [INSTALLATION.md](INSTALLATION.md).
 
 ## Daily use
 
@@ -28,6 +28,11 @@ pull-projects      # fast-forward every clean repo in ~/Projects
 
 `nix-workstation COMMAND --help` explains each alias. A macOS update can reset
 `/etc/zshrc`; run `nswitch` again.
+
+On Windows, PowerShell on vm and desktop has `nswitch`, `nupdate` and `mup`;
+the first two run `windows\apply.ps1`, `nupdate` with `-Update`, which upgrades
+winget and Mise first. basic runs `~\Projects\nix\windows\apply.ps1` directly.
+In NixOS in WSL, the aliases above work without Snapper.
 
 Roll back with `nh os rollback` or an older generation in the boot menu; on a
 Mac, `nrollback N` leaves apps and macOS settings as they are. Rollback
