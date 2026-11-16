@@ -16,10 +16,12 @@ in
   xdg.configFile = {
     "mise/conf.d/agents.toml".source = link "mise/conf.d/agents.toml";
     "mise/conf.d/runtimes.toml".source = link "mise/conf.d/runtimes.toml";
-    # git/config includes this; both programs come through Windows' PATH.
+    # git/config includes this. Windows' own ssh by path, as on Windows: Git
+    # for Windows' ssh, first in PATH under Git Bash, cannot reach the agent.
+    # The signing program comes through Windows' PATH.
     "git/windows".text = ''
       [core]
-      	sshCommand = ssh.exe
+      	sshCommand = /mnt/c/Windows/System32/OpenSSH/ssh.exe
       [gpg "ssh"]
       	program = op-ssh-sign-wsl.exe
     '';
