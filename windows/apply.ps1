@@ -84,8 +84,9 @@ function Get-RegistryChanges {
 }
 
 function Get-PowerAc([string] $subgroup, [string] $setting) {
-    # The last two values are the AC and DC indexes.
-    $values = [regex]::Matches((powercfg /query SCHEME_CURRENT $subgroup $setting) -join "`n", '0x[0-9a-fA-F]{8}')
+    # The last two values are the AC and DC indexes. /qh also lists settings
+    # Windows hides, such as the power button's action on some PCs.
+    $values = [regex]::Matches((powercfg /qh SCHEME_CURRENT $subgroup $setting) -join "`n", '0x[0-9a-fA-F]{8}')
     if ($values.Count -ge 2) { [Convert]::ToInt64($values[$values.Count - 2].Value, 16) }
 }
 
@@ -97,9 +98,11 @@ function Test-BitLocker {
 }
 
 function Test-Wsl {
-    # Windows' own wsl.exe exits with an error until WSL is installed.
+    # Windows' own wsl.exe exits with an error until WSL is installed. WSL 2
+    # also needs the Host Compute Service, which the Virtual Machine Platform
+    # brings only after a restart.
     wsl --status *> $null
-    $LASTEXITCODE -eq 0
+    $LASTEXITCODE -eq 0 -and (Get-Service vmcompute -ErrorAction Ignore)
 }
 
 # What needs administrator, worked out the same way in both halves
@@ -202,13 +205,16 @@ function Enable-BitLockerWithKey {
         Enable-BitLocker $drive -EncryptionMethod XtsAes256 -UsedSpaceOnly -TpmProtector -SkipHardwareTest `
             -WarningAction Ignore | Out-Null
     }
+    # A drive Windows encrypted itself waits for its TPM protector to turn
+    # protection on. One that has it and protection off was suspended for a
+    # restart, by INSTALLATION.md or an update, and resumes by itself.
     $volume = Get-BitLockerVolume $drive
     if (-not ($volume.KeyProtector | Where-Object KeyProtectorType -EQ 'Tpm')) {
         Add-BitLockerKeyProtector $drive -TpmProtector -WarningAction Ignore | Out-Null
-    }
-    $volume = Get-BitLockerVolume $drive
-    if ($volume.ProtectionStatus -eq 'Off' -and $volume.VolumeStatus -eq 'FullyEncrypted') {
-        Resume-BitLocker $drive | Out-Null
+        $volume = Get-BitLockerVolume $drive
+        if ($volume.ProtectionStatus -eq 'Off' -and $volume.VolumeStatus -eq 'FullyEncrypted') {
+            Resume-BitLocker $drive | Out-Null
+        }
     }
 }
 
@@ -526,32 +532,38 @@ elseif ($want.Wsl.Distribution -eq 'NixOS') {
         $shell = '/run/current-system/sw/bin/sh'
         # Done once the account has its checkout; nswitch inside NixOS applies
         # later changes. Until then each run redoes the steps still missing.
-        wsl --distribution NixOS --user $user --exec $shell -c 'test -f ~/Projects/nix/hosts/wsl/local/user.nix' 2> $null
+        # wsl.exe prints its own errors to stdout.
+        wsl --distribution NixOS --user $user --exec $shell -c 'test -f ~/Projects/nix/hosts/wsl/local/user.nix' *> $null
         if ($LASTEXITCODE -eq 0) { return }
-        $url = git -C $root remote get-url origin
+        # A new NixOS has no SSH key for GitHub, so its clones use HTTPS;
+        # INSTALLATION.md switches the checkout to SSH afterwards.
+        $url = (git -C $root remote get-url origin) -replace '^git@github\.com:', 'https://github.com/'
         $branch = git -C $root branch --show-current
         if (-not $branch) { $branch = 'main' }
 
         if ((wsl --list --quiet 2> $null) -notcontains 'NixOS') {
             $image = Join-Path ([IO.Path]::GetTempPath()) 'nixos.wsl'
-            Write-Host 'download NixOS-WSL'
-            Invoke-WebRequest $want.Wsl.Image -OutFile $image
-            if ((Get-FileHash $image).Hash -ne $want.Wsl.Sha256) { throw "$image does not match its checksum." }
-            Write-Host 'install  NixOS'
-            wsl --install --from-file $image --no-launch
-            if ($LASTEXITCODE -ne 0) { throw "wsl --install ($LASTEXITCODE)" }
-            Remove-Item $image
+            try {
+                Write-Host 'download NixOS-WSL'
+                Invoke-WebRequest $want.Wsl.Image -OutFile $image
+                if ((Get-FileHash $image).Hash -ne $want.Wsl.Sha256) { throw "$image does not match its checksum." }
+                Write-Host 'install  NixOS'
+                wsl --install --from-file $image --no-launch
+                if ($LASTEXITCODE -ne 0) { throw "wsl --install ($LASTEXITCODE)" }
+            }
+            finally { Remove-Item $image -ErrorAction Ignore }
         }
 
-        # A login shell, since wsl --exec starts without NixOS' PATH
+        # A login shell, since wsl --exec starts without NixOS' PATH. Git may
+        # check this file out with CRLF, which sh reads as part of each line.
         function Invoke-NixOS([string] $account, [string] $script, [string[]] $arguments) {
-            wsl --distribution NixOS --user $account --exec $shell -lc $script sh @arguments
+            wsl --distribution NixOS --user $account --exec $shell -lc ($script -replace "`r") sh @arguments
             if ($LASTEXITCODE -ne 0) { throw "in NixOS as $account ($LASTEXITCODE)" }
         }
         $userNix = "{ wsl.defaultUser = `"$user`"; }"
         # NixOS-WSL's steps for a new account, until it exists: build the boot
         # generation as root, then start it once as root and stop it.
-        wsl --distribution NixOS --user $user --exec $shell -c true 2> $null
+        wsl --distribution NixOS --user $user --exec $shell -c true *> $null
         if ($LASTEXITCODE -ne 0) {
             Write-Host "build    NixOS for $user"
             Invoke-NixOS root @'
