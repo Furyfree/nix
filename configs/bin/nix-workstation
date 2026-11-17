@@ -326,16 +326,28 @@ check_names() {
   done
 }
 
+# Run a command, showing its output only when it fails.
+quietly() {
+  local log result=0
+  log=$(mktemp)
+  "$@" >"$log" 2>&1 || result=$?
+  ((result == 0)) || cat -- "$log" >&2
+  rm -f -- "$log"
+  return "$result"
+}
+
 # nvfetcher runs in the checkout, since claude-desktop.sh's path is relative.
+# The summary at the end lists what changed.
 bump_pins() {
   local filter=()
   if (($#)); then
     filter=(--filter "^($(IFS='|'; printf '%s' "$*"))\$")
   fi
+  printf 'Checking pinned apps...\n'
   (
     cd -- "$repo"
-    nix develop path:. -c nvfetcher --config pins/nvfetcher.toml --build-dir pins/_sources "${filter[@]}"
-    nix develop path:. -c pins/claude-desktop.sh \
+    quietly nix develop path:. -c nvfetcher --config pins/nvfetcher.toml --build-dir pins/_sources "${filter[@]}"
+    quietly nix develop path:. -c pins/claude-desktop.sh \
       "$(jq -r '."claude-desktop".version' pins/_sources/generated.json)" \
       "$(jq -r '."claude-desktop".src.sha256' pins/_sources/generated.json)"
   )
