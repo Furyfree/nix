@@ -1,5 +1,9 @@
 { pkgs, ... }:
 
 {
-  environment.systemPackages = [ pkgs.ffmpeg ];
+  # jq: nix-workstation, and Noctalia's plugin commands on the desktops.
+  environment.systemPackages = [
+    pkgs.ffmpeg
+    pkgs.jq
+  ];
 }

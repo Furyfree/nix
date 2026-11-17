@@ -104,6 +104,7 @@ class ConfigurationTests(unittest.TestCase):
         ]:
             shutil.copy2(root / name, destination / name)
         shutil.copytree(root / "components", destination / "components")
+        shutil.copytree(root / "pins", destination / "pins")
         shutil.copytree(root / "home", destination / "home")
         shutil.copytree(root / "configs", destination / "configs")
         for host in common.HOSTS:

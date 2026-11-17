@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Rebuild, update and maintain this workstation: NixOS on Linux, nix-darwin on
-# macOS. aliases.zsh adds nswitch, nupdate, ninfo, nrollback, nclean, nsearch,
-# ndesktop, mup and fup.
+# macOS. aliases.zsh adds nswitch, nupdate, npin, ninfo, nrollback, nclean,
+# nsearch, ndesktop, mup and fup.
 set -euo pipefail
 
 # path: includes the ignored machine data in hosts/<host>/local/.
@@ -35,11 +35,25 @@ EOF
       cat <<'EOF'
 usage: nix-workstation update [INPUT...]   (alias: nupdate)
 
-Update all flake inputs, or only the named ones (nixpkgs, home-manager,
-nix-darwin), and show the flake.lock diff. Then run just check and switch.
-If a step fails or you answer no, flake.lock stays updated and the undo
-command is printed. On macOS, nix flake check replaces just check, which
-needs Linux tools.
+Update every flake input and bump the pinned apps as pin does, or update
+only the named flake inputs. Then run just check and build the system
+without switching, and list what was updated; nswitch applies it. It never
+asks or uses sudo, so an agent can run it. Nothing new skips the build. A
+failed step leaves the updated files in place and prints the undo command.
+
+On macOS and in WSL, the pinned apps are skipped. On macOS, nix flake check
+replaces just check, which needs Linux tools.
+EOF
+      ;;
+    pin)
+      cat <<'EOF'
+usage: nix-workstation pin [APP...]   (alias: npin)
+
+Bump the apps in pins/nvfetcher.toml, or only the named ones, to their
+newest release with nvfetcher. Claude Desktop's download must match
+Anthropic's signed index. Then check and build as update does. To hold an
+app at its current version, add pinned = true to its table. Linux desktops
+only: macOS and WSL do not install these apps.
 EOF
       ;;
     info)
@@ -113,7 +127,8 @@ usage: nix-workstation COMMAND [ARGS...]
 
 Commands (alias):
   switch (nswitch)             build, show changes, ask, then switch
-  update (nupdate) [INPUT...]  update flake inputs, run just check, then switch
+  update (nupdate) [INPUT...]  update flake inputs and pinned apps, check, build
+  pin (npin) [APP...]          bump pinned apps, check, build
   info (ninfo)                 list system generations
   rollback (nrollback) GEN     macOS: switch to an earlier generation
   clean (nclean)               remove old generations; keeps the newest 10
@@ -230,24 +245,119 @@ cmd_switch_darwin() {
   nh darwin switch --ask --hostname macos
 }
 
-# An updated but unapplied lock stays for debugging.
-cmd_update() {
-  nix flake update "$@" --flake "$NH_FLAKE"
-  if git -C "$repo" diff --quiet -- flake.lock; then
-    printf 'flake.lock is unchanged.\n'
-  else
-    git -C "$repo" --no-pager diff -- flake.lock
-    trap '(($? == 0)) || printf "Undo: git -C %q restore flake.lock\n" "$repo" >&2' EXIT
+# update and pin change only flake.lock and pins/_sources, then check and
+# build without switching. The copies taken first give the summary.
+saved=
+prepare() {
+  saved=$(mktemp -d)
+  cp -- "$repo/flake.lock" "$repo/pins/_sources/generated.json" "$saved/"
+  trap finish EXIT
+}
+
+finish() {
+  local result=$?
+  if updated; then
+    printf '\nUpdated:\n'
+    jq -r --slurpfile old "$saved/flake.lock" '
+      .nodes as $new | $old[0].nodes as $was | .nodes.root.inputs | to_entries[]
+      | select(.value | type == "string") | .value as $node
+      | select($was[$node].locked.narHash != $new[$node].locked.narHash)
+      | "  \(.key): \($was[$node].locked.lastModified // 0 | todate[:10]) → \($new[$node].locked.lastModified | todate[:10])"
+    ' "$repo/flake.lock"
+    jq -r --slurpfile old "$saved/generated.json" '
+      def short: if length == 40 then .[:7] else . end;
+      to_entries[] | select($old[0][.key].version != .value.version)
+      | "  \(.key): \($old[0][.key].version // "new" | short) → \(.value.version | short)"
+    ' "$repo/pins/_sources/generated.json"
+  fi
+  if pending; then
+    if ((result)); then
+      printf 'Failed. Undo: ' >&2
+    else
+      printf 'Built, not applied. Run nswitch to apply. Undo: ' >&2
+    fi
+    printf 'git -C %q restore flake.lock pins/_sources\n' "$repo" >&2
+  fi
+  rm -rf -- "$saved"
+  return "$result"
+}
+
+updated() {
+  ! cmp -s "$saved/flake.lock" "$repo/flake.lock" ||
+    ! cmp -s "$saved/generated.json" "$repo/pins/_sources/generated.json"
+}
+
+# Changed since the last commit, by this run or an earlier one.
+pending() {
+  [[ -n $(git -C "$repo" status --porcelain -- flake.lock pins/_sources) ]]
+}
+
+# Check and build the system without switching; nswitch reuses the build.
+build() {
+  if ! pending; then
+    printf 'Already up to date.\n'
+    return
   fi
   if $darwin; then
+    [[ -e $repo/hosts/macos/local/user.nix ]] ||
+      die 'hosts/macos/local/user.nix is missing; it names the account and profile'
     # just check needs Hyprland, Niri and the Linux dev shell; macOS only
     # evaluates.
     nix flake check --no-build "$NH_FLAKE"
-    cmd_switch_darwin
+    nh darwin build --hostname macos
   else
     (cd -- "$repo" && nix develop path:. -c just check)
-    cmd_switch
+    if $wsl; then
+      nh os build --hostname wsl
+    else
+      nh os build
+    fi
   fi
+}
+
+# Every name must be one of KIND's names, which come on stdin.
+check_names() {
+  local kind=$1 name names
+  shift
+  names=$(cat)
+  for name; do
+    grep -qxF -- "$name" <<<"$names" ||
+      die "$name is not a $kind; choose from: $(paste -sd ' ' <<<"$names")"
+  done
+}
+
+# nvfetcher runs in the checkout, since claude-desktop.sh's path is relative.
+bump_pins() {
+  local filter=()
+  if (($#)); then
+    filter=(--filter "^($(IFS='|'; printf '%s' "$*"))\$")
+  fi
+  (
+    cd -- "$repo"
+    nix develop path:. -c nvfetcher --config pins/nvfetcher.toml --build-dir pins/_sources "${filter[@]}"
+    nix develop path:. -c pins/claude-desktop.sh \
+      "$(jq -r '."claude-desktop".version' pins/_sources/generated.json)" \
+      "$(jq -r '."claude-desktop".src.sha256' pins/_sources/generated.json)"
+  )
+}
+
+cmd_update() {
+  check_names 'flake input' "$@" < <(jq -r '.nodes.root.inputs | keys[]' "$repo/flake.lock")
+  prepare
+  nix flake update "$@" --flake "$NH_FLAKE"
+  if (($# == 0)) && ! $darwin && ! $wsl; then
+    bump_pins
+  fi
+  build
+}
+
+cmd_pin() {
+  $darwin && die 'pinned apps are Linux only'
+  $wsl && die 'WSL does not install the pinned apps'
+  check_names 'pinned app' "$@" < <(sed -n 's/^\[\(.*\)\]$/\1/p' "$repo/pins/nvfetcher.toml")
+  prepare
+  bump_pins "$@"
+  build
 }
 
 command=${1-}
@@ -264,6 +374,7 @@ case $command in
   clean) nh clean all --no-gcroots --keep 10 --ask "$@" ;;
   search) nh search "$@" ;;
   update) cmd_update "$@" ;;
+  pin) cmd_pin "$@" ;;
   mise) (($# == 0)) || usage mise; mise upgrade ;;
   *)
     if $darwin; then

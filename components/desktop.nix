@@ -117,7 +117,6 @@ in
       # and the tailnet plugin's gio.
       slurp
       socat
-      jq
       glib
       # Noctalia screenshots, text recognition, QR codes and plugin data.
       grim

@@ -1,8 +1,7 @@
 # Computer use for agents, from agent-sh's prebuilt release binaries:
 # computer-use-linux drives the real desktop, agent-workspace-linux runs a
-# hidden desktop of the agent's own. Both are MCP servers. To update, take the
-# version from https://github.com/agent-sh/<tool>/releases and each binary's
-# hash from its .sha256 file (`nix hash convert --hash-algo sha256 <hex>`).
+# hidden desktop of the agent's own. Both are MCP servers; ../pins/ holds their
+# versions and npin bumps them.
 {
   config,
   lib,
@@ -11,12 +10,7 @@
 }:
 
 let
-  release =
-    repo: version: binary: hash:
-    pkgs.fetchurl {
-      url = "https://github.com/agent-sh/${repo}/releases/download/v${version}/${binary}-x86_64-unknown-linux-gnu";
-      inherit hash;
-    };
+  sources = pkgs.callPackage ../pins/_sources/generated.nix { };
 
   meta = pname: description: {
     inherit description;
@@ -47,15 +41,13 @@ let
 
   computer-use-linux =
     let
-      pname = "computer-use-linux";
-      version = "0.7.52";
-      server = release pname version pname "sha256-7/7tRSFMftkYkEe55oq0bHujlC4ulwGsa4481hNKqJU=";
-      indicator =
-        release pname version "${pname}-indicator"
-          "sha256-YGIp7pqLu96gvP4Y5widoOF3wyVBgamw/IVZpfb5psE=";
+      server = sources.computer-use-linux;
+      indicator = sources.computer-use-linux-indicator;
     in
+    assert lib.assertMsg (server.version == indicator.version)
+      "pins: computer-use-linux ${server.version} and its indicator ${indicator.version} differ; run npin computer-use-linux computer-use-linux-indicator";
     pkgs.stdenv.mkDerivation {
-      inherit pname version;
+      inherit (server) pname version;
       dontUnpack = true;
 
       nativeBuildInputs = with pkgs; [
@@ -72,8 +64,8 @@ let
       # between actions.
       installPhase = ''
         runHook preInstall
-        install -Dm755 ${server} $out/bin/computer-use-linux
-        install -Dm755 ${indicator} $out/bin/computer-use-linux-indicator
+        install -Dm755 ${server.src} $out/bin/computer-use-linux
+        install -Dm755 ${indicator.src} $out/bin/computer-use-linux-indicator
         wrapProgram $out/bin/computer-use-linux \
           --prefix PATH : ${
             lib.makeBinPath (
@@ -90,17 +82,15 @@ let
         runHook postInstall
       '';
 
-      meta = meta pname "Control the real desktop for AI agents";
+      meta = meta server.pname "Control the real desktop for AI agents";
     };
 
   agent-workspace-linux =
     let
-      pname = "agent-workspace-linux";
-      version = "0.6.4";
+      inherit (sources.agent-workspace-linux) pname version src;
     in
     pkgs.stdenv.mkDerivation {
-      inherit pname version;
-      src = release pname version pname "sha256-2RklPmNUC1fG59VmzXRoBUOYH995BS8Ak2fsPiZ9uBs=";
+      inherit pname version src;
       dontUnpack = true;
 
       nativeBuildInputs = with pkgs; [

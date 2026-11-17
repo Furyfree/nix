@@ -3,19 +3,18 @@
 # brightness through ddcutil.
 { pkgs, ... }:
 
+let
+  pin = (pkgs.callPackage ../pins/_sources/generated.nix { }).librepods;
+in
 {
   # The harveywuk fork adds the status file, librepods-ctl commands and the
-  # headless daemon; the patch is the one the COPR package carried.
+  # headless daemon; the patch is the one the COPR package carried. ../pins/
+  # holds its commit and npin bumps it.
   nixpkgs.overlays = [
     (_: prev: {
       librepods = prev.librepods.overrideAttrs (old: {
-        version = "0-unstable-2026-08-26";
-        src = prev.fetchFromGitHub {
-          owner = "harveywuk";
-          repo = "librepods";
-          rev = "4ed49df0b301ac3e6fba9c81dfbbb6726cc52201";
-          hash = "sha256-Ygoqz5lnGMwZkys+Q4c4pyAUI0llvpGZ/ij5E91CkAg=";
-        };
+        version = "0-unstable-${pin.date}";
+        inherit (pin) src;
         sourceRoot = "source";
         patches = [ ./librepods-fix-a2dp-profile-selection.patch ];
         buildInputs = old.buildInputs ++ [ prev.qt6.qtdeclarative ];

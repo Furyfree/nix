@@ -102,6 +102,9 @@
             util-linux
             openssh
             powershell
+            # nix-workstation pin: nvfetcher, and gpgv for Claude Desktop's index
+            nvfetcher
+            gnupg
           ];
         };
 

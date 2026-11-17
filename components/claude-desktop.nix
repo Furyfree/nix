@@ -1,19 +1,12 @@
-# Anthropic's official Claude Desktop for Linux, from its signed apt repository.
-# To update, take the version and SHA256 from
-# https://downloads.claude.ai/claude-desktop/apt/stable/dists/stable/main/binary-amd64/Packages
-# after checking dists/stable/InRelease against Anthropic's key
-# 31DDDE24DDFAB679F42D7BD2BAA929FF1A7ECACE.
+# Anthropic's official Claude Desktop for Linux, from its signed apt
+# repository; ../pins/ holds the version and npin bumps it.
 { lib, pkgs, ... }:
 
 let
-  claude-desktop = pkgs.stdenv.mkDerivation (finalAttrs: {
-    pname = "claude-desktop";
-    version = "5.1231.2";
+  sources = pkgs.callPackage ../pins/_sources/generated.nix { };
 
-    src = pkgs.fetchurl {
-      url = "https://downloads.claude.ai/claude-desktop/apt/stable/pool/main/c/claude-desktop/claude-desktop_${finalAttrs.version}_amd64.deb";
-      hash = "sha256-600Wya/wppY2bYhyj3T6VRNr58/ePB/jWvQGK0WVW28=";
-    };
+  claude-desktop = pkgs.stdenv.mkDerivation {
+    inherit (sources.claude-desktop) pname version src;
 
     nativeBuildInputs = with pkgs; [
       dpkg
@@ -90,7 +83,7 @@ let
       mainProgram = "claude-desktop";
       platforms = [ "x86_64-linux" ];
     };
-  });
+  };
 in
 {
   environment.systemPackages = [ claude-desktop ];

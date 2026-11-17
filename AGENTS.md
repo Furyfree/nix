@@ -79,6 +79,8 @@ Docs and comments state no current versions or status; open work lives in
   Windows bootstrap; update it with installer or first-boot changes.
 - `scripts/install.py`: installer launcher; `scripts/nixos_setup/` holds its
   modules.
+- `pins/`: apps from outside nixpkgs; `nvfetcher.toml` says where each comes
+  from, and nvfetcher writes `_sources/`, which `components/` reads.
 - `tests/`, `justfile`: installer behavior checks, one file per module, and
   local gates.
 
@@ -95,6 +97,8 @@ application-data directories or overwrite GUI state while adding app preferences
 Use `nix develop` for tooling. Run focused checks while editing and `just check`
 for the repository gate; it also parses the Windows scripts and profiles.
 Evaluate active flake outputs and build system changes without activation.
+To update, run `nix-workstation update` (or `pin` for the apps in `pins/`),
+report its summary and stop; I run `nswitch`.
 Installation, login, sleep/resume and rollback need machine checks; a successful
 build does not establish those behaviors. Windows changes need Windows: the VM
 from `windows-vm`, which has no WSL2, or the desktop.

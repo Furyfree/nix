@@ -76,9 +76,9 @@ check-powershell:
 lint:
     uv run --locked ruff check scripts tests
     uv run --locked ruff format --check scripts tests
-    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path './hosts/*/local/*' -exec nixfmt --check {} +
+    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path './hosts/*/local/*' -not -path './pins/_sources/*' -exec nixfmt --check {} +
     statix check
-    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path './hosts/*/local/*' -exec deadnix --fail {} +
+    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path './hosts/*/local/*' -not -path './pins/_sources/*' -exec deadnix --fail {} +
 
 typecheck:
     uv run --locked basedpyright
@@ -89,7 +89,7 @@ test:
 # Format Python and Nix source files
 format:
     uv run --locked ruff format scripts tests
-    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path './hosts/*/local/*' -exec nixfmt {} +
+    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path './hosts/*/local/*' -not -path './pins/_sources/*' -exec nixfmt {} +
 
 # Evaluate configurations without building or deploying a system, and each
 # NixOS host with every other compositor it can pick

@@ -1,25 +1,14 @@
 # Craft apps from storytold's Linux release tarballs, each with its headless
-# CLI and MCP server. To update, take the version from
-# https://github.com/storytold/<app>/releases and the hash of
-# <app>-<version>-linux-x86_64.tar.gz from that release's SHA256SUMS.txt
-# (`nix hash convert --hash-algo sha256 <hex>`).
+# CLI and MCP server; ../pins/ holds their versions and npin bumps them.
 { lib, pkgs, ... }:
 
 let
-  mkCraftApp =
-    {
-      pname,
-      version,
-      hash,
-      description,
-    }:
-    pkgs.stdenv.mkDerivation {
-      inherit pname version;
+  sources = pkgs.callPackage ../pins/_sources/generated.nix { };
 
-      src = pkgs.fetchurl {
-        url = "https://github.com/storytold/${pname}/releases/download/v${version}/${pname}-${version}-linux-x86_64.tar.gz";
-        inherit hash;
-      };
+  mkCraftApp =
+    pname: description:
+    pkgs.stdenv.mkDerivation {
+      inherit (sources.${pname}) pname version src;
 
       nativeBuildInputs = [ pkgs.autoPatchelfHook ];
 
@@ -67,30 +56,10 @@ let
     };
 in
 {
-  environment.systemPackages = map mkCraftApp [
-    {
-      pname = "filmcraft";
-      version = "0.20.1";
-      hash = "sha256-Pk/qPLjUc+aPGJoKh5K6RhYPq1B62rOriSAHP9QfJPo=";
-      description = "Video editor";
-    }
-    {
-      pname = "effectcraft";
-      version = "0.24.1";
-      hash = "sha256-XOA5NpAUQif6kYboIwitY4pu9tn5dsmW5tA7W1G2Wns=";
-      description = "Motion graphics and compositing";
-    }
-    {
-      pname = "soundcraft";
-      version = "0.20.1";
-      hash = "sha256-yu/PhcTxE4cX1ZLTHOW+B/L8phbsNtY/rGdgze++KKk=";
-      description = "Audio editor and mixer";
-    }
-    {
-      pname = "photocraft";
-      version = "0.23.1";
-      hash = "sha256-Q4Ou9noHzDcK0lCm7WABUgXT5sRj+vP/Sw9nuBeMz8g=";
-      description = "Raster image editor";
-    }
-  ];
+  environment.systemPackages = lib.mapAttrsToList mkCraftApp {
+    filmcraft = "Video editor";
+    effectcraft = "Motion graphics and compositing";
+    soundcraft = "Audio editor and mixer";
+    photocraft = "Raster image editor";
+  };
 }
