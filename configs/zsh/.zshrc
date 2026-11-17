@@ -1,3 +1,7 @@
+if [[ $OSTYPE == darwin* && ! -o login ]]; then
+  source "$ZDOTDIR/.zprofile"
+fi
+
 source "$ZDOTDIR/conf.d/mise.zsh"
 source "$ZDOTDIR/conf.d/env.zsh"
 source "$ZDOTDIR/conf.d/options.zsh"
