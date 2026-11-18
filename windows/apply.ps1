@@ -61,7 +61,7 @@ $wallpaper = if ($want.Wallpaper) { Join-Path $HOME $want.Wallpaper }
 $lockScreenKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP'
 # The Start Layout policy, which only administrators may set, even per user
 $taskbar = if ($want.Taskbar) { [IO.Path]::GetFullPath((Join-Path $root "configs/$($want.Taskbar)")) }
-$taskbarKey = 'HKCU:\Software\Policies\Microsoft\Windows\Explorer'
+$taskbarKey = 'HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Explorer'
 
 function Get-Installed {
     $file = Join-Path ([IO.Path]::GetTempPath()) "nix-workstation-$PID.json"
@@ -120,7 +120,7 @@ function Get-AdminWork($installed) {
         LockScreen = $wallpaper -and (Test-Path $wallpaper) -and
             (Get-ItemProperty $lockScreenKey -ErrorAction Ignore).LockScreenImagePath -ne $wallpaper
         Taskbar    = $taskbar -and $(
-            $policy = Get-ItemProperty $taskbarKey -ErrorAction Ignore
+            $policy = Get-ItemProperty "Registry::$taskbarKey" -ErrorAction Ignore
             $policy.StartLayoutFile -ne $taskbar -or $policy.LockedStartLayout -ne 1
         )
         Wsl        = $want.Wsl.Distribution -and -not (Test-Wsl)
@@ -148,18 +148,22 @@ function Invoke-Step([string] $stepName, [scriptblock] $stepBlock) {
     try { & $stepBlock } catch { $script:failures.Add("${stepName}: $_") }
 }
 
-function Save-RegistryBackup([string] $file) {
-    # A file per key that undoes apply, so reg import restores the key: the
-    # first time apply touches it, its old values, or the key's deletion when
-    # it did not exist; then deletions for values this file adds, also ones
-    # added to it later.
-    $backup = Join-Path $state 'backup'
-    New-Item -ItemType Directory -Force $backup | Out-Null
+# The value names a .reg file sets, by key
+function Get-RegistryNames([string] $file) {
     $names = [ordered]@{}
     foreach ($line in Get-Content $file) {
         if ($line -match '^\[(.+)\]$') { $key = $Matches[1]; if (-not $names.Contains($key)) { $names[$key] = @() } }
         elseif ($line -match '^"(.+?)"=') { $names[$key] += $Matches[1] }
     }
+    $names
+}
+
+function Save-RegistryBackup([Collections.IDictionary] $names) {
+    # A file per key that undoes apply, so reg import restores the key: the
+    # first time apply touches it, its old values, or the key's deletion when
+    # it did not exist; then deletions for values apply adds, also later ones.
+    $backup = Join-Path $state 'backup'
+    New-Item -ItemType Directory -Force $backup | Out-Null
     foreach ($key in $names.Keys) {
         $target = Join-Path $backup (($key -replace '[\\/:*?"<>|]', '_') + '.reg')
         if (-not (Test-Path $target)) {
@@ -236,7 +240,7 @@ if ($Elevated) {
         foreach ($name in $work.Registry) {
             $file = Join-Path $PSScriptRoot "registry\$name"
             Invoke-Step "registry $name" {
-                Save-RegistryBackup $file
+                Save-RegistryBackup (Get-RegistryNames $file)
                 Write-Host "import   $name"
                 reg import $file *> $null
                 if ($LASTEXITCODE -ne 0) { throw "reg import failed ($LASTEXITCODE)" }
@@ -271,9 +275,10 @@ if ($Elevated) {
     if ($work.Taskbar) {
         Write-Host 'taskbar  pins from the next sign-in'
         Invoke-Step 'taskbar' {
-            if (-not (Test-Path $taskbarKey)) { New-Item $taskbarKey -Force | Out-Null }
-            Set-ItemProperty $taskbarKey StartLayoutFile $taskbar
-            Set-ItemProperty $taskbarKey LockedStartLayout 1 -Type DWord
+            Save-RegistryBackup @{ $taskbarKey = 'StartLayoutFile', 'LockedStartLayout' }
+            if (-not (Test-Path "Registry::$taskbarKey")) { New-Item "Registry::$taskbarKey" -Force | Out-Null }
+            Set-ItemProperty "Registry::$taskbarKey" StartLayoutFile $taskbar
+            Set-ItemProperty "Registry::$taskbarKey" LockedStartLayout 1 -Type DWord
         }
     }
     if ($work.BitLocker) {
