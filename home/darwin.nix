@@ -123,6 +123,21 @@ in
     };
   };
 
+  # VSCodium: the shared settings with GitHub Dark, since Noctalia's theme
+  # colors exist only on Linux. Merged like Zed's, so settings changed in
+  # VSCodium's window stay on that Mac.
+  workstation.settingMerges =
+    let
+      settings = "${homeDirectory}/Library/Application Support/VSCodium/User/settings.json";
+      theme = pkgs.writeText "vscodium-macos.json" (
+        builtins.toJSON { "workbench.colorTheme" = "GitHub Dark"; }
+      );
+    in
+    ''
+      merge "${settings}" ${../configs/vscodium/settings.json} json
+      merge "${settings}" ${theme} json
+    '';
+
   targets.darwin = {
     # Homebrew installs every app, so Home Manager has none to copy into
     # ~/Applications and needs no App Management check.

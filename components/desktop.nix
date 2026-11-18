@@ -9,11 +9,7 @@
 
 let
   autoLogin = config.services.displayManager.autoLogin;
-  cursor = {
-    package = pkgs.bibata-cursors;
-    name = "Bibata-Modern-Ice";
-    size = "24";
-  };
+  session = import ./session-variables.nix;
   desktopUsers = lib.filter (name: config.users.users.${name}.isNormalUser) (
     builtins.attrNames config.home-manager.users
   );
@@ -70,7 +66,10 @@ in
       # The compositor's component sets the default session.
       displayManager.noctalia-greeter = {
         enable = true;
-        cursorTheme = { inherit (cursor) package name; };
+        cursorTheme = {
+          package = pkgs.bibata-cursors;
+          name = session.XCURSOR_THEME;
+        };
         passwordlessSyncUsers = lib.optional autoLogin.enable autoLogin.user;
         settings = {
           appearance = {
@@ -106,13 +105,18 @@ in
 
     xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
+    # Picks the compositor's host file in home/niri.nix and home/hyprland.nix.
+    home-manager.sharedModules = [ { workstation.host = config.networking.hostName; } ];
+
     qt = {
       enable = true;
-      platformTheme = "qt5ct";
+      platformTheme = session.QT_QPA_PLATFORMTHEME;
     };
     # The session environment, which login sets for the compositor, systemd
-    # and shells alike; components/<desktop>.nix adds the compositor's own.
-    environment.sessionVariables = {
+    # and shells alike: the list Ubuntu shares, and NixOS's own.
+    # components/<desktop>.nix adds the compositor's. The qt module sets
+    # QT_QPA_PLATFORMTHEME for shells only.
+    environment.sessionVariables = session // {
       # The checkout's helpers, such as launch, and the tools mise installs.
       PATH = [
         "$HOME/.local/bin"
@@ -124,22 +128,9 @@ in
       # T3 Code writes its t3code:// link handler with this command; the Nix
       # package leaves it unset, so the handler would start bare Electron.
       T3CODE_DESKTOP_LAUNCHER_PATH = "/run/current-system/sw/bin/t3code-desktop";
-      # Prefer native Wayland, with X11 as a fallback. GTK does so by itself;
-      # components/hyprland.nix forces it there only.
-      QT_QPA_PLATFORM = "wayland;xcb";
-      ELECTRON_OZONE_PLATFORM_HINT = "auto";
       # nixpkgs wrappers (Spotify, Obsidian, Vesktop, VSCodium) run natively on
       # Wayland only with this; otherwise they scale blurrily through XWayland.
       NIXOS_OZONE_WL = "1";
-      GTK_IM_MODULE = "simple";
-      # The qt module sets this for shells only. qt6ct also accepts qt5ct, so
-      # both Qt generations load their plugin.
-      QT_QPA_PLATFORMTHEME = config.qt.platformTheme;
-      XCURSOR_THEME = cursor.name;
-      XCURSOR_SIZE = cursor.size;
-      # Hyprland's cursor library; other desktops ignore these.
-      HYPRCURSOR_THEME = cursor.name;
-      HYPRCURSOR_SIZE = cursor.size;
     };
     environment.systemPackages = with pkgs; [
       ghostty

@@ -79,6 +79,10 @@
       # NixOS in WSL on the Windows desktop profile; it builds once
       # windows/apply.ps1 has written the ignored local/user.nix.
       wslUser = ./hosts/wsl/local/user.nix;
+
+      # Home Manager on its own on the Ubuntu work laptop; it builds once the
+      # ignored local/user.nix names the account and the host.
+      ubuntuUser = ./hosts/ubuntu/local/user.nix;
     in
     {
       devShells.x86_64-linux.default =
@@ -131,6 +135,16 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
             }
+          ];
+        };
+      };
+
+      homeConfigurations = nixpkgs.lib.optionalAttrs (builtins.pathExists ubuntuUser) {
+        ubuntu = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          modules = [
+            ./hosts/ubuntu/home.nix
+            ubuntuUser
           ];
         };
       };

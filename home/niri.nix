@@ -1,10 +1,9 @@
 # Niri's live checkout links and Noctalia's Niri settings, loaded by
-# components/niri.nix. The machine's monitors and keys come from
-# configs/niri/hosts/<hostname>.kdl.
+# components/niri.nix on NixOS and home/ubuntu.nix. The machine's monitors
+# and keys come from configs/niri/hosts/<host>.kdl, after workstation.host.
 {
   config,
   lib,
-  osConfig,
   pkgs,
   ...
 }:
@@ -13,7 +12,7 @@ let
   link =
     path:
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
-  host = "niri/hosts/${osConfig.networking.hostName}.kdl";
+  host = "niri/hosts/${config.workstation.host}.kdl";
   noctalia = builtins.fromTOML (builtins.readFile ../configs/noctalia/config.toml);
 in
 {
@@ -39,10 +38,17 @@ in
       # Hyprland's colour template; a change there reaches Niri at the next
       # rebuild.
       "noctalia/niri.toml".source = (pkgs.formats.toml { }).generate "noctalia-niri.toml" {
-        plugins.enabled = lib.subtractLists [
-          "furyfree/key-promoter"
-          "profidev/hypr-screen-mirror"
-        ] noctalia.plugins.enabled;
+        plugins.enabled = lib.subtractLists (
+          [
+            "furyfree/key-promoter"
+            "profidev/hypr-screen-mirror"
+          ]
+          # Ubuntu has neither Tailscale nor gpu-screen-recorder.
+          ++ lib.optionals config.targets.genericLinux.enable [
+            "rylos/tailnet"
+            "noctalia/screen_recorder"
+          ]
+        ) noctalia.plugins.enabled;
         theme.templates.builtin_ids = lib.remove "hyprland" noctalia.theme.templates.builtin_ids;
         # Off in config.toml for Hyprland's crash (#6), which Niri does not have.
         idle.behavior.screen-off.enabled = true;

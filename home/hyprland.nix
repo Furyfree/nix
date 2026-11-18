@@ -1,10 +1,9 @@
 # Hyprland's live checkout links and Noctalia's Hyprland settings, loaded by
 # components/hyprland.nix. The machine's monitors and keys come from
-# configs/hypr/hosts/<hostname>.lua.
+# configs/hypr/hosts/<host>.lua, after workstation.host.
 {
   config,
   lib,
-  osConfig,
   pkgs,
   ...
 }:
@@ -13,7 +12,7 @@ let
   link =
     path:
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
-  host = "hypr/hosts/${osConfig.networking.hostName}.lua";
+  host = "hypr/hosts/${config.workstation.host}.lua";
   noctalia = builtins.fromTOML (builtins.readFile ../configs/noctalia/config.toml);
 in
 {

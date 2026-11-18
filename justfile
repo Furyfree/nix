@@ -154,6 +154,13 @@ eval-local:
     nix --extra-experimental-features 'nix-command flakes' eval --no-write-lock-file --raw \
         "path:$temporary#nixosConfigurations.wsl.config.system.build.toplevel.drvPath"
     echo
+    mkdir -p "$temporary/hosts/ubuntu/local"
+    printf '{ home.username = "alice"; home.homeDirectory = "/home/alice"; workstation.host = "work-laptop"; }\n' \
+        >"$temporary/hosts/ubuntu/local/user.nix"
+    printf 'ubuntu: '
+    nix --extra-experimental-features 'nix-command flakes' eval --no-write-lock-file --raw \
+        "path:$temporary#homeConfigurations.ubuntu.activationPackage.drvPath"
+    echo
 
 # Build the installer ISO through the ignored result symlink
 build-iso:

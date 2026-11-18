@@ -2,7 +2,7 @@
 { ... }:
 
 {
-  imports = [ ../../home/linux.nix ];
+  imports = [ ../../home/nixos.nix ];
 
   home.stateVersion = "26.05";
 }

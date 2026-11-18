@@ -39,7 +39,7 @@ _:
       "font-inter" # Zed's interface font, as on Linux
     ];
 
-    # Command-line tools the shared configs use, as components/shell.nix,
+    # Command-line tools the shared configs use, as components/shell-packages.nix,
     # cli.nix and development.nix install them on NixOS; a tool added there goes
     # here too.
     # macOS and the Command Line Tools provide Git, clangd, clang-format, file,

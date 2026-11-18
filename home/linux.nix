@@ -1,6 +1,7 @@
-# Home Manager settings for the NixOS desktop: Noctalia, GTK and Qt, launcher
-# entries and Linux-only tools. Builds on common.nix; the compositor's links
-# come from its component.
+# Home Manager settings for the Linux desktop on NixOS and Ubuntu: Noctalia,
+# GTK and Qt, launcher entries and the Linux merges. Builds on common.nix;
+# nixos.nix and ubuntu.nix add each system's own, and the compositor's links
+# come from niri.nix or hyprland.nix.
 {
   config,
   lib,
@@ -12,6 +13,7 @@ let
   link =
     path:
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
+  session = import ../components/session-variables.nix;
   # A copy of a package's launcher entry, hidden from app menus but still
   # usable for file associations.
   hidden =
@@ -23,252 +25,166 @@ in
 {
   imports = [ ./common.nix ];
 
-  xdg = {
-    dataFile =
-      lib.mapAttrs'
-        (name: package: lib.nameValuePair "applications/${name}" { source = hidden package name; })
-        {
-          "nvim.desktop" = pkgs.neovim;
-          "yazi.desktop" = pkgs.yazi;
-          "mpv.desktop" = pkgs.mpv;
-          "qt5ct.desktop" = pkgs.libsForQt5.qt5ct;
-          "qt6ct.desktop" = pkgs.qt6Packages.qt6ct;
-          "base.desktop" = pkgs.libreoffice;
-          "math.desktop" = pkgs.libreoffice;
-          "remote-viewer.desktop" = pkgs.virt-viewer;
-          "dev.noctalia.Noctalia.desktop" = config.programs.noctalia.package;
-          "me.kavishdevar.librepods.desktop" = pkgs.librepods;
-        }
-      // lib.genAttrs [ "chatgpt" "fotmob" "google-maps" ] (name: {
-        target = "icons/hicolor/512x512/apps/webapp-${name}.png";
-        source = ../configs/icons/webapp-${name}.png;
-      });
-    desktopEntries = {
-      chatgpt = {
-        name = "ChatGPT";
-        exec = "launch focus-webapp https://chatgpt.com/";
-        icon = "webapp-chatgpt";
-      };
-      fotmob = {
-        name = "FotMob";
-        exec = "launch focus-webapp https://www.fotmob.com/";
-        icon = "webapp-fotmob";
-      };
-      google-maps = {
-        name = "Google Maps";
-        exec = "launch focus-webapp https://www.google.com/maps";
-        icon = "webapp-google-maps";
-      };
-      # Replaces the package's entry; window rules float and centre it.
-      btop = {
-        name = "btop";
-        exec = "launch tui btop";
-        icon = "com.github.stsdc.monitor";
-      };
-      # Watch, pause or help an agent in its hidden desktop.
-      agent-workspace = {
-        name = "Agent Workspace";
-        exec = "agent-workspace-linux viewer --id default --input-forwarding";
-        icon = "preferences-desktop-remote-desktop";
-      };
+  options.workstation = {
+    host = lib.mkOption {
+      type = lib.types.str;
+      description = "Picks configs/niri/hosts/<host>.kdl and configs/hypr/hosts/<host>.lua: the hostname on NixOS, local/user.nix on Ubuntu.";
     };
-    userDirs = {
-      enable = true;
-      createDirectories = true;
-      extraConfig = {
-        SCREENSHOTS = "${config.home.homeDirectory}/Pictures/Screenshots";
-        WALLPAPERS = "${config.home.homeDirectory}/Pictures/Wallpapers";
-        RECORDINGS = "${config.home.homeDirectory}/Videos/Recordings";
-      };
+    hiddenEntries = lib.mkOption {
+      type = lib.types.attrsOf lib.types.package;
+      default = { };
+      description = "Launcher entries to hide, by file name, with the Nix package that has them.";
     };
-    configFile =
-      lib.genAttrs
-        [
-          "zsh/conf.d/noctalia.zsh"
-          "noctalia/config.toml"
-          "noctalia/vscodium.toml"
-          "noctalia/templates/vscodium-output-path.sh"
-          "noctalia/templates/strata.toml"
-          "noctalia/assets/profile-picture.jpg"
-          "noctalia/assets/profile-picture-circle.svg"
-          "zathura/zathurarc"
-          "udiskie/config.yml"
-          "mise/conf.d/agents.toml"
-          "mise/conf.d/linux-tools.toml"
-          "mise/conf.d/runtimes.toml"
-          # Kept in GLib's own format, without comments: apps that set themselves
-          # as default rewrite the whole file that way.
-          "mimeapps.list"
-          "voxtype/config.toml"
-          "MangoHud/MangoHud.conf"
-        ]
-        (name: {
-          source = link name;
-        })
-      // {
-        "gtk-3.0/settings.ini".source = link "gtk/gtk-3.0/settings.ini";
-        "gtk-4.0/settings.ini".source = link "gtk/gtk-4.0/settings.ini";
-        # File manager sidebar; bookmarks need absolute paths.
-        "gtk-3.0/bookmarks".text =
-          lib.concatMapStrings (path: "file://${config.home.homeDirectory}/${path} ${baseNameOf path}\n")
-            [
-              "Documents"
-              "Downloads"
-              "Projects"
-              "Pictures"
-              "Projects/dtu-bachelor"
-              "Projects/nix"
-            ];
-        # Reuse the pinned renderer and reload hook, not the config-rewriting apply hook.
-        "noctalia/templates/ghostty".source =
-          "${config.programs.noctalia.package}/share/noctalia/assets/templates/ghostty";
-      }
-      # qtct needs an absolute palette path; Noctalia's Qt template writes the colors.
-      // lib.genAttrs [ "qt5ct" "qt6ct" ] (name: {
-        target = "${name}/${name}.conf";
-        text = ''
-          [Appearance]
-          color_scheme_path=${config.xdg.configHome}/${name}/colors/noctalia.conf
-          custom_palette=true
-          icon_theme=Papirus-Dark
-          style=Fusion
-        '';
-      })
-      // lib.mapAttrs (_: name: { source = link "vscodium/${name}"; }) {
-        "VSCodium/product.json" = "product.json";
-        "VSCodium/User/settings.json" = "settings.json";
-        "VSCodium/User/keybindings.json" = "keybindings.json";
-      };
   };
 
-  home.file = {
-    # Steam's own link, made before Noctalia's Steam template can create a real
-    # folder here that stops Steam's first-run setup.
-    ".steam/steam".source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/Steam";
-    ".local/bin/launch".source = link "bin/launch";
-  };
+  config = {
+    workstation.hiddenEntries = {
+      "nvim.desktop" = pkgs.neovim;
+      "yazi.desktop" = pkgs.yazi;
+    };
 
-  # Zed's registry Grok starts its bin with Node, but Grok's npm install swaps
-  # that bin for the native binary; start mise's grok directly instead.
-  programs.zed-editor.userSettings.agent_servers.Grok = {
-    type = "custom";
-    command = "grok";
-    args = [
-      "agent"
-      "stdio"
-    ];
-  };
-
-  home.activation = {
-    # Opt out of Toolbox's default autostart before its first launch, then leave
-    # the setting to Toolbox.
-    jetbrainsToolboxAutostart = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      settings="${config.xdg.dataHome}/JetBrains/Toolbox/.settings.json"
-      if [[ ! -e $settings ]]; then
-        run install -D -m 0644 /dev/stdin "$settings" <<<'{ "autostart": false }'
-      fi
-    '';
-
-    # Prism picks the bundled Java each instance needs; a chosen Java is a store
-    # path that breaks when Prism updates. Yq would drop the quotes Qt needs, so
-    # change only this line.
-    prismJavaSwitch = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      cfg="${config.xdg.dataHome}/PrismLauncher/prismlauncher.cfg"
-      if [[ ! -e $cfg ]]; then
-        run install -D -m 0644 /dev/stdin "$cfg" <<<$'[General]\nAutomaticJavaSwitch=true'
-      elif ! grep -qx 'AutomaticJavaSwitch=true' "$cfg"; then
-        run sed -i -e '/^AutomaticJavaSwitch=/d' \
-          -e '/^\[General\]$/a AutomaticJavaSwitch=true' "$cfg"
-      fi
-    '';
-
-    # The wallpapers repository lives with the other clones so pull-projects
-    # updates it; link it where Noctalia looks once it is cloned. Runs before
-    # Home Manager creates the user folders, and replaces only an empty folder.
-    wallpapersLink = lib.hm.dag.entryBetween [ "createXdgUserDirectories" ] [ "writeBoundary" ] ''
-      clone="${config.home.homeDirectory}/Projects/wallpapers"
-      link="${config.home.homeDirectory}/Pictures/Wallpapers"
-      if [[ -d $clone && ! -L $link ]]; then
-        if [[ -d $link && -z $(ls -A "$link") ]]; then
-          run rmdir "$link"
-        fi
-        if [[ ! -e $link ]]; then
-          run mkdir -p "$(dirname "$link")"
-          run ln -s "$clone" "$link"
-        fi
-      fi
-    '';
-
-    # Strata saves its settings only through links its user owns, not through
-    # Home Manager's link into the store, so link the file straight to the
-    # checkout. A settings file already there is kept as settings.toml.backup.
-    strataSettingsLink = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      tracked="${config.home.homeDirectory}/Projects/nix/configs/strata/settings.toml"
-      link="${config.xdg.configHome}/strata/settings.toml"
-      if [[ ! -L $link ]]; then
-        if [[ -e $link ]]; then
-          run mv --backup=numbered "$link" "$link.backup"
-        fi
-        run mkdir -p "$(dirname "$link")"
-        run ln -s "$tracked" "$link"
-      fi
-    '';
-
-    # Newest first where new files land. Strata keeps per-folder sorts as its
-    # own state, so write them only before its first run, then leave the file
-    # to Strata.
-    strataFolderSorts =
-      let
-        views = (pkgs.formats.toml { }).generate "strata-folder-views.toml" {
-          version = 1;
-          folder =
-            map
-              (path: {
-                inherit path;
-                sort = "created";
-                direction = "descending";
-              })
-              [
-                config.xdg.userDirs.download
-                config.xdg.userDirs.extraConfig.SCREENSHOTS
-                config.xdg.userDirs.extraConfig.RECORDINGS
-              ];
+    xdg = {
+      dataFile =
+        lib.mapAttrs' (
+          name: package: lib.nameValuePair "applications/${name}" { source = hidden package name; }
+        ) config.workstation.hiddenEntries
+        // lib.genAttrs [ "chatgpt" "google-maps" ] (name: {
+          target = "icons/hicolor/512x512/apps/webapp-${name}.png";
+          source = ../configs/icons/webapp-${name}.png;
+        });
+      desktopEntries = {
+        chatgpt = {
+          name = "ChatGPT";
+          exec = "launch focus-webapp https://chatgpt.com/";
+          icon = "webapp-chatgpt";
         };
-      in
-      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        file="${config.xdg.stateHome}/strata/folder-views.toml"
-        if [[ ! -e $file ]]; then
-          run install -D -m 0600 ${views} "$file"
+        google-maps = {
+          name = "Google Maps";
+          exec = "launch focus-webapp https://www.google.com/maps";
+          icon = "webapp-google-maps";
+        };
+        # Replaces the package's entry; window rules float and centre it.
+        btop = {
+          name = "btop";
+          exec = "launch tui btop";
+          icon = "com.github.stsdc.monitor";
+        };
+      };
+      userDirs = {
+        enable = true;
+        createDirectories = true;
+        extraConfig = {
+          SCREENSHOTS = "${config.home.homeDirectory}/Pictures/Screenshots";
+          WALLPAPERS = "${config.home.homeDirectory}/Pictures/Wallpapers";
+          RECORDINGS = "${config.home.homeDirectory}/Videos/Recordings";
+        };
+      };
+      configFile =
+        lib.genAttrs
+          [
+            "zsh/conf.d/noctalia.zsh"
+            "noctalia/config.toml"
+            "noctalia/vscodium.toml"
+            "noctalia/templates/vscodium-output-path.sh"
+            "noctalia/templates/strata.toml"
+            "noctalia/assets/profile-picture.jpg"
+            "noctalia/assets/profile-picture-circle.svg"
+            "udiskie/config.yml"
+            "mise/conf.d/agents.toml"
+            "mise/conf.d/linux-tools.toml"
+          ]
+          (name: {
+            source = link name;
+          })
+        // {
+          "gtk-3.0/settings.ini".source = link "gtk/gtk-3.0/settings.ini";
+          "gtk-4.0/settings.ini".source = link "gtk/gtk-4.0/settings.ini";
+          # File manager sidebar; bookmarks need absolute paths.
+          "gtk-3.0/bookmarks".text =
+            lib.concatMapStrings (path: "file://${config.home.homeDirectory}/${path} ${baseNameOf path}\n")
+              [
+                "Documents"
+                "Downloads"
+                "Projects"
+                "Pictures"
+                "Projects/dtu-bachelor"
+                "Projects/nix"
+              ];
+        }
+        # qtct needs an absolute palette path; Noctalia's Qt template writes the colors.
+        // lib.genAttrs [ "qt5ct" "qt6ct" ] (name: {
+          target = "${name}/${name}.conf";
+          text = ''
+            [Appearance]
+            color_scheme_path=${config.xdg.configHome}/${name}/colors/noctalia.conf
+            custom_palette=true
+            icon_theme=Papirus-Dark
+            style=Fusion
+          '';
+        })
+        // lib.mapAttrs (_: name: { source = link "vscodium/${name}"; }) {
+          "VSCodium/product.json" = "product.json";
+          "VSCodium/User/settings.json" = "settings.json";
+          "VSCodium/User/keybindings.json" = "keybindings.json";
+        };
+    };
+
+    home.file.".local/bin/launch".source = link "bin/launch";
+
+    # Noctalia's AI usage widget, and gh opening the browser in its own systemd
+    # unit.
+    workstation.settingMerges = ''
+      merge ${config.xdg.configHome}/ai-usagebar/config.toml ${../configs/ai-usagebar/config.toml} toml
+      merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/linux.yml} yaml
+    '';
+
+    home.activation = {
+      # Opt out of Toolbox's default autostart before its first launch, then leave
+      # the setting to Toolbox.
+      jetbrainsToolboxAutostart = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        settings="${config.xdg.dataHome}/JetBrains/Toolbox/.settings.json"
+        if [[ ! -e $settings ]]; then
+          run install -D -m 0644 /dev/stdin "$settings" <<<'{ "autostart": false }'
         fi
       '';
-  };
 
-  dconf.settings =
-    let
-      # Show hidden files and folders first; open where the app is working.
-      fileChooser = {
-        show-hidden = true;
-        sort-directories-first = true;
-        startup-mode = "cwd";
-      };
-    in
-    {
-      "org/gnome/desktop/interface" = {
-        gtk-enable-primary-paste = true;
-        icon-theme = "Papirus-Dark";
-        cursor-theme = "Bibata-Modern-Ice";
-        cursor-size = 24;
-        # Apps list their buttons and fields for computer-use-linux.
-        toolkit-accessibility = true;
-      };
-      "org/gnome/desktop/privacy".remember-recent-files = false;
-      "org/gtk/settings/file-chooser" = fileChooser;
-      "org/gtk/gtk4/settings/file-chooser" = fileChooser;
-      # ProtonPlus keeps Proton builds updated in the background (hourly by default).
-      "com/vysp3r/ProtonPlus/State" = {
-        background-updates = true;
-        check-updates-on-boot = true;
-        check-updates-on-launch = true;
-      };
+      # The wallpapers repository lives with the other clones so pull-projects
+      # updates it; link it where Noctalia looks once it is cloned. Runs before
+      # Home Manager creates the user folders, and replaces only an empty folder.
+      wallpapersLink = lib.hm.dag.entryBetween [ "createXdgUserDirectories" ] [ "writeBoundary" ] ''
+        clone="${config.home.homeDirectory}/Projects/wallpapers"
+        link="${config.home.homeDirectory}/Pictures/Wallpapers"
+        if [[ -d $clone && ! -L $link ]]; then
+          if [[ -d $link && -z $(ls -A "$link") ]]; then
+            run rmdir "$link"
+          fi
+          if [[ ! -e $link ]]; then
+            run mkdir -p "$(dirname "$link")"
+            run ln -s "$clone" "$link"
+          fi
+        fi
+      '';
     };
+
+    dconf.settings =
+      let
+        # Show hidden files and folders first; open where the app is working.
+        fileChooser = {
+          show-hidden = true;
+          sort-directories-first = true;
+          startup-mode = "cwd";
+        };
+      in
+      {
+        "org/gnome/desktop/interface" = {
+          gtk-enable-primary-paste = true;
+          icon-theme = "Papirus-Dark";
+          cursor-theme = session.XCURSOR_THEME;
+          cursor-size = lib.toInt session.XCURSOR_SIZE;
+        };
+        "org/gnome/desktop/privacy".remember-recent-files = false;
+        "org/gtk/settings/file-chooser" = fileChooser;
+        "org/gtk/gtk4/settings/file-chooser" = fileChooser;
+      };
+  };
 }
