@@ -1,23 +1,24 @@
-# Hyprland under UWSM, with the shared desktop from desktop.nix. Its links
-# are in home/hyprland.nix.
+# Hyprland, which starts the systemd session itself, with the shared desktop
+# from desktop.nix. Its links are in home/hyprland.nix.
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 
 {
   config = lib.mkIf (config.workstation.desktop == "hyprland") {
-    programs.hyprland = {
-      enable = true;
-      withUWSM = true;
-    };
+    programs.hyprland.enable = true;
+
+    # GTK prefers native Wayland, with X11 as a fallback. Hyprland only: under
+    # Niri it turns off the GNOME portal's screen sharing (Niri's wiki,
+    # Important Software).
+    environment.sessionVariables.GDK_BACKEND = "wayland,x11,*";
 
     services = {
-      displayManager.noctalia-greeter.settings.session.default = "Hyprland (uwsm-managed)";
+      displayManager.noctalia-greeter.settings.session.default = "Hyprland";
       greetd.settings.initial_session = lib.mkIf config.services.displayManager.autoLogin.enable {
-        command = "${lib.getExe pkgs.uwsm} start -e -D Hyprland hyprland.desktop";
+        command = lib.getExe' config.programs.hyprland.package "start-hyprland";
       };
     };
 

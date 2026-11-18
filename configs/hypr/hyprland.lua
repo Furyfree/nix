@@ -1,6 +1,6 @@
 -- Load the Hyprland configuration modules from conf.d.
 
--- UWSM prepares the session environment before starting Hyprland.
+-- Login sets the session environment: components/desktop.nix and hyprland.nix.
 -- Key Promoter wraps hl.bind and hl.gesture, so it loads before both.
 pcall(require, "./conf.d/key-promoter.lua")
 require("./conf.d/window-actions.lua")

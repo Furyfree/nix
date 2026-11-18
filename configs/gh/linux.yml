@@ -1,3 +1,3 @@
-# Open login pages as a UWSM service: it returns at once, while a scope would
-# wait until a newly started browser closes.
-browser: uwsm-app -t service -- xdg-open
+# Open login pages in their own systemd unit: it returns at once, while plain
+# xdg-open would wait until a newly started browser closes.
+browser: systemd-run --user --quiet --collect -- xdg-open

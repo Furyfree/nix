@@ -32,7 +32,6 @@ in
         "hypr/conf.d/window-rules.lua"
         "hypr/conf.d/autostart.lua"
         "hypr/conf.d/keybinds.lua"
-        "uwsm/env-hyprland"
       ]
       (name: {
         source = link name;

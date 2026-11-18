@@ -1,6 +1,6 @@
 // Load the Niri configuration files from conf.d.
 
-// UWSM prepares the session environment before starting Niri.
+// Login sets the session environment: components/desktop.nix.
 include "conf.d/input.kdl"
 include "conf.d/monitors.kdl"
 include "conf.d/layout.kdl"
