@@ -24,6 +24,10 @@ Build the system and show the package changes, then ask before switching.
 A yes takes a Snapper pre snapshot, switches and takes the post snapshot.
 A failed build or a no changes nothing and leaves no snapshots.
 
+Before the build, a firmware boot list with Windows Boot Manager creates
+hosts/<host>/local/limine-windows, which adds Windows to Limine's menu. It is
+never removed by itself; delete it to drop the entry.
+
 On macOS: build the Mac's nix-darwin configuration, show the changes, ask,
 then switch (nh darwin switch --ask). The switch installs missing Homebrew
 apps and writes the macOS settings.
@@ -153,6 +157,36 @@ die() {
   exit 1
 }
 
+# Mark a machine whose firmware lists Windows Boot Manager, which flake.nix
+# then adds to Limine's menu. Limine looks the name up among the BootOrder
+# entries, so only those count. Never unmarks: a firmware reset can drop the
+# entry for a while, and the menu should not change with it.
+mark_windows() {
+  local marker list order line found=false
+  marker=$repo/hosts/$(uname -n)/local/limine-windows
+  [[ -d ${marker%/*} ]] || return 0
+  if ! command -v efibootmgr >/dev/null; then
+    printf 'nix-workstation: efibootmgr is missing; the next nswitch looks for Windows\n' >&2
+    return 0
+  fi
+  # No UEFI boot list, as in a VM booted through BIOS: leave the marker alone.
+  list=$(efibootmgr 2>/dev/null) || return 0
+  order=$(sed -n 's/^BootOrder: //p' <<<"$list")
+  while IFS= read -r line; do
+    # Boot0001* Windows Boot Manager<tab>device path
+    if [[ ${line%%$'\t'*} =~ ^Boot([0-9A-F]{4})[*\ ]\ Windows\ Boot\ Manager$ ]] &&
+      [[ ,$order, == *,${BASH_REMATCH[1]},* ]]; then
+      found=true
+    fi
+  done <<<"$list"
+  if $found && [[ ! -e $marker ]]; then
+    : >"$marker"
+    printf 'Windows found: Limine gets a Windows entry.\n'
+  elif ! $found && [[ -e $marker ]]; then
+    printf 'nix-workstation: the firmware no longer lists Windows Boot Manager; delete %s to drop Limine'\''s Windows entry\n' "$marker" >&2
+  fi
+}
+
 # A failed or declined build leaves no snapshots behind. With "boot", the build
 # only becomes the boot default; LABEL starts the snapshot description.
 booted=false
@@ -162,6 +196,7 @@ cmd_switch() {
     nh os switch --ask --hostname wsl
     return
   fi
+  mark_windows
   nh os build
   if [[ $mode == boot ]]; then
     read -rp 'Boot into it next time? [y/N] ' answer

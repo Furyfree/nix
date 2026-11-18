@@ -1,6 +1,6 @@
 # MSI Z690 desktop: Intel integrated graphics plus an NVIDIA RTX 3080, which
 # drives both monitors. The installer writes ./local with the detected
-# hardware, the chosen account and the Windows boot entry.
+# hardware and the chosen account; nswitch adds Windows to the boot menu.
 {
   config,
   lib,

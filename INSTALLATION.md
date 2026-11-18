@@ -1,7 +1,7 @@
 # Installation
 
 The installer erases the whole disk you choose. On the desktop, Windows stays
-on its own disk and gets an entry in the boot menu.
+on its own disk and joins the boot menu at the first `nswitch`.
 
 ## Before you start
 
@@ -20,7 +20,7 @@ on its own disk and gets an entry in the boot menu.
    connect with `wpa_cli` (`add_network`, `set_network 0 ssid "name"`,
    `set_network 0 psk "password"`, `enable_network 0`), then run `nixos-setup`.
 3. Choose the machine, the disk and your username. The review shows the swap
-   size and, on the desktop, the Windows partition it found.
+   size.
 4. Enter one password for disk encryption, root and your user, type the disk's
    full path to confirm, and wait. Reboot when it finishes.
 

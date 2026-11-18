@@ -62,8 +62,10 @@ Docs and comments state no current versions or status; open work lives in
   Keep the checkout at `~/Projects/nix` for these links.
 - `hosts/`: tracked host exceptions; ignored `hosts/<host>/local/` holds detected
   hardware and installation data, on NixOS an optional `desktop.nix` that
-  picks the compositor, on macOS `user.nix` with the account and profile, in
-  WSL `user.nix` with the account, and on Windows `profile` with its name.
+  picks the compositor and an empty `limine-windows`, which `nswitch` creates
+  when the firmware lists Windows (`components/limine-windows.nix`), on macOS
+  `user.nix` with the account and profile, in WSL `user.nix` with the account,
+  and on Windows `profile` with its name.
   Shared policy belongs above it.
 - `windows/`: `bootstrap.ps1` prepares a fresh Windows and clones the
   checkout; `apply.ps1` applies the layers in `profiles/`, whose keys

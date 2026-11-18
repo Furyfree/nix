@@ -34,7 +34,8 @@
     let
       # A host builds only from its ignored local/ data, which the installer
       # writes; without it, the host has no output. An optional
-      # local/desktop.nix picks the compositor.
+      # local/desktop.nix picks the compositor, and an empty
+      # local/limine-windows adds Windows to Limine's menu.
       mkHost =
         name:
         let
@@ -42,6 +43,7 @@
           localHardware = host + "/local/hardware-configuration.nix";
           localInstallation = host + "/local/installation.nix";
           localDesktop = host + "/local/desktop.nix";
+          localWindows = host + "/local/limine-windows";
           installation =
             if builtins.pathExists localHardware && builtins.pathExists localInstallation then
               localInstallation
@@ -63,7 +65,8 @@
                     home-manager.useUserPackages = true;
                   }
                 ]
-                ++ nixpkgs.lib.optional (builtins.pathExists localDesktop) localDesktop;
+                ++ nixpkgs.lib.optional (builtins.pathExists localDesktop) localDesktop
+                ++ nixpkgs.lib.optional (builtins.pathExists localWindows) ./components/limine-windows.nix;
               }
             );
           };

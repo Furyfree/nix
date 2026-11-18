@@ -9,7 +9,6 @@ from nixos_setup.common import GIB, HOSTS, Disk, Plan
 from nixos_setup.planning import (
     detect_ram,
     discover_disks,
-    find_windows,
     key_fingerprint,
     plan_storage,
     suggested_swap,
@@ -59,8 +58,7 @@ def collect_plan() -> Plan:
     )
     ram = detect_ram()
     suggestion = suggested_swap(ram)
-    windows = find_windows(storage.disk)
-    plan = Plan(host, username, "", "none", storage, ram, suggestion, windows)
+    plan = Plan(host, username, "", "none", storage, ram, suggestion)
     if swap_error(str(suggestion), storage.capacity):
         print(f"Suggested swap ({suggestion} GiB) will not fit.")
         plan = change_setting(plan, "Swap size")
@@ -94,9 +92,7 @@ def change_setting(plan: Plan, setting: str) -> Plan:
         return replace(plan, host=choose_host())
     if setting == "Disk":
         storage = plan_storage(choose_disk(), "erase")
-        plan = replace(
-            plan, storage=storage, windows=find_windows(storage.disk)
-        )
+        plan = replace(plan, storage=storage)
         if not swap_error(str(plan.swap_gib), plan.storage.capacity):
             return plan
 
@@ -129,10 +125,6 @@ def show_plan(plan: Plan) -> None:
     print(f"Mode: {storage.mode}")
     print("ERASE: all existing data on this disk will be lost.")
     print("Layout: 4 GiB EFI + LUKS2-encrypted Btrfs.")
-    if plan.windows:
-        print(f"Windows: boot menu entry for partition {plan.windows}")
-    else:
-        print("Windows: none found on other disks")
     print(f"RAM: {plan.ram / GIB:.1f} GiB")
     fraction = plan.swap_gib * GIB / storage.capacity
     remaining = storage.capacity / GIB - plan.swap_gib
