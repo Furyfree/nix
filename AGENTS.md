@@ -72,6 +72,8 @@ Docs and comments state no current versions or status; open work lives in
   PowerShell, Terminal, WSL and Office files.
 - `hosts/wsl/`, `home/wsl.nix`: NixOS in WSL for desktop; `apply.ps1` installs
   it.
+- `ubuntu/`: investigation scripts for the Ubuntu work laptop (#28); its
+  README says how to run them.
 - `configs/hypr/hosts/<host>.lua`, `configs/niri/hosts/<host>.kdl`: per-host
   monitors, workspaces and keys, linked as `host.lua` or `host.kdl` by
   `home/hyprland.nix` or `home/niri.nix` after the hostname.
