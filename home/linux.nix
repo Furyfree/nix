@@ -37,7 +37,6 @@ in
           "math.desktop" = pkgs.libreoffice;
           "remote-viewer.desktop" = pkgs.virt-viewer;
           "dev.noctalia.Noctalia.desktop" = config.programs.noctalia.package;
-          "uuctl.desktop" = pkgs.uwsm;
           "me.kavishdevar.librepods.desktop" = pkgs.librepods;
         }
       // lib.genAttrs [ "chatgpt" "fotmob" "google-maps" ] (name: {
@@ -85,7 +84,6 @@ in
     configFile =
       lib.genAttrs
         [
-          "uwsm/env"
           "zsh/conf.d/noctalia.zsh"
           "noctalia/config.toml"
           "noctalia/vscodium.toml"

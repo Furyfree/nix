@@ -7,14 +7,13 @@ import subprocess
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from typing import Any
 from unittest.mock import Mock, patch
 
 import install as launcher
 import questionary
-from helpers import GIB, device, disk, partition, public_key
-from nixos_setup import common, planning, wizard
+from helpers import GIB, device, disk, public_key
+from nixos_setup import planning, wizard
 from prompt_toolkit.input import create_pipe_input
 from prompt_toolkit.output import DummyOutput
 
@@ -102,51 +101,29 @@ class WizardTests(unittest.TestCase):
             self.assertIn(text, output)
         self.assertTrue(calls)
 
-    def test_machine_choice_and_windows_on_another_disk_reach_the_plan(self):
-        guid = "0f2c9a4e-1b7d-4c3a-9e8f-5a6b7c8d9e0f"
-        with TemporaryDirectory(prefix="windows-esp-") as esp:
-            loader = Path(esp).joinpath(*planning.WINDOWS_LOADER)
-            loader.parent.mkdir(parents=True)
-            loader.write_bytes(b"fixture loader")
-            windows_disk = device(
-                name="/dev/fixture1",
-                children=[
-                    partition(
-                        2048,
-                        GIB,
-                        name="/dev/fixture1p1",
-                        parttype=common.ESP_TYPE,
-                        partuuid=guid.upper(),
-                        mountpoints=[esp],
-                    )
+    def test_machine_choice_reaches_the_plan(self):
+        reviewed: list[Any] = []
+
+        def install(plan: Any) -> int:
+            reviewed.append(wizard.review_plan(plan, dry_run=False))
+            return 0
+
+        with patch.object(launcher, "install", side_effect=install):
+            status, output, _, _ = self.run_preview(
+                [
+                    "nixos-test",
+                    disk(),
+                    "river",
+                    "Change settings",
+                    "Machine",
+                    "desktop",
+                    "Continue to installation",
                 ],
+                argv=[],
             )
-            reviewed: list[Any] = []
-
-            def install(plan: Any) -> int:
-                reviewed.append(wizard.review_plan(plan, dry_run=False))
-                return 0
-
-            with patch.object(launcher, "install", side_effect=install):
-                status, output, _, _ = self.run_preview(
-                    [
-                        "nixos-test",
-                        disk(),
-                        "river",
-                        "Change settings",
-                        "Machine",
-                        "desktop",
-                        "Continue to installation",
-                    ],
-                    metadata={"blockdevices": [device(), windows_disk]},
-                    argv=[],
-                )
         self.assertEqual(status, 0)
-        self.assertEqual(
-            (reviewed[0].host, reviewed[0].windows), ("desktop", guid)
-        )
+        self.assertEqual(reviewed[0].host, "desktop")
         self.assertIn("Host: desktop", output)
-        self.assertIn(f"Windows: boot menu entry for partition {guid}", output)
 
     def test_changed_settings_survive_review_and_reach_the_installer(self):
         answers = [

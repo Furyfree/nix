@@ -10,28 +10,28 @@ hl.config({ binds = { window_direction_monitor_fallback = false } })
 -- 1. Applications and panels
 hl.bind(
     mainMod .. " + Return",
-    hl.dsp.exec_cmd("uwsm-app -- ghostty +new-window"),
+    hl.dsp.exec_cmd("ghostty +new-window"),
     { description = "Open Ghostty terminal" }
 )
 hl.bind(
     mainMod .. " + SHIFT + B",
-    hl.dsp.exec_cmd("uwsm-app -- brave-origin"),
+    hl.dsp.exec_cmd("brave-origin"),
     { description = "Open Brave browser" }
 )
 -- Native activation targets the main window; Quick Access shares its class.
 hl.bind(
     mainMod .. " + SHIFT + P",
-    hl.dsp.exec_cmd("uwsm-app -- 1password"),
+    hl.dsp.exec_cmd("1password"),
     { description = "Focus or open 1Password" }
 )
 hl.bind(
     "CTRL + SHIFT + Space",
-    hl.dsp.exec_cmd("uwsm-app -- 1password --quick-access"),
+    hl.dsp.exec_cmd("1password --quick-access"),
     { description = "Open 1Password Quick Access" }
 )
 hl.bind(
     mainMod .. " + SHIFT + F",
-    hl.dsp.exec_cmd("uwsm-app -- strata"),
+    hl.dsp.exec_cmd("strata"),
     { description = "Open file manager" }
 )
 hl.bind(
@@ -47,48 +47,48 @@ hl.bind(
 -- Focus the most recently used app window, even on another workspace.
 hl.bind(
     mainMod .. " + SHIFT + O",
-    hl.dsp.exec_cmd("launch focus md.obsidian.Obsidian uwsm-app -- obsidian"),
+    hl.dsp.exec_cmd("launch focus md.obsidian.Obsidian obsidian"),
     { description = "Focus or open Obsidian" }
 )
 hl.bind(
     mainMod .. " + SHIFT + D",
-    hl.dsp.exec_cmd("launch focus vesktop uwsm-app -- vesktop"),
+    hl.dsp.exec_cmd("launch focus vesktop vesktop"),
     { description = "Focus or open Discord in Vesktop" }
 )
 hl.bind(
     mainMod .. " + SHIFT + G",
-    hl.dsp.exec_cmd("launch focus signal uwsm-app -- signal-desktop"),
+    hl.dsp.exec_cmd("launch focus signal signal-desktop"),
     { description = "Focus or open Signal" }
 )
 hl.bind(
     mainMod .. " + SHIFT + E",
-    hl.dsp.exec_cmd("launch focus com.fastmail.Fastmail uwsm-app -- fastmail"),
+    hl.dsp.exec_cmd("launch focus com.fastmail.Fastmail fastmail"),
     { description = "Focus or open Fastmail" }
 )
 hl.bind(
     mainMod .. " + SHIFT + Z",
-    hl.dsp.exec_cmd("uwsm-app -- zeditor"),
+    hl.dsp.exec_cmd("zeditor"),
     { description = "Open Zed" }
 )
 hl.bind(
     mainMod .. " + SHIFT + V",
-    hl.dsp.exec_cmd("uwsm-app -- codium"),
+    hl.dsp.exec_cmd("codium"),
     { description = "Open VSCodium" }
 )
 hl.bind(
     mainMod .. " + SHIFT + T",
-    hl.dsp.exec_cmd("launch focus com.t3tools.T3Code uwsm-app -- t3code-desktop"),
+    hl.dsp.exec_cmd("launch focus com.t3tools.T3Code t3code-desktop"),
     { description = "Focus or open T3 Code" }
 )
 hl.bind(
     mainMod .. " + SHIFT + C",
-    hl.dsp.exec_cmd("launch focus com.anthropic.Claude uwsm-app -- claude-desktop"),
+    hl.dsp.exec_cmd("launch focus com.anthropic.Claude claude-desktop"),
     { description = "Focus or open Claude" }
 )
 -- Does nothing on hosts without components/local-ai.nix.
 hl.bind(
     mainMod .. " + SHIFT + A",
-    hl.dsp.exec_cmd("uwsm-app -- llama-cpp.desktop"),
+    hl.dsp.exec_cmd("gio launch /etc/profiles/per-user/$USER/share/applications/llama-cpp.desktop"),
     { description = "Focus or open the llama.cpp WebUI" }
 )
 hl.bind(

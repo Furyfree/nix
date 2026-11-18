@@ -2,8 +2,8 @@
 # WSL: this runs in a VM on Linux, which has no WSL2. desktop builds on this
 # layer.
 @{
-    Include    = @('common')
-    Winget     = @(
+    Include     = @('common')
+    Winget      = @(
         'jdx.mise'
         'DEVCOM.JetBrainsMonoNerdFont'
         'Brave.BraveOrigin'
@@ -28,8 +28,17 @@
         '7zip.7zip'
         'Gyan.FFmpeg'
     )
-    Registry   = @('personal.reg')
-    Links      = @{
+    # No winget package
+    Downloads   = @{
+        Fastmail = @{
+            Url    = 'https://www.fastmail.com/download/windows/x64/'
+            Signer = 'Fastmail Pty Ltd'
+            Args   = @('/S')
+            Path   = '%LOCALAPPDATA%\Programs\Fastmail\Fastmail.exe'
+        }
+    }
+    Registry    = @('personal.reg')
+    Links       = @{
         '~\.config\git\config'                             = 'git/config'
         '~\.config\git\ignore'                             = 'git/ignore'
         '~\.config\starship.toml'                          = 'starship/starship.toml'
@@ -50,22 +59,25 @@
         '%LOCALAPPDATA%\1Password\config\ssh\agent.toml'   = '1password/ssh/personal.toml'
         '%DOCUMENTS%\PowerShell\profile.ps1'               = 'windows/powershell/profile.ps1'
     }
-    Merges     = @{
-        # GitHub Dark, as on the Mac; Noctalia's theme exists only on Linux.
+    Merges      = @{
+        # GitHub's themes, as on the Mac; Noctalia's exist only on Linux.
         '%APPDATA%\VSCodium\User\settings.json'            = @('vscodium/settings.json', 'windows/vscodium.json')
-        '%APPDATA%\Zed\settings.json'                      = 'zed/settings.json'
+        '%APPDATA%\Zed\settings.json'                      = @('zed/settings.json', 'windows/zed.json')
         '~\.claude\settings.json'                          = 'claude/settings.json'
         '~\.codex\config.toml'                             = 'codex/config.toml'
         '%APPDATA%\GitHub CLI\config.yml'                  = 'gh/config.yml'
-        # Windows Terminal adds its own profiles to this file.
+        # Windows Terminal adds its own profiles to this file. Its new-tab menu
+        # lists profiles by name, NixOS second on desktop; the others hide.
         '%LOCALAPPDATA%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json' =
         'windows/terminal/settings.json'
     }
-    GitWindows = $true
-    Extensions = @{ codium = 'vscodium/extensions.txt' }
+    GitWindows  = $true
+    Extensions  = @{ codium = 'vscodium/extensions.txt' }
     # Location, for night light and the time zone; WinUtil's Standard tweaks
     # disable it.
-    Services   = @{ lfsvc = 'Manual' }
-    NightLight = $true
-    Wallpaper  = 'Pictures\Wallpapers\charcoal-amber-mountain-horizon.jpg'
+    Services    = @{ lfsvc = 'Manual' }
+    # The home and projects folders, as in the Linux file manager
+    QuickAccess = @('~', '~\Projects')
+    NightLight  = $true
+    Wallpaper   = 'Pictures\Wallpapers\charcoal-amber-mountain-horizon.jpg'
 }

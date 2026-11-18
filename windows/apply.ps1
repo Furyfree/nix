@@ -53,12 +53,15 @@ foreach ($layer in $layers) {
     }
 }
 foreach ($key in 'Winget', 'Store', 'Registry') { if ($null -eq $want[$key]) { $want[$key] = @() } }
-foreach ($key in 'Links', 'Merges', 'Extensions', 'Power', 'Services', 'Wsl') {
+foreach ($key in 'Links', 'Merges', 'Extensions', 'Power', 'Services', 'Wsl', 'Downloads') {
     if ($null -eq $want[$key]) { $want[$key] = @{} }
 }
 $packages = foreach ($entry in $want.Winget) { if ($entry -is [string]) { @{ Id = $entry } } else { $entry } }
 $wallpaper = if ($want.Wallpaper) { Join-Path $HOME $want.Wallpaper }
 $lockScreenKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP'
+# The Start Layout policy, which only administrators may set, even per user
+$taskbar = if ($want.Taskbar) { [IO.Path]::GetFullPath((Join-Path $root "configs/$($want.Taskbar)")) }
+$taskbarKey = 'HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Explorer'
 
 function Get-Installed {
     $file = Join-Path ([IO.Path]::GetTempPath()) "nix-workstation-$PID.json"
@@ -81,8 +84,9 @@ function Get-RegistryChanges {
 }
 
 function Get-PowerAc([string] $subgroup, [string] $setting) {
-    # The last two values are the AC and DC indexes.
-    $values = [regex]::Matches((powercfg /query SCHEME_CURRENT $subgroup $setting) -join "`n", '0x[0-9a-fA-F]{8}')
+    # The last two values are the AC and DC indexes. /qh also lists settings
+    # Windows hides, such as the power button's action on some PCs.
+    $values = [regex]::Matches((powercfg /qh SCHEME_CURRENT $subgroup $setting) -join "`n", '0x[0-9a-fA-F]{8}')
     if ($values.Count -ge 2) { [Convert]::ToInt64($values[$values.Count - 2].Value, 16) }
 }
 
@@ -94,9 +98,11 @@ function Test-BitLocker {
 }
 
 function Test-Wsl {
-    # Windows' own wsl.exe exits with an error until WSL is installed.
+    # Windows' own wsl.exe exits with an error until WSL is installed. WSL 2
+    # also needs the Host Compute Service, which the Virtual Machine Platform
+    # brings only after a restart.
     wsl --status *> $null
-    $LASTEXITCODE -eq 0
+    $LASTEXITCODE -eq 0 -and (Get-Service vmcompute -ErrorAction Ignore)
 }
 
 # What needs administrator, worked out the same way in both halves
@@ -113,13 +119,17 @@ function Get-AdminWork($installed) {
         BitLocker  = $want.BitLocker -and -not (Test-BitLocker)
         LockScreen = $wallpaper -and (Test-Path $wallpaper) -and
             (Get-ItemProperty $lockScreenKey -ErrorAction Ignore).LockScreenImagePath -ne $wallpaper
+        Taskbar    = $taskbar -and $(
+            $policy = Get-ItemProperty "Registry::$taskbarKey" -ErrorAction Ignore
+            $policy.StartLayoutFile -ne $taskbar -or $policy.LockedStartLayout -ne 1
+        )
         Wsl        = $want.Wsl.Distribution -and -not (Test-Wsl)
     }
 }
 
 function Test-Work($work) {
     $work.Packages -or $work.Store -or $work.Registry -or $work.Power -or $work.Services -or $work.BitLocker -or
-    $work.LockScreen -or $work.Wsl
+    $work.LockScreen -or $work.Taskbar -or $work.Wsl
 }
 
 # winget exit codes for an app that is already there, or there after a restart
@@ -138,18 +148,22 @@ function Invoke-Step([string] $stepName, [scriptblock] $stepBlock) {
     try { & $stepBlock } catch { $script:failures.Add("${stepName}: $_") }
 }
 
-function Save-RegistryBackup([string] $file) {
-    # A file per key that undoes apply, so reg import restores the key: the
-    # first time apply touches it, its old values, or the key's deletion when
-    # it did not exist; then deletions for values this file adds, also ones
-    # added to it later.
-    $backup = Join-Path $state 'backup'
-    New-Item -ItemType Directory -Force $backup | Out-Null
+# The value names a .reg file sets, by key
+function Get-RegistryNames([string] $file) {
     $names = [ordered]@{}
     foreach ($line in Get-Content $file) {
         if ($line -match '^\[(.+)\]$') { $key = $Matches[1]; if (-not $names.Contains($key)) { $names[$key] = @() } }
         elseif ($line -match '^"(.+?)"=') { $names[$key] += $Matches[1] }
     }
+    $names
+}
+
+function Save-RegistryBackup([Collections.IDictionary] $names) {
+    # A file per key that undoes apply, so reg import restores the key: the
+    # first time apply touches it, its old values, or the key's deletion when
+    # it did not exist; then deletions for values apply adds, also later ones.
+    $backup = Join-Path $state 'backup'
+    New-Item -ItemType Directory -Force $backup | Out-Null
     foreach ($key in $names.Keys) {
         $target = Join-Path $backup (($key -replace '[\\/:*?"<>|]', '_') + '.reg')
         if (-not (Test-Path $target)) {
@@ -195,13 +209,16 @@ function Enable-BitLockerWithKey {
         Enable-BitLocker $drive -EncryptionMethod XtsAes256 -UsedSpaceOnly -TpmProtector -SkipHardwareTest `
             -WarningAction Ignore | Out-Null
     }
+    # A drive Windows encrypted itself waits for its TPM protector to turn
+    # protection on. One that has it and protection off was suspended for a
+    # restart, by INSTALLATION.md or an update, and resumes by itself.
     $volume = Get-BitLockerVolume $drive
     if (-not ($volume.KeyProtector | Where-Object KeyProtectorType -EQ 'Tpm')) {
         Add-BitLockerKeyProtector $drive -TpmProtector -WarningAction Ignore | Out-Null
-    }
-    $volume = Get-BitLockerVolume $drive
-    if ($volume.ProtectionStatus -eq 'Off' -and $volume.VolumeStatus -eq 'FullyEncrypted') {
-        Resume-BitLocker $drive | Out-Null
+        $volume = Get-BitLockerVolume $drive
+        if ($volume.ProtectionStatus -eq 'Off' -and $volume.VolumeStatus -eq 'FullyEncrypted') {
+            Resume-BitLocker $drive | Out-Null
+        }
     }
 }
 
@@ -223,7 +240,7 @@ if ($Elevated) {
         foreach ($name in $work.Registry) {
             $file = Join-Path $PSScriptRoot "registry\$name"
             Invoke-Step "registry $name" {
-                Save-RegistryBackup $file
+                Save-RegistryBackup (Get-RegistryNames $file)
                 Write-Host "import   $name"
                 reg import $file *> $null
                 if ($LASTEXITCODE -ne 0) { throw "reg import failed ($LASTEXITCODE)" }
@@ -253,6 +270,15 @@ if ($Elevated) {
             Set-ItemProperty $lockScreenKey LockScreenImagePath $wallpaper
             Set-ItemProperty $lockScreenKey LockScreenImageUrl $wallpaper
             Set-ItemProperty $lockScreenKey LockScreenImageStatus 1 -Type DWord
+        }
+    }
+    if ($work.Taskbar) {
+        Write-Host 'taskbar  pins from the next sign-in'
+        Invoke-Step 'taskbar' {
+            Save-RegistryBackup @{ $taskbarKey = 'StartLayoutFile', 'LockedStartLayout' }
+            if (-not (Test-Path "Registry::$taskbarKey")) { New-Item "Registry::$taskbarKey" -Force | Out-Null }
+            Set-ItemProperty "Registry::$taskbarKey" StartLayoutFile $taskbar
+            Set-ItemProperty "Registry::$taskbarKey" LockedStartLayout 1 -Type DWord
         }
     }
     if ($work.BitLocker) {
@@ -286,6 +312,29 @@ foreach ($package in $packages | Where-Object { $_.User -and $installed -notcont
 # ~ and %NAME% in the profiles' targets
 function Resolve-Target([string] $path) {
     [Environment]::ExpandEnvironmentVariables(($path -replace '^~', $HOME))
+}
+
+# Apps without a winget package, from their publisher, as yourself; each
+# updates itself.
+foreach ($name in $want.Downloads.Keys) {
+    $download = $want.Downloads[$name]
+    if (Test-Path (Resolve-Target $download.Path)) { continue }
+    Invoke-Step "install $name" {
+        Write-Host "install  $name"
+        $installer = Join-Path ([IO.Path]::GetTempPath()) "nix-workstation-$name.exe"
+        Invoke-WebRequest $download.Url -OutFile $installer
+        $signature = Get-AuthenticodeSignature $installer
+        $signer = if ($signature.SignerCertificate) {
+            $signature.SignerCertificate.GetNameInfo([Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false)
+        }
+        if ($signature.Status -ne 'Valid' -or $signer -ne $download.Signer) {
+            Remove-Item $installer
+            throw "the installer is not signed by $($download.Signer)."
+        }
+        $process = Start-Process $installer -ArgumentList $download.Args -Wait -PassThru
+        Remove-Item $installer
+        if ($process.ExitCode -ne 0) { throw "the installer exited with $($process.ExitCode)." }
+    }
 }
 
 # A write under a linked folder lands in what it points to, such as the
@@ -376,13 +425,30 @@ foreach ($target in $want.Merges.Keys) {
 
 foreach ($editor in $want.Extensions.Keys) {
     if (-not (Get-Command $editor -ErrorAction Ignore)) { continue }
-    $list = $want.Extensions[$editor]
-    if ($list -is [string]) { $list = Get-Content (Join-Path $root "configs/$list") }
+    # IDs, and configs/ files of them, which are paths
+    $list = foreach ($item in $want.Extensions[$editor]) {
+        if ($item -like '*/*') { Get-Content (Join-Path $root "configs/$item") } else { $item }
+    }
     $present = & $editor --list-extensions
     foreach ($extension in $list | Where-Object { $present -notcontains $_ }) {
         Write-Host "extend   $extension"
         & $editor --install-extension $extension
         if ($LASTEXITCODE -ne 0) { $failures.Add("$editor extension $extension ($LASTEXITCODE)") }
+    }
+}
+
+if ($want.QuickAccess) {
+    Invoke-Step 'Quick access' {
+        # Pins only, so folders pinned or unpinned by hand stay as they are.
+        $shell = New-Object -ComObject Shell.Application
+        $pinned = @($shell.Namespace('shell:::{679f85cb-0220-4080-b29b-5540cc05aab6}').Items() |
+            Where-Object { $_.ExtendedProperty('System.Home.IsPinned') } | ForEach-Object Path)
+        foreach ($folder in $want.QuickAccess) {
+            $path = Resolve-Target $folder
+            if ($pinned -contains $path) { continue }
+            Write-Host "pin      $folder"
+            $shell.Namespace($path).Self.InvokeVerb('pintohome')
+        }
     }
 }
 
@@ -471,32 +537,38 @@ elseif ($want.Wsl.Distribution -eq 'NixOS') {
         $shell = '/run/current-system/sw/bin/sh'
         # Done once the account has its checkout; nswitch inside NixOS applies
         # later changes. Until then each run redoes the steps still missing.
-        wsl --distribution NixOS --user $user --exec $shell -c 'test -f ~/Projects/nix/hosts/wsl/local/user.nix' 2> $null
+        # wsl.exe prints its own errors to stdout.
+        wsl --distribution NixOS --user $user --exec $shell -c 'test -f ~/Projects/nix/hosts/wsl/local/user.nix' *> $null
         if ($LASTEXITCODE -eq 0) { return }
-        $url = git -C $root remote get-url origin
+        # A new NixOS has no SSH key for GitHub, so its clones use HTTPS;
+        # INSTALLATION.md switches the checkout to SSH afterwards.
+        $url = (git -C $root remote get-url origin) -replace '^git@github\.com:', 'https://github.com/'
         $branch = git -C $root branch --show-current
         if (-not $branch) { $branch = 'main' }
 
         if ((wsl --list --quiet 2> $null) -notcontains 'NixOS') {
             $image = Join-Path ([IO.Path]::GetTempPath()) 'nixos.wsl'
-            Write-Host 'download NixOS-WSL'
-            Invoke-WebRequest $want.Wsl.Image -OutFile $image
-            if ((Get-FileHash $image).Hash -ne $want.Wsl.Sha256) { throw "$image does not match its checksum." }
-            Write-Host 'install  NixOS'
-            wsl --install --from-file $image --no-launch
-            if ($LASTEXITCODE -ne 0) { throw "wsl --install ($LASTEXITCODE)" }
-            Remove-Item $image
+            try {
+                Write-Host 'download NixOS-WSL'
+                Invoke-WebRequest $want.Wsl.Image -OutFile $image
+                if ((Get-FileHash $image).Hash -ne $want.Wsl.Sha256) { throw "$image does not match its checksum." }
+                Write-Host 'install  NixOS'
+                wsl --install --from-file $image --no-launch
+                if ($LASTEXITCODE -ne 0) { throw "wsl --install ($LASTEXITCODE)" }
+            }
+            finally { Remove-Item $image -ErrorAction Ignore }
         }
 
-        # A login shell, since wsl --exec starts without NixOS' PATH
+        # A login shell, since wsl --exec starts without NixOS' PATH. Git may
+        # check this file out with CRLF, which sh reads as part of each line.
         function Invoke-NixOS([string] $account, [string] $script, [string[]] $arguments) {
-            wsl --distribution NixOS --user $account --exec $shell -lc $script sh @arguments
+            wsl --distribution NixOS --user $account --exec $shell -lc ($script -replace "`r") sh @arguments
             if ($LASTEXITCODE -ne 0) { throw "in NixOS as $account ($LASTEXITCODE)" }
         }
         $userNix = "{ wsl.defaultUser = `"$user`"; }"
         # NixOS-WSL's steps for a new account, until it exists: build the boot
         # generation as root, then start it once as root and stop it.
-        wsl --distribution NixOS --user $user --exec $shell -c true 2> $null
+        wsl --distribution NixOS --user $user --exec $shell -c true *> $null
         if ($LASTEXITCODE -ne 0) {
             Write-Host "build    NixOS for $user"
             Invoke-NixOS root @'

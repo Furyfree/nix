@@ -548,7 +548,6 @@ class ConfigurationTests(unittest.TestCase):
         examples = [
             replace(self.plan, host="installer"),
             replace(self.plan, host="unknown"),
-            replace(self.plan, windows="not-a-guid"),
             replace(
                 self.plan, storage=planning.plan_storage(disk(), "preserve")
             ),
@@ -592,15 +591,10 @@ class ConfigurationTests(unittest.TestCase):
             self.assertEqual(result["autoLoginUser"], username)
             self.assertEqual(result["initialSessionUser"], username)
 
-    def test_real_nix_evaluation_of_each_host_and_its_windows_entry(self):
-        guid = "0f2c9a4e-1b7d-4c3a-9e8f-5a6b7c8d9e0f"
-        for host, windows in [
-            ("desktop", guid),
-            ("laptop", ""),
-            ("nixos-test", guid),
-        ]:
-            with self.subTest(host=host, windows=windows):
-                plan = replace(self.plan, host=host, windows=windows)
+    def test_real_nix_evaluation_of_each_host(self):
+        for host in ["desktop", "laptop", "nixos-test"]:
+            with self.subTest(host=host):
+                plan = replace(self.plan, host=host)
                 local = self.checkout / "hosts" / host / "local"
                 local.mkdir(exist_ok=True)
                 (local / "hardware-configuration.nix").write_text(
@@ -613,18 +607,37 @@ class ConfigurationTests(unittest.TestCase):
                     self.checkout, plan, 24680
                 )
                 self.assertEqual(result["host"], host)
-                if windows:
-                    self.assertIn(
-                        f"path: guid({guid}):/EFI/Microsoft/Boot/bootmgfw.efi",
-                        result["entries"],
-                    )
-                else:
-                    self.assertNotIn("/Windows", result["entries"])
-                    # A plan expecting Windows rejects a host without it.
-                    with self.assertRaisesRegex(ValueError, "does not match"):
-                        configuration.evaluate_configuration(
-                            self.checkout, replace(plan, windows=guid), 24680
-                        )
+
+    def test_limine_windows_marker_adds_windows_to_that_host_only(self):
+        # nix-workstation switch creates the marker when the firmware lists
+        # Windows Boot Manager; Limine restarts into that firmware entry.
+        local = self.checkout / "hosts/nixos-test/local"
+        (local / "installation.nix").write_text(
+            configuration.render_installation(self.plan, 24680)
+        )
+
+        def entries() -> str:
+            return json.loads(
+                common.command_output(
+                    [
+                        "nix",
+                        "--extra-experimental-features",
+                        "nix-command flakes",
+                        "eval",
+                        "--json",
+                        "--no-write-lock-file",
+                        f"path:{self.checkout}#nixosConfigurations"
+                        ".nixos-test.config.boot.loader.limine.extraEntries",
+                    ],
+                    timeout=300,
+                )
+            )
+
+        self.assertNotIn("/Windows", entries())
+        (local / "limine-windows").touch()
+        windows = entries()
+        self.assertIn("protocol: efi_boot_entry", windows)
+        self.assertIn("entry: Windows Boot Manager", windows)
 
     def test_real_nix_evaluation_selects_an_unambiguous_desktop_account(self):
         for accounts, explicit, expected in [

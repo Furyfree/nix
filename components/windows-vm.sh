@@ -75,7 +75,7 @@ cmd_install() {
 Type=Application
 Name=Windows
 Comment=Start the Windows VM and connect with RDP
-Exec=uwsm-app -- windows-vm launch
+Exec=windows-vm launch
 Icon=distributor-logo-windows
 Terminal=false
 Categories=System;Virtualization;

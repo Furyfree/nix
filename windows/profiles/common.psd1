@@ -14,7 +14,14 @@
 #                   Yq sets only their keys, in order
 #   GitWindows      $true writes ~\.config\git\windows, which git/config
 #                   includes: Windows' ssh.exe and 1Password's signing program
-#   Extensions      editor command = extension IDs, or a configs/ file of them
+#   Extensions      editor command = extension IDs and configs/ files of them
+#   Downloads       apps without a winget package, installed as yourself:
+#                   name = @{ Url of the installer; Signer, the name its
+#                   valid signature must carry; Args for a silent install;
+#                   Path, a file that exists once it is installed }
+#   Taskbar         a configs/ taskbar layout for the Start Layout policy;
+#                   Windows replaces the pins at the next sign-in
+#   QuickAccess     folders to pin in Explorer's sidebar, after its own pins
 #   Wsl             Distribution, plus Apt packages for Ubuntu or the Image
 #                   URL and its Sha256 for NixOS
 #   Power           powercfg values on the active plan, 'SUBGROUP SETTING' = AC
