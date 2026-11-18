@@ -114,8 +114,7 @@ card_borders = false
 clipboard_auto_paste = "off"
 font_family = "Inter"
 input_borders = false
-launch_apps_as_systemd_services = false
-launch_apps_custom_command = "uwsm-app -- $CMD"
+launch_apps_as_systemd_services = true
 polkit_agent = true
 popup_borders = false
 screen_time_enabled = true
@@ -137,7 +136,6 @@ variant = "default"
 
 [[shell.session.actions]]
 action = "logout"
-command = "uwsm stop"
 countdown_seconds = 5
 enabled = true
 shortcut = "x"

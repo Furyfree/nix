@@ -32,7 +32,8 @@ gestures {
     }
 }
 
-// UWSM passes Niri's cursor to the session, so it matches configs/uwsm/env.
+// Niri passes its cursor to the apps it starts; it matches XCURSOR_* in
+// components/desktop.nix, which the rest of the session gets.
 cursor {
     xcursor-theme "Bibata-Modern-Ice"
     xcursor-size 24
