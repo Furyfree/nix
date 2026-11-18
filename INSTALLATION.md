@@ -316,8 +316,8 @@ one with `reg import FILE`.
   Battle.net, Ubisoft Connect, Epic, Riot, Discord and the NVIDIA App.
 - Settings, which Windows keeps out of reach of a `.reg` file: the PC's
   nearby-sharing name (System → Nearby sharing); Brave Origin as the default
-  browser and PDF reader (Apps → Default apps); on the desktop, each monitor
-  at its highest refresh rate (System → Display → Advanced display).
+  browser and PDF reader (Apps → Default apps); on the desktop, the monitor at
+  its highest refresh rate (System → Display → Advanced display).
 - The wallpaper: put `charcoal-amber-mountain-horizon.jpg` in
   `~\Pictures\Wallpapers`; the next `nswitch` sets it for the desktop and the
   lock screen.
