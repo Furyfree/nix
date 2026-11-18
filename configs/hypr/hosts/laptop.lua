@@ -15,5 +15,3 @@ hl.bind(
     hl.dsp.exec_cmd("noctalia msg plugin 8bury/lid-guard:lid-guard-service all toggle"),
     { description = "Toggle Lid Guard" }
 )
-
-return {}

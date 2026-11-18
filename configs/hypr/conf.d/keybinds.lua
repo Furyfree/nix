@@ -344,16 +344,16 @@ for i = 1, 10 do
     hl.bind(
         mainMod .. " + " .. key,
         function()
-            hl.dispatch(hl.dsp.focus({ workspace = workspaces.on_current_monitor(i) }))
+            hl.dispatch(hl.dsp.focus({ workspace = i }))
         end,
-        { description = "Switch to local workspace " .. i }
+        { description = "Switch to workspace " .. i }
     )
     hl.bind(
         mainMod .. " + SHIFT + " .. key,
         function()
-            workspaces.move_window({ workspace = workspaces.on_current_monitor(i) })
+            workspaces.move_window({ workspace = i })
         end,
-        { description = "Move window to local workspace " .. i }
+        { description = "Move window to workspace " .. i }
     )
 end
 

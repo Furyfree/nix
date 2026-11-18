@@ -1,5 +1,5 @@
 # MSI Z690 desktop: Intel integrated graphics plus an NVIDIA RTX 3080, which
-# drives both monitors. The installer writes ./local with the detected
+# drives the monitor. The installer writes ./local with the detected
 # hardware and the chosen account; nswitch adds Windows to the boot menu.
 {
   config,
@@ -32,7 +32,7 @@
   nixpkgs.config.cudaCapabilities = [ "8.6" ];
   services.llama-cpp.package = pkgs.llama-cpp-cuda;
 
-  # Both monitors hang on the NVIDIA card. With an Intel driver in the early
+  # The monitor hangs on the NVIDIA card. With an Intel driver in the early
   # boot image, Plymouth binds the unused iGPU and the unlock prompt is
   # invisible; without one it draws on the firmware framebuffer. i915 and xe
   # still load after unlock.

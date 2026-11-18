@@ -1,30 +1,11 @@
--- Desktop monitors and workspaces; home/hyprland.nix links this file to
+-- Desktop monitor; home/hyprland.nix links this file to
 -- ~/.config/hypr/host.lua on the host named desktop.
 
--- BenQ XL2720Z is the main display; ZOWIE XL LCD is to its right. Matched by
--- description, so swapping cables keeps the layout. The firmware, Limine and
--- the unlock prompt use the RTX 3080's first DisplayPort, so the BenQ goes there.
-local benq = "desc:BNQ BenQ XL2720Z SCE00737SL0"
-local zowie = "desc:BNQ ZOWIE XL LCD 95H03263SL0"
-
+-- The BenQ XL2720Z, matched by description. The firmware, Limine and the
+-- unlock prompt use the RTX 3080's first DisplayPort, so it goes there.
 hl.monitor({
-    output = benq,
+    output = "desc:BNQ BenQ XL2720Z SCE00737SL0",
     mode = "1920x1080@144",
     position = "0x0",
     scale = 1,
 })
-hl.monitor({
-    output = zowie,
-    mode = "1920x1080@144",
-    position = "1920x0",
-    scale = 1,
-})
-hl.config({ cursor = { default_monitor = benq } })
-
-return {
-    -- Each monitor's ten workspace slots.
-    workspaces = {
-        [benq] = { 1, 2, 3, 4, 5, 11, 12, 13, 14, 15 },
-        [zowie] = { 6, 7, 8, 9, 10, 16, 17, 18, 19, 20 },
-    },
-}
