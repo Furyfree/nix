@@ -16,6 +16,25 @@ in
     gnome-disks.enable = true;
     # Opens its port 53317 for receiving.
     localsend.enable = true;
+    # The headless Chrome T3 Code downloads for its previews.
+    nix-ld.libraries = with pkgs; [
+      alsa-lib
+      at-spi2-core
+      dbus
+      expat
+      glib
+      libgbm
+      libx11
+      libxcb
+      libxcomposite
+      libxdamage
+      libxext
+      libxfixes
+      libxkbcommon
+      libxrandr
+      nspr
+      nss
+    ];
     obs-studio.enable = true;
   };
 
