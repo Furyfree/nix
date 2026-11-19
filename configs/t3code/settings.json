@@ -15,6 +15,10 @@
     {
       "provider": "pi",
       "model": "github-copilot/gpt-6.1-sol"
+    },
+    {
+      "provider": "claudeAgent",
+      "model": "claude-fable-5-2"
     }
   ],
   "projectSettingsFolded": true,
