@@ -2,7 +2,8 @@
 # reads them in Include order and applies each layer once. Keys:
 #   Include         layers applied first, by file name without .psd1
 #   Winget          package IDs; a hashtable adds Args (extra winget arguments;
-#                   {configs} is the checkout's configs folder)
+#                   {configs} is the checkout's configs folder) or User = $true
+#                   for an installer that refuses to run as administrator
 #   Store           Microsoft Store IDs
 #   Registry        files in windows/registry, imported in order
 #   Links           target = file or folder in configs/; ~ is the home folder,
@@ -14,10 +15,15 @@
 #   GitWindows      $true writes ~\.config\git\windows, which git/config
 #                   includes: Windows' ssh.exe and 1Password's signing program
 #   Extensions      editor command = extension IDs and configs/ files of them
-#   Taskbar         a configs/ taskbar layout for the Start Layout policy;
+#   Downloads       apps without a winget package, installed as yourself:
+#                   name = @{ Url of the installer; Signer, the name its
+#                   valid signature must carry; Args for a silent install;
+#                   Path, a file that exists once it is installed }
+#   Taskbar        a configs/ taskbar layout for the Start Layout policy;
 #                   Windows replaces the pins at the next sign-in
 #   QuickAccess     folders to pin in Explorer's sidebar, after its own pins
-#   Wsl             Distribution 'Ubuntu', plus Apt packages for it
+#   Wsl             Distribution, plus Apt packages for Ubuntu or the Image
+#                   URL and its Sha256 for NixOS
 #   Power           powercfg values on the active plan, 'SUBGROUP SETTING' = AC
 #   Services        start types, name = 'Manual', 'Automatic' or 'Disabled'
 #   NightLight      $true schedules night light from sunset to sunrise

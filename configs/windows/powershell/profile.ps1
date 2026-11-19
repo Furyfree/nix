@@ -42,6 +42,7 @@ Set-Alias lg lazygit
 Set-Alias c Clear-Host
 Set-Alias f fastfetch
 Set-Alias help tldr
+if (-not (Get-Command code -ErrorAction Ignore)) { Set-Alias code codium }
 
 # nix-workstation's switch, update and mise on Linux
 function nswitch { & "$HOME\Projects\nix\windows\apply.ps1" @args }

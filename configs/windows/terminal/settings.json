@@ -7,6 +7,7 @@
   ],
   "newTabMenu": [
     { "type": "profile", "profile": "PowerShell" },
+    { "type": "profile", "profile": "NixOS" },
     { "type": "profile", "profile": "Windows PowerShell" },
     { "type": "profile", "profile": "Command Prompt" }
   ],

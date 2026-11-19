@@ -20,7 +20,10 @@ Open work only; finished work lives in Git.
   run `nswitch` past the move.
 - Install from USB on a spare disk with the new layout.
 
-## Windows
+## Windows and WSL
 
 Profiles, apps, links and steps live in
 [#20](https://github.com/Furyfree/nix/issues/20).
+
+Fallback: if 1Password misbehaves in WSL, relay its agent with npiperelay and
+socat.

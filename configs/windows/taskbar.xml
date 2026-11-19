@@ -13,6 +13,7 @@
     <defaultlayout:TaskbarLayout>
       <taskbar:TaskbarPinList>
         <taskbar:DesktopApp DesktopApplicationID="Microsoft.Windows.Explorer" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="com.fastmail.Fastmail" PinGeneration="1" />
         <taskbar:DesktopApp DesktopApplicationLinkPath="%APPDATA%\Microsoft\Windows\Start Menu\Programs\Brave Origin.lnk" PinGeneration="1" />
         <taskbar:UWA AppUserModelID="Microsoft.WindowsTerminal_8wekyb3d8bbwe!App" PinGeneration="1" />
         <taskbar:UWA AppUserModelID="Agilebits.1Password_amwd9z03whsfe!Agilebits.OnePassword" PinGeneration="1" />
@@ -21,7 +22,12 @@
         <taskbar:DesktopApp DesktopApplicationLinkPath="%APPDATA%\Microsoft\Windows\Start Menu\Programs\Prism Launcher.lnk" PinGeneration="1" />
         <taskbar:DesktopApp DesktopApplicationLinkPath="%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\Riot Games\Riot Client.lnk" PinGeneration="1" />
         <taskbar:DesktopApp DesktopApplicationID="com.squirrel.Discord.Discord" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="org.whispersystems.signal-desktop" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationLinkPath="%APPDATA%\Microsoft\Windows\Start Menu\Programs\Spotify.lnk" PinGeneration="1" />
         <taskbar:DesktopApp DesktopApplicationID="ZedIndustries.Zed" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="VSCodium.VSCodium" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="com.squirrel.AnthropicClaude.claude" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="com.t3tools.t3code" PinGeneration="1" />
         <taskbar:DesktopApp DesktopApplicationID="com.nvidia.nvapp" PinGeneration="1" />
       </taskbar:TaskbarPinList>
     </defaultlayout:TaskbarLayout>

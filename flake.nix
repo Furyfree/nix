@@ -17,6 +17,10 @@
       url = "github:lgse/strata";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -75,6 +79,10 @@
       # The Ubuntu work laptop runs Home Manager on its own; it builds once its
       # ignored local/user.nix names the account.
       ubuntuUser = ./ubuntu/local/user.nix;
+
+      # NixOS in WSL on the Windows desktop profile; it builds once
+      # windows/apply.ps1 has written the ignored local/user.nix.
+      wslUser = ./nixos/hosts/wsl/local/user.nix;
     in
     {
       devShells.x86_64-linux.default =
@@ -115,7 +123,21 @@
       }
       // mkHost "desktop"
       // mkHost "laptop"
-      // mkHost "nixos-test";
+      // mkHost "nixos-test"
+      // nixpkgs.lib.optionalAttrs (builtins.pathExists wslUser) {
+        wsl = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./nixos/hosts/wsl/configuration.nix
+            home-manager.nixosModules.home-manager
+            wslUser
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+            }
+          ];
+        };
+      };
 
       homeConfigurations = nixpkgs.lib.optionalAttrs (builtins.pathExists ubuntuUser) {
         ubuntu = home-manager.lib.homeManagerConfiguration {

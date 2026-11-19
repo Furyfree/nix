@@ -123,8 +123,8 @@ eval:
           )
         )'
 
-# Evaluate each Mac profile and Ubuntu from a temporary checkout with a
-# placeholder user; neither has an output here without its ignored
+# Evaluate each Mac profile, Ubuntu and NixOS in WSL from a temporary checkout
+# with a placeholder user; none has an output here without its ignored
 # local/user.nix
 eval-local:
     #!/usr/bin/env bash
@@ -154,6 +154,12 @@ eval-local:
     printf 'ubuntu: '
     nix --extra-experimental-features 'nix-command flakes' eval --no-write-lock-file --raw \
         "path:$temporary#homeConfigurations.ubuntu.activationPackage.drvPath"
+    echo
+    mkdir -p "$temporary/nixos/hosts/wsl/local"
+    printf '{ wsl.defaultUser = "alice"; }\n' >"$temporary/nixos/hosts/wsl/local/user.nix"
+    printf 'wsl: '
+    nix --extra-experimental-features 'nix-command flakes' eval --no-write-lock-file --raw \
+        "path:$temporary#nixosConfigurations.wsl.config.system.build.toplevel.drvPath"
     echo
 
 # Build the installer ISO through the ignored result symlink

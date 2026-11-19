@@ -10,9 +10,11 @@ not break.
   ignored `local/profile` with the profile's name.
 - `apply.ps1`: `nswitch`; applies the profile's layers from `profiles/`, whose
   keys `common.psd1` lists, with the settings in `registry/`.
-- `profiles/`: `desktop` takes `vm` and `gaming`; `basic` stands apart. An app
+- `profiles/`: `desktop` takes `vm` and `gaming` and adds the apps I use every
+  day and NixOS in WSL (`../nixos/hosts/wsl/`); `basic` stands apart. An app
   or setting goes in the layer that needs it.
-- `../configs/windows/`: the PowerShell, Terminal, Office and taskbar files.
+- `../configs/windows/`: the PowerShell, Terminal, WSL, VSCodium, Office and
+  taskbar files.
 
 ## Verify
 
