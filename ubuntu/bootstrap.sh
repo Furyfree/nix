@@ -2,13 +2,15 @@
 # Set up the Ubuntu work laptop from this repository: install Git, clone this
 # repository, debloat Ubuntu once, install Nix, write ubuntu/local/user.nix,
 # switch Home Manager and install the apps. Each step checks first, so running
-# it again carries on where it stopped. On a fresh Ubuntu, in GNOME's terminal:
-#   curl -fsSL https://raw.githubusercontent.com/Furyfree/nix/main/ubuntu/bootstrap.sh | bash
+# it again carries on where it stopped. On a fresh Ubuntu, which has wget but
+# not curl, in GNOME's terminal:
+#   wget -qO- https://raw.githubusercontent.com/Furyfree/nix/main/ubuntu/bootstrap.sh | bash
 set -euo pipefail
 
 repo=$HOME/Projects/nix
 user_file=$repo/ubuntu/local/user.nix
 nix_bin=/nix/var/nix/profiles/default/bin
+debloated=${XDG_STATE_HOME:-$HOME/.local/state}/nix-workstation/debloated
 
 say() { printf '\n==> %s\n' "$*"; }
 die() {
@@ -22,23 +24,30 @@ check() {
   # apps.sh installs from this release's repositories.
   [[ ${ID-} == ubuntu && ${VERSION_CODENAME-} == resolute ]] || die 'this needs Ubuntu 26.04'
   ((EUID != 0)) || die 'run this as your own account, not as root'
-  # sudo asks on the terminal, since curl feeds this script on stdin.
+  # sudo asks on the terminal, since wget feeds this script on stdin.
   sudo -v
 }
 
-# Over HTTPS: the SSH keys arrive later through 1Password.
+# Over HTTPS: the SSH keys arrive later through 1Password. curl is for the Nix
+# installer.
 clone() {
-  command -v git >/dev/null || sudo env DEBIAN_FRONTEND=noninteractive apt-get install -qy git </dev/null
+  if ! command -v git >/dev/null || ! command -v curl >/dev/null; then
+    say 'Installing Git and curl'
+    sudo apt-get update -q </dev/null
+    sudo env DEBIAN_FRONTEND=noninteractive apt-get install -qy git curl </dev/null
+  fi
   [[ ! -e $repo ]] || return 0
   say "Cloning this repository to $repo"
   git clone https://github.com/Furyfree/nix.git "$repo"
 }
 
-# Once: debloat.sh purges snapd, so its absence means it has run.
+# Until it has finished once; a run cut short repeats it, which is safe.
 debloat() {
-  command -v snap >/dev/null || return 0
+  [[ ! -e $debloated ]] || return 0
   say 'Debloating Ubuntu'
   "$repo/ubuntu/debloat.sh" </dev/null
+  mkdir -p "${debloated%/*}"
+  touch "$debloated"
 }
 
 install_nix() {
