@@ -28,10 +28,13 @@ in
 
   # Merges for the Linux desktop: Noctalia's AI usage widget, gh opening the
   # browser in its own systemd unit, Codex's Linux desktop tools, and the agents
-  # only NixOS installs.
+  # only NixOS installs. VSCodium and the apps that set themselves as default
+  # save their files themselves.
   workstation.settingMerges = ''
     merge ${config.xdg.configHome}/ai-usagebar/config.toml ${../configs/ai-usagebar/config.toml} toml
     merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/linux.yml} yaml
+    merge ${config.xdg.configHome}/VSCodium/User/settings.json ${../configs/vscodium/settings.json} json
+    merge ${config.xdg.configHome}/mimeapps.list ${../configs/mimeapps.list} ini
     merge ${config.home.homeDirectory}/.codex/config.toml ${../configs/codex/linux.toml} toml
     merge ${config.home.homeDirectory}/.grok/config.toml ${../configs/grok/config.toml} toml
     merge ${config.xdg.configHome}/opencode/opencode.jsonc ${../configs/opencode/opencode.json} json
@@ -112,9 +115,6 @@ in
           "mise/conf.d/agents.toml"
           "mise/conf.d/linux-tools.toml"
           "mise/conf.d/nixos-tools.toml"
-          # Kept in GLib's own format, without comments: apps that set themselves
-          # as default rewrite the whole file that way.
-          "mimeapps.list"
           "voxtype/config.toml"
           "MangoHud/MangoHud.conf"
         ]
@@ -152,7 +152,6 @@ in
       })
       // lib.mapAttrs (_: name: { source = link "vscodium/${name}"; }) {
         "VSCodium/product.json" = "product.json";
-        "VSCodium/User/settings.json" = "settings.json";
         "VSCodium/User/keybindings.json" = "keybindings.json";
       };
   };

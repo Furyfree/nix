@@ -27,14 +27,14 @@
         '~\.config\mise\config.toml'                       = 'mise/config.toml'
         '~\.config\mise\conf.d\agents.toml'                = 'mise/conf.d/agents.toml'
         '~\.config\mise\conf.d\windows-tools.toml'         = 'mise/conf.d/windows-tools.toml'
-        # A list, which a merge would replace anyway
-        '%APPDATA%\Zed\keymap.json'                        = 'zed/keymap.json'
         '~\.ssh\config'                                    = 'ssh/windows.conf'
         '%LOCALAPPDATA%\1Password\config\ssh\agent.toml'   = '1password/ssh/personal.toml'
         '%DOCUMENTS%\PowerShell\profile.ps1'               = 'windows/powershell/profile.ps1'
     }
     Merges      = @{
         '%APPDATA%\Zed\settings.json'                      = @('zed/settings.json', 'windows/zed.json')
+        # Zed saves its keymap itself; a list, so the repository's replaces it.
+        '%APPDATA%\Zed\keymap.json'                        = 'zed/keymap.json'
         '~\.claude\settings.json'                          = 'claude/settings.json'
         '~\.codex\config.toml'                             = 'codex/config.toml'
         '%APPDATA%\GitHub CLI\config.yml'                  = 'gh/config.yml'

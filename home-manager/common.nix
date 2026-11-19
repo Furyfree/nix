@@ -89,10 +89,6 @@ in
 
     home.file = {
       ".zshenv".source = link "zsh/.zshenv";
-      # T3 Code keeps these next to its threads and secrets, which stay unlinked.
-      ".t3/userdata/settings.json".source = link "t3code/settings.json";
-      ".t3/userdata/client-settings.json".source = link "t3code/client-settings.json";
-      ".t3/userdata/keybindings.json".source = link "t3code/keybindings.json";
     }
     // lib.genAttrs [ "pull-projects" "nix-workstation" "agent-brave" ] (name: {
       target = ".local/bin/${name}";
@@ -128,6 +124,9 @@ in
           merge ${config.home.homeDirectory}/.codex/config.toml ${../configs/codex/config.toml} toml
           merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/config.yml} yaml
           merge ${config.home.homeDirectory}/.agent-browser/config.json ${agentBrowser} json
+          merge ${config.home.homeDirectory}/.t3/userdata/settings.json ${../configs/t3code/settings.json} json
+          merge ${config.home.homeDirectory}/.t3/userdata/client-settings.json ${../configs/t3code/client-settings.json} json
+          merge ${config.home.homeDirectory}/.t3/userdata/keybindings.json ${../configs/t3code/keybindings.json} json
           ${config.workstation.settingMerges}
         '';
   };
