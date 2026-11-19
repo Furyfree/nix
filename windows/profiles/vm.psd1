@@ -31,6 +31,7 @@
         '~\.ssh\config'                                    = 'ssh/windows.conf'
         '%LOCALAPPDATA%\1Password\config\ssh\agent.toml'   = '1password/ssh/personal.toml'
         '%DOCUMENTS%\PowerShell\profile.ps1'               = 'windows/powershell/profile.ps1'
+        '~\.config\fastfetch\ff.lua'                       = 'fastfetch/ff.lua'
     }
     Merges      = @{
         '%APPDATA%\Zed\settings.json'                      = @('zed/settings.json', 'windows/zed.json')
@@ -39,6 +40,8 @@
         '~\.claude\settings.json'                          = 'claude/settings.json'
         '~\.codex\config.toml'                             = 'codex/config.toml'
         '%APPDATA%\GitHub CLI\config.yml'                  = 'gh/config.yml'
+        # The shared layout with the Windows logo, as the Mac gets its own.
+        '~\.config\fastfetch\config.jsonc'                 = @('fastfetch/config.jsonc', 'windows/fastfetch.json')
         # Windows Terminal adds its own profiles to this file. Its new-tab menu
         # lists profiles by name, NixOS second on desktop; the others hide.
         '%LOCALAPPDATA%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json' =

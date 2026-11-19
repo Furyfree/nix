@@ -19,9 +19,8 @@
   },
   "modules": [
     {
-      "type": "command",
-      "text": "printf %s \"${XDG_CONFIG_HOME:-$HOME/.config}/fastfetch/ff.lua\"",
-      "format": "lua:dofile((...).result)"
+      "type": "title",
+      "format": "lua:dofile((...).homeDir .. '.config/fastfetch/ff.lua')"
     },
     {
       "type": "os",
@@ -37,6 +36,7 @@
     },
     {
       "type": "packages",
+      "disabled": [],
       "format": "lua:ff.packages = ..."
     },
     {
@@ -77,9 +77,13 @@
       "format": "lua:ff.disk = ..."
     },
     {
+      "type": "datetime",
+      "format": "lua:ff.now = ..."
+    },
+    {
       "type": "command",
       "text": "sh \"${XDG_CONFIG_HOME:-$HOME/.config}/fastfetch/ff.sh\" age",
-      "format": "lua:ff.age = (...).result",
+      "format": "lua:ff.ageDays = tonumber((...).result)",
       "timeout": 1000
     },
     {
@@ -101,7 +105,7 @@
     {
       "type": "custom",
       "key": "OS          ",
-      "format": "lua:return ff.text(ff.os and (ff.os.name .. ' ' .. ff.os.versionId))"
+      "format": "lua:return ff.text(ff.osName())"
     },
     {
       "type": "custom",
@@ -111,7 +115,7 @@
     {
       "type": "custom",
       "key": "OS age      ",
-      "format": "lua:return ff.text(ff.age or 'not recorded')"
+      "format": "lua:return ff.text(ff.ageText())"
     },
     {
       "type": "custom",
@@ -131,7 +135,7 @@
     {
       "type": "custom",
       "key": "DE          ",
-      "format": "lua:return ff.text(ff.name(ff.de) or ff.noctalia)"
+      "format": "lua:return ff.deText()"
     },
     {
       "type": "custom",

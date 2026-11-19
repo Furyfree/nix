@@ -449,7 +449,7 @@ foreach ($target in $want.Merges.Keys) {
             New-Item -ItemType Directory -Force (Split-Path $path) | Out-Null
             New-Item $path | Out-Null
         }
-        $format = @{ '.json' = 'json'; '.toml' = 'toml'; '.yml' = 'yaml' }[[IO.Path]::GetExtension($path)]
+        $format = @{ '.json' = 'json'; '.jsonc' = 'json'; '.toml' = 'toml'; '.yml' = 'yaml' }[[IO.Path]::GetExtension($path)]
         # A list merges entry by entry: Zed's keymap by context, as Home Manager's
         # Zed module merges it, and T3 Code's keybindings by key and when, as
         # home-manager/common.nix merges them. Entries only the machine has stay.
