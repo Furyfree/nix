@@ -16,6 +16,13 @@ in
   '';
 
   xdg = {
+    # A terminal app from Mise's Linux tools; launch tui opens it in its own
+    # Ghostty window, or focuses the one already open.
+    desktopEntries.vm-curator = {
+      name = "VM Curator";
+      exec = "launch tui vm-curator";
+      icon = "qemu";
+    };
     userDirs = {
       enable = true;
       createDirectories = true;
