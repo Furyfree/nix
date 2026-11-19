@@ -2,29 +2,19 @@
 # Shell rows for config.jsonc; fastfetch's Lua cannot read files or run commands.
 
 os_age() {
+  # Whole days since installation, for ff.lua to word; nothing when unknown.
   # NixOS writes machine-id on first boot after installation; macOS writes
   # .AppleSetupDone when Setup Assistant finishes.
   birth=$(stat -c %W /etc/machine-id 2>/dev/null ||
-    stat -f %B /var/db/.AppleSetupDone 2>/dev/null) || birth=
-  now=$(date +%s 2>/dev/null) || now=
+    stat -f %B /var/db/.AppleSetupDone 2>/dev/null) || return
+  now=$(date +%s 2>/dev/null) || return
   case "$birth:$now" in
-    *[!0-9:]* | :* | *:)
-      printf 'not recorded'
-      return
-      ;;
+    *[!0-9:]* | :* | *:) return ;;
   esac
   if [ "$birth" -le 0 ] || [ "$birth" -gt "$now" ]; then
-    printf 'not recorded'
     return
   fi
-  days=$(((now - birth) / 86400))
-  if [ "$days" -eq 0 ]; then
-    printf '<1 day (estimate)'
-  elif [ "$days" -eq 1 ]; then
-    printf '~1 day'
-  else
-    printf '~%s days' "$days"
-  fi
+  printf '%s' $(((now - birth) / 86400))
 }
 
 noctalia_label() {
