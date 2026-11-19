@@ -4,5 +4,3 @@ resvg = "latest"
 "github:ifd3f/caligula" = { version = "latest", bin = "caligula" }
 # Upstream publishes Linux x86_64 binaries only.
 "github:mroboff/vm-curator" = { version = "latest", os = ["linux/x64"], asset_pattern = "vm-curator-*-linux-x86_64.tar.gz" }
-# Usage data for Noctalia's AI usage widget.
-"cargo:ai-usagebar" = "latest"

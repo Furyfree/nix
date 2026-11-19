@@ -1,6 +1,8 @@
 # Tools only the NixOS desktops install; nixos/home.nix links this file.
 [tools]
 tinymist = "latest"
+# Usage data for Noctalia's AI usage widget.
+"cargo:ai-usagebar" = "latest"
 
 # The other agent CLIs; ai-workflow links their shared rules and skills.
 antigravity-cli = "latest"
