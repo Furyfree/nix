@@ -1,9 +1,20 @@
-# Every machine. conf.d/ adds more by machine: runtimes.toml on Linux, the
-# personal Mac and Windows, agents.toml on Linux, the work Mac and Windows,
-# linux-tools.toml on Linux, windows-tools.toml on Windows.
+# Every machine. conf.d/ adds more by machine: agents.toml on Linux, the work
+# Mac and Windows, linux-tools.toml on Linux, windows-tools.toml on Windows.
 [tools]
 # Runs the npm tools below.
 node = "lts"
+
+# Language runtimes: current LTS families, each at its latest patch
+dotnet = "10"
+go = "latest"
+java = "corretto-25"
+rust = { version = "stable", components = "rust-analyzer" }
+uv = "latest"
+
+# Go's language server and linters, which need Go.
+"go:golang.org/x/tools/gopls" = "latest"
+staticcheck = "latest"
+golangci-lint = "latest"
 
 # ACP adapters for Obsidian's Agent Client; OpenCode and Grok speak ACP natively.
 "npm:@agentclientprotocol/claude-agent-acp" = "latest"

@@ -95,7 +95,6 @@ in
           "udiskie/config.yml"
           "mise/conf.d/agents.toml"
           "mise/conf.d/linux-tools.toml"
-          "mise/conf.d/runtimes.toml"
           # Kept in GLib's own format, without comments: apps that set themselves
           # as default rewrite the whole file that way.
           "mimeapps.list"
