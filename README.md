@@ -1,8 +1,10 @@
 # Nix
 
 NixOS with integrated Home Manager for my workstations, nix-darwin with Home
-Manager for the Macs, and PowerShell profiles for Windows. To set up a machine,
-follow [INSTALLATION.md](INSTALLATION.md).
+Manager for the Macs, Home Manager on its own for the Ubuntu work laptop, and
+PowerShell profiles for Windows. To set up a machine, follow
+[INSTALLATION.md](INSTALLATION.md), or [ubuntu/README.md](ubuntu/README.md)
+for Ubuntu.
 
 ## Daily use
 
@@ -33,6 +35,10 @@ pull-projects      # fast-forward every clean repo in ~/Projects
 To update, run `git pull`, `nupdate`, then `nswitch`, and commit and push
 `flake.lock` and `pins/_sources`; other machines then run `pull-projects` and
 `nswitch`. `nupdate` and `npin` never ask or switch, so an agent can run them.
+
+On Ubuntu, `nswitch` switches Home Manager, then `ubuntu/apps.sh` installs the
+apps that are missing; `git pull` brings `flake.lock` from NixOS, so `nupdate`
+and `npin` run on NixOS only.
 
 On Windows, PowerShell on vm and desktop has `nswitch`, `nupdate` and `mup`;
 the first two run `windows\apply.ps1`, `nupdate` with `-Update`, which upgrades

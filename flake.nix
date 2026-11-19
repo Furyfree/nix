@@ -71,6 +71,10 @@
       # builds only once its ignored local/user.nix names the account and this
       # Mac's profile.
       macUser = ./hosts/macos/local/user.nix;
+
+      # The Ubuntu work laptop runs Home Manager on its own; it builds once its
+      # ignored local/user.nix names the account.
+      ubuntuUser = ./hosts/ubuntu/local/user.nix;
     in
     {
       devShells.x86_64-linux.default =
@@ -112,6 +116,16 @@
       // mkHost "desktop"
       // mkHost "laptop"
       // mkHost "nixos-test";
+
+      homeConfigurations = nixpkgs.lib.optionalAttrs (builtins.pathExists ubuntuUser) {
+        ubuntu = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          modules = [
+            ./ubuntu/home.nix
+            ubuntuUser
+          ];
+        };
+      };
 
       darwinConfigurations = nixpkgs.lib.optionalAttrs (builtins.pathExists macUser) {
         macos = nix-darwin.lib.darwinSystem {

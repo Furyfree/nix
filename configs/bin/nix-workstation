@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Rebuild, update and maintain this workstation: NixOS on Linux, nix-darwin on
-# macOS. aliases.zsh adds nswitch, nupdate, npin, ninfo, nrollback, nclean,
+# macOS, and Home Manager on its own on Linux without NixOS (Ubuntu). aliases.zsh adds nswitch, nupdate, npin, ninfo, nrollback, nclean,
 # nsearch, ndesktop, mup and fup.
 set -euo pipefail
 
@@ -10,6 +10,9 @@ repo=${NH_FLAKE#path:}
 
 darwin=false
 [[ $OSTYPE == darwin* ]] && darwin=true
+# Linux without NixOS: Home Manager alone, and the distribution's own apps.
+home=false
+[[ $OSTYPE == linux* && ! -e /etc/NIXOS ]] && home=true
 
 help() {
   case ${1-} in
@@ -28,6 +31,9 @@ never removed by itself; delete it to drop the entry.
 On macOS: build the Mac's nix-darwin configuration, show the changes, ask,
 then switch (nh darwin switch --ask). The switch installs missing Homebrew
 apps and writes the macOS settings.
+
+On Linux without NixOS: switch Home Manager (nh home switch --ask), then
+ubuntu/apps.sh installs the apps that are missing.
 EOF
       ;;
     update)
@@ -41,7 +47,8 @@ asks or uses sudo, so an agent can run it. Nothing new skips the build. A
 failed step leaves the updated files in place and prints the undo command.
 
 On macOS, the pinned apps are skipped, and nix flake check replaces just
-check, which needs Linux tools.
+check, which needs Linux tools. Without NixOS, flake.lock comes from NixOS
+through Git: run git pull, then nswitch.
 EOF
       ;;
     pin)
@@ -61,7 +68,7 @@ usage: nix-workstation info   (alias: ninfo)
 
 List system generations with build dates, versions and sizes (nh os info).
 On macOS, list nix-darwin generations (darwin-rebuild --list-generations);
-nrollback takes their numbers.
+nrollback takes their numbers. Without NixOS, list Home Manager generations.
 EOF
       ;;
     rollback)
@@ -71,7 +78,8 @@ usage: nix-workstation rollback GENERATION   (alias: nrollback)
 macOS: switch to an earlier nix-darwin generation from nix-workstation info
 (darwin-rebuild --switch-generation). Homebrew apps and written macOS
 settings stay as they are.
-On Linux, roll back from the boot menu or a Snapper snapshot instead.
+On NixOS, roll back from the boot menu or a Snapper snapshot instead. Without
+NixOS, run an older Home Manager generation's activate script from ninfo.
 EOF
       ;;
     clean)
@@ -80,7 +88,8 @@ usage: nix-workstation clean   (alias: nclean)
 
 Remove old generations and unused store paths. Keeps the newest 10, the boot
 menu's entries, and project build roots; lists what goes and asks first
-(nh clean all --no-gcroots --keep 10 --ask).
+(nh clean all --no-gcroots --keep 10 --ask). Without NixOS, only your own
+generations (nh clean user).
 EOF
       ;;
     search)
@@ -271,6 +280,14 @@ cmd_switch_darwin() {
   nh darwin switch --ask --hostname macos
 }
 
+# Home Manager first, so a failing app never blocks the terminal.
+cmd_switch_home() {
+  [[ -e $repo/hosts/ubuntu/local/user.nix ]] ||
+    die 'hosts/ubuntu/local/user.nix is missing; it names the account'
+  nh home switch --ask --configuration ubuntu
+  "$repo/ubuntu/apps.sh"
+}
+
 # update and pin change only flake.lock and pins/_sources, then check and
 # build without switching. The copies taken first give the summary.
 saved=
@@ -376,6 +393,7 @@ bump_pins() {
 }
 
 cmd_update() {
+  $home && die 'flake.lock comes from NixOS: run git pull, then nswitch'
   check_names 'flake input' "$@" < <(jq -r '.nodes.root.inputs | keys[]' "$repo/flake.lock")
   prepare
   nix flake update "$@" --flake "$NH_FLAKE"
@@ -386,7 +404,8 @@ cmd_update() {
 }
 
 cmd_pin() {
-  $darwin && die 'pinned apps are Linux only'
+  $darwin && die 'pinned apps are NixOS only'
+  $home && die 'pinned apps are NixOS only'
   check_names 'pinned app' "$@" < <(sed -n 's/^\[\(.*\)\]$/\1/p' "$repo/pins/nvfetcher.toml")
   prepare
   bump_pins "$@"
@@ -404,7 +423,13 @@ done
 
 [[ $NH_FLAKE == path:* ]] || die 'NH_FLAKE must be a path: flake'
 case $command in
-  clean) nh clean all --no-gcroots --keep 10 --ask "$@" ;;
+  clean)
+    if $home; then
+      nh clean user --no-gcroots --keep 10 --ask "$@"
+    else
+      nh clean all --no-gcroots --keep 10 --ask "$@"
+    fi
+    ;;
   search) nh search "$@" ;;
   update) cmd_update "$@" ;;
   pin) cmd_pin "$@" ;;
@@ -424,14 +449,25 @@ case $command in
       esac
     else
       case $command in
-        switch) (($# == 0)) || usage switch; cmd_switch ;;
-        info) nh os info "$@" ;;
+        switch)
+          (($# == 0)) || usage switch
+          if $home; then cmd_switch_home; else cmd_switch; fi
+          ;;
+        info)
+          if $home; then
+            nix profile history --profile "${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/home-manager"
+          else
+            nh os info "$@"
+          fi
+          ;;
         desktop)
+          $home && die 'pick the session at the login screen'
           (($# <= 1)) || usage desktop
           cmd_desktop "$@"
           ;;
         rollback)
-          die 'on Linux, roll back from the boot menu or a Snapper snapshot'
+          $home && die "run an older Home Manager generation's activate script from ninfo"
+          die 'on NixOS, roll back from the boot menu or a Snapper snapshot'
           ;;
         firmware)
           (($# == 0)) || usage firmware

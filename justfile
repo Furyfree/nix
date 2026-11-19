@@ -123,8 +123,9 @@ eval:
           )
         )'
 
-# Evaluate each Mac profile from a temporary checkout with a placeholder user;
-# the Mac has no output here without its ignored local/user.nix
+# Evaluate each Mac profile and Ubuntu from a temporary checkout with a
+# placeholder user; neither has an output here without its ignored
+# local/user.nix
 eval-local:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -147,6 +148,13 @@ eval-local:
             "path:$temporary#darwinConfigurations.macos.system.drvPath"
         echo
     done
+    mkdir -p "$temporary/hosts/ubuntu/local"
+    printf '{ home.username = "alice"; home.homeDirectory = "/home/alice"; }\n' \
+        >"$temporary/hosts/ubuntu/local/user.nix"
+    printf 'ubuntu: '
+    nix --extra-experimental-features 'nix-command flakes' eval --no-write-lock-file --raw \
+        "path:$temporary#homeConfigurations.ubuntu.activationPackage.drvPath"
+    echo
 
 # Build the installer ISO through the ignored result symlink
 build-iso:
