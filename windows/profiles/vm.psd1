@@ -33,7 +33,7 @@
     }
     Merges      = @{
         '%APPDATA%\Zed\settings.json'                      = @('zed/settings.json', 'windows/zed.json')
-        # Zed saves its keymap itself; a list, so the repository's replaces it.
+        # Zed saves its keymap itself.
         '%APPDATA%\Zed\keymap.json'                        = 'zed/keymap.json'
         '~\.claude\settings.json'                          = 'claude/settings.json'
         '~\.codex\config.toml'                             = 'codex/config.toml'

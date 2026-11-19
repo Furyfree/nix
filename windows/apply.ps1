@@ -339,9 +339,9 @@ foreach ($target in $want.Links.Keys) {
 
 # A link this script made that the profile no longer has goes, as Home Manager
 # does it, but only while it still points into the checkout's configs.
+$configs = [IO.Path]::GetFullPath((Join-Path $root 'configs')) + [IO.Path]::DirectorySeparatorChar
 Invoke-Step 'old links' {
     $file = Join-Path $state 'links.json'
-    $configs = [IO.Path]::GetFullPath((Join-Path $root 'configs')) + [IO.Path]::DirectorySeparatorChar
     $wanted = @($want.Links.Keys | ForEach-Object { Resolve-Target $_ })
     $made = @(if (Test-Path $file) { Get-Content $file -Raw | ConvertFrom-Json })
     foreach ($path in $made | Where-Object { $wanted -notcontains $_ }) {
@@ -397,13 +397,25 @@ foreach ($target in $want.Merges.Keys) {
     Invoke-Step "merge $target" {
         if (-not $yq) { throw 'Mise has no yq.' }
         Assert-RealFolder $path
+        # A link from before the file was merged would carry the merge into the
+        # checkout.
+        $item = Get-Item $path -Force -ErrorAction Ignore
+        if ($item.LinkType -and $item.Target.StartsWith($configs, [StringComparison]::OrdinalIgnoreCase)) {
+            Write-Host "unlink   $path"
+            Remove-Item $path -Force
+        }
         if (-not (Test-Path $path)) {
             New-Item -ItemType Directory -Force (Split-Path $path) | Out-Null
             New-Item $path | Out-Null
         }
         $format = @{ '.json' = 'json'; '.toml' = 'toml'; '.yml' = 'yaml' }[[IO.Path]::GetExtension($path)]
+        # A list, such as Zed's keymap, merges by context, as Home Manager's Zed
+        # module merges it.
+        $expression = if ("$(Get-Content $patches[0] -Raw)".TrimStart().StartsWith('[')) {
+            '[.] | flatten(1) | group_by(.context) | map(. as $g | $g[] as $item ireduce ({}; . * $item))'
+        } else { '. as $item ireduce ({}; . * $item)' }
         # An empty file is no document to Yq, so the patches alone remain.
-        $merged = & $yq ea -p $format -o $format '. as $item ireduce ({}; . * $item)' $path @patches
+        $merged = & $yq ea -p $format -o $format $expression $path @patches
         if ($LASTEXITCODE -ne 0) { Write-Host "skip     $target`: Yq cannot merge it"; return }
         $merged = $merged -join "`n"
         if ($merged -ne "$(Get-Content $path -Raw)".TrimEnd()) {
