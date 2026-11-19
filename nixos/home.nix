@@ -9,12 +9,7 @@
 }:
 
 let
-  link =
-    path:
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
-  # A live link to one of the checkout's own scripts in bin/.
-  script =
-    name: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/bin/${name}";
+  inherit (config.lib.workstation) link script;
   # A copy of a package's launcher entry, hidden from app menus but still
   # usable for file associations.
   hidden =

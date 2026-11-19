@@ -20,9 +20,7 @@ let
     }:
 
     let
-      link =
-        path:
-        config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
+      inherit (config.lib.workstation) link;
       host = "hypr/hosts/${osConfig.networking.hostName}.lua";
       noctalia = builtins.fromTOML (builtins.readFile ../configs/noctalia/config.toml);
     in

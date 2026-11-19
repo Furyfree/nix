@@ -8,13 +8,7 @@
 }:
 
 let
-  # A live link to a file or folder in the checkout's configs/.
-  link =
-    path:
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
-  # A live link to one of the checkout's own scripts in bin/.
-  script =
-    name: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/bin/${name}";
+  inherit (config.lib.workstation) link script;
   # agent-browser expands no ~ in its config, so Nix writes the paths. The
   # profile is the agents' own, never mine: it keeps passed bot checks and sign-ins.
   agentBrowser = pkgs.writeText "agent-browser.json" (
@@ -37,6 +31,17 @@ in
   };
 
   config = {
+    # Live links into the checkout, for every Home Manager module here.
+    lib.workstation = {
+      # A file or folder in configs/.
+      link =
+        path:
+        config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
+      # One of the checkout's own scripts in bin/.
+      script =
+        name: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/bin/${name}";
+    };
+
     xdg = {
       enable = true;
       configFile =

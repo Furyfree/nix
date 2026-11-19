@@ -10,12 +10,7 @@
 }:
 
 let
-  link =
-    path:
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
-  # A live link to one of the checkout's own scripts in bin/.
-  script =
-    name: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/bin/${name}";
+  inherit (config.lib.workstation) link script;
   # Docker and systemd come from apt, so the script uses theirs.
   windows-vm = import ../bin/windows-vm.nix { inherit pkgs; };
 in
