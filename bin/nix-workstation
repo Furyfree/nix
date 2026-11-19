@@ -339,7 +339,8 @@ finish() {
     else
       printf 'Built, not applied. Run nswitch to apply. Undo: ' >&2
     fi
-    printf 'git -C %q restore flake.lock nixos/pins/_sources configs/nvim/nvim-pack-lock.json\n' "$repo" >&2
+    # The plugins nvim_plugins installed stay until nswitch follows the lock.
+    printf "git -C %q restore flake.lock nixos/pins/_sources configs/nvim/nvim-pack-lock.json; the next nswitch puts Neovim's plugins back\n" "$repo" >&2
   fi
   rm -rf -- "$saved"
   return "$result"
