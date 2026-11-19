@@ -13,7 +13,7 @@ rules that must not break.
 - `apps.sh`: the app list, which `nswitch` runs after Home Manager. It installs
   only what is missing, must-haves first; a nice-to-have that fails is
   reported and skipped. A new app goes in the part its setup needs.
-- `bootstrap.sh`: the first setup, through `curl … | bash`; it runs
+- `bootstrap.sh`: the first setup, through `wget … | bash`; it runs
   `debloat.sh` once, installs Nix, writes `local/user.nix`, switches Home
   Manager and runs `apps.sh`.
 - `debloat.sh`: what `bootstrap.sh` removes from a fresh install.

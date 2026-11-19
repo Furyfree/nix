@@ -9,15 +9,15 @@ agents; nothing here touches them.
 1. Ubuntu Desktop 26.04, Default selection. In GNOME's terminal:
 
    ```bash
-   curl -fsSL https://raw.githubusercontent.com/Furyfree/nix/main/ubuntu/bootstrap.sh | bash
+   wget -qO- https://raw.githubusercontent.com/Furyfree/nix/main/ubuntu/bootstrap.sh | bash
    ```
 
-   It installs Git and clones this repository over HTTPS to `~/Projects/nix`,
-   runs `debloat.sh` once, installs Nix with flakes, writes the ignored
-   `ubuntu/local/user.nix` with your account, switches Home Manager and runs
-   `apps.sh`. `debloat.sh` removes the snaps, telemetry and unused services,
-   and stops before removing one of Ubuntu's base packages. After an error,
-   run it again; it carries on.
+   It installs Git and curl, clones this repository over HTTPS to
+   `~/Projects/nix`, runs `debloat.sh` once, installs Nix with flakes, writes
+   the ignored `ubuntu/local/user.nix` with your account, switches Home Manager
+   and runs `apps.sh`. `debloat.sh` removes the snaps, telemetry and unused
+   services, and stops before removing one of Ubuntu's base packages. After an
+   error, run it again; it carries on.
 2. Reboot, for the debloat, zsh and the `docker` and `kvm` groups. Then
    `mise install`, and 1Password, the work machine's SSH keys and `gh` as in
    [SSH keys](../README.md#ssh-keys).
