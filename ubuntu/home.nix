@@ -1,6 +1,6 @@
-# Home Manager for the Ubuntu work laptop: the terminal and app configs from
-# home-manager/common.nix, with the work SSH keys. apps.sh installs the apps. The
-# flake adds the ignored ubuntu/local/user.nix with the account, e.g.:
+# Home Manager for the Ubuntu work laptop: the terminal, app configs and Niri
+# desktop from home-manager/, with the work SSH keys. apps.sh installs the
+# apps. The flake adds the ignored ubuntu/local/user.nix with the account, e.g.:
 #   { home.username = "alice"; home.homeDirectory = "/home/alice"; }
 {
   config,
@@ -10,12 +10,15 @@
 }:
 
 let
-  inherit (config.lib.workstation) link script;
   # Docker and systemd come from apt, so the script uses theirs.
   windows-vm = import ../bin/windows-vm.nix { inherit pkgs; };
 in
 {
-  imports = [ ../home-manager/common.nix ];
+  imports = [
+    ../home-manager/common.nix
+    ../home-manager/linux.nix
+    ../home-manager/niri.nix
+  ];
 
   # Nix's profile on the session's paths. Ubuntu's own drivers serve the GUI
   # apps, which come from apt and Flatpak.
@@ -37,20 +40,20 @@ in
         (writeShellScriptBin "op-ssh-sign" ''exec /opt/1Password/op-ssh-sign "$@"'')
       ])
       ++ [ windows-vm ];
-    file.".local/bin/launch".source = script "launch";
     stateVersion = "26.11";
   };
   fonts.fontconfig.enable = true;
 
   workstation = {
     sshProfile = "work";
-    # Noctalia's AI usage widget, gh opening the browser in its own systemd unit
-    # and VSCodium, which saves its settings itself, as on NixOS.
-    settingMerges = ''
-      merge ${config.xdg.configHome}/ai-usagebar/config.toml ${../configs/ai-usagebar/config.toml} toml
-      merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/linux.yml} yaml
-      merge ${config.xdg.configHome}/VSCodium/User/settings.json ${../configs/vscodium/settings.json} json
-    '';
+    # configs/niri/hosts/ubuntu.kdl, a fixed name rather than the laptop's own.
+    host = "ubuntu";
+    # AirPods control, the tailnet and the screen recorder stay on NixOS.
+    noctaliaPluginsOff = [
+      "harveywuk/airpods"
+      "rylos/tailnet"
+      "noctalia/screen_recorder"
+    ];
   };
 
   # Zed installs and updates itself; Home Manager merges its settings.
@@ -68,13 +71,8 @@ in
       );
       "windows-vm/windows-vm.rules".text = windows-vm.passthru.polkitRule;
     };
-    configFile =
-      lib.genAttrs [ "mise/conf.d/agents.toml" "mise/conf.d/linux-tools.toml" ] (name: {
-        source = link name;
-      })
-      // lib.mapAttrs (_: name: { source = link "vscodium/${name}"; }) {
-        "VSCodium/product.json" = "product.json";
-        "VSCodium/User/keybindings.json" = "keybindings.json";
-      };
+    # Noctalia's renderer and reload hook for Ghostty, from Noctalia's .deb.
+    configFile."noctalia/templates/ghostty".source =
+      config.lib.file.mkOutOfStoreSymlink "/usr/share/noctalia/assets/templates/ghostty";
   };
 }

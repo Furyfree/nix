@@ -1,4 +1,4 @@
-// Laptop monitor and keys; home/niri.nix links this file to
+// Laptop monitor and keys; home-manager/niri.nix links this file to
 // ~/.config/niri/host.kdl on the host named laptop.
 
 // The 2880x1800 internal panel uses a 1920x1200 logical workspace.

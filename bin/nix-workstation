@@ -284,7 +284,8 @@ cmd_switch_darwin() {
 cmd_switch_home() {
   [[ -e $repo/ubuntu/local/user.nix ]] ||
     die 'ubuntu/local/user.nix is missing; it names the account'
-  nh home switch --ask --configuration ubuntu
+  # A file Ubuntu made where a link goes is kept with this ending, as on the Mac.
+  nh home switch --ask --configuration ubuntu --backup-extension before-home-manager
   "$repo/ubuntu/apps.sh"
 }
 
