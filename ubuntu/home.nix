@@ -64,8 +64,8 @@ in
     sshProfile = "work";
     # configs/niri/hosts/ubuntu.kdl, a fixed name rather than the laptop's own.
     host = "ubuntu";
-    # Ptyxis, Ubuntu's own terminal, in Noctalia's colours; its preferences
-    # pick the Noctalia palette once.
+    # Ptyxis, Ubuntu's own terminal, in Noctalia's colours; dconf.settings
+    # below picks the palette.
     noctaliaTemplates.ptyxis = {
       enabled = true;
       input_path = "templates/ptyxis.palette";
@@ -89,6 +89,16 @@ in
         inode/directory=org.gnome.Nautilus.desktop
       ''} ini
     '';
+  };
+
+  # Ptyxis names its profile with a random ID on first start, so this one has a
+  # fixed ID that can carry Noctalia's palette (noctaliaTemplates.ptyxis).
+  dconf.settings = {
+    "org/gnome/Ptyxis" = {
+      default-profile-uuid = "4b6a268a8d504a9ebb29e6f66ce9780d";
+      profile-uuids = [ "4b6a268a8d504a9ebb29e6f66ce9780d" ];
+    };
+    "org/gnome/Ptyxis/Profiles/4b6a268a8d504a9ebb29e6f66ce9780d".palette = "noctalia";
   };
 
   # Zed installs and updates itself; Home Manager merges its settings.
