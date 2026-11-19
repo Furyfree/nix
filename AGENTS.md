@@ -83,7 +83,7 @@ GitHub issues, and a workaround links its issue.
 - `bin/`: our own scripts, linked into `~/.local/bin`: `nix-workstation` (the
   `n*` aliases), `pull-projects`, `launch`, `agent-brave`, and `windows-vm`,
   which `windows-vm.nix` builds for NixOS and Ubuntu.
-- `justfile`: the local gates.
+- `justfile`: the local gates; its longer recipes run scripts in `scripts/`.
 
 ## Ways to hurt yourself
 

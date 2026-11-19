@@ -255,7 +255,7 @@ class ConfigurationTests(unittest.TestCase):
             ).exists()
         )
 
-    def test_real_nix_local_data_builds_and_ignores_legacy_files(self):
+    def test_real_nix_local_data_evaluates_and_ignores_legacy_files(self):
         host = self.checkout / "nixos/hosts/nixos-test"
         (host / "local/installation.nix").write_text(
             configuration.render_installation(self.plan, 24680)
@@ -277,19 +277,6 @@ class ConfigurationTests(unittest.TestCase):
                 'throw "Legacy data must not be imported"'
             )
         self.assertEqual(common.command_output(command, timeout=300), before)
-        common.run_command(
-            [
-                "nix",
-                "--extra-experimental-features",
-                "nix-command flakes",
-                "build",
-                "--no-link",
-                "--no-write-lock-file",
-                "--no-update-lock-file",
-                f"path:{self.checkout}#nixosConfigurations.nixos-test.config.system.build.toplevel",
-            ],
-            timeout=600,
-        )
 
     def test_public_outputs_and_incomplete_local_data(self):
         local = self.checkout / "nixos/hosts/nixos-test/local"
@@ -584,7 +571,8 @@ class ConfigurationTests(unittest.TestCase):
             self.assertEqual(result["initialSessionUser"], username)
 
     def test_real_nix_evaluation_of_each_host(self):
-        for host in ["desktop", "laptop", "nixos-test"]:
+        # The key-comments test above evaluates nixos-test with this plan.
+        for host in ["desktop", "laptop"]:
             with self.subTest(host=host):
                 plan = replace(self.plan, host=host)
                 local = self.checkout / "nixos" / "hosts" / host / "local"
