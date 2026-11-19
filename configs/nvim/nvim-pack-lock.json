@@ -6,7 +6,7 @@
     },
     "mini.nvim": {
       "rev": "8831fa150fa26492cfe135801fa498132f1491d2",
-      "src": "https://github.com/echasnovski/mini.nvim"
+      "src": "https://github.com/nvim-mini/mini.nvim"
     },
     "nvim-lspconfig": {
       "rev": "ac062d0d01c019c0dbdb798968f3e5d8b35c3853",
