@@ -13,6 +13,8 @@ let
   link =
     path:
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
+  # Docker and systemd come from apt, so the script uses theirs.
+  windows-vm = import ../bin/windows-vm.nix { inherit pkgs; };
 in
 {
   imports = [ ../home/common.nix ];
@@ -35,7 +37,8 @@ in
         nerd-fonts.jetbrains-mono
         # Git signs with this name, which 1Password's .deb keeps in /opt.
         (writeShellScriptBin "op-ssh-sign" ''exec /opt/1Password/op-ssh-sign "$@"'')
-      ]);
+      ])
+      ++ [ windows-vm ];
     file.".local/bin/launch".source = link "bin/launch";
     stateVersion = "26.11";
   };
@@ -54,13 +57,26 @@ in
   # Zed installs and updates itself; Home Manager merges its settings.
   programs.zed-editor.package = null;
 
-  xdg.configFile =
-    lib.genAttrs [ "mise/conf.d/agents.toml" "mise/conf.d/linux-tools.toml" ] (name: {
-      source = link name;
-    })
-    // lib.mapAttrs (_: name: { source = link "vscodium/${name}"; }) {
-      "VSCodium/product.json" = "product.json";
-      "VSCodium/User/settings.json" = "settings.json";
-      "VSCodium/User/keybindings.json" = "keybindings.json";
+  xdg = {
+    # The Windows VM's system service and polkit rule, as on NixOS; apps.sh
+    # installs them.
+    dataFile = {
+      "windows-vm/${windows-vm.service}.service".text = lib.generators.toINI { } (
+        windows-vm.passthru.unit {
+          exe = lib.getExe windows-vm;
+          docker = "/usr/bin/docker";
+        }
+      );
+      "windows-vm/windows-vm.rules".text = windows-vm.passthru.polkitRule;
     };
+    configFile =
+      lib.genAttrs [ "mise/conf.d/agents.toml" "mise/conf.d/linux-tools.toml" ] (name: {
+        source = link name;
+      })
+      // lib.mapAttrs (_: name: { source = link "vscodium/${name}"; }) {
+        "VSCodium/product.json" = "product.json";
+        "VSCodium/User/settings.json" = "settings.json";
+        "VSCodium/User/keybindings.json" = "keybindings.json";
+      };
+  };
 }

@@ -103,6 +103,7 @@ class ConfigurationTests(unittest.TestCase):
             ".gitignore",
         ]:
             shutil.copy2(root / name, destination / name)
+        shutil.copytree(root / "bin", destination / "bin")
         shutil.copytree(root / "components", destination / "components")
         shutil.copytree(root / "pins", destination / "pins")
         shutil.copytree(root / "home", destination / "home")
