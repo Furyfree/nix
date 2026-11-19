@@ -25,7 +25,6 @@
         '~\.config\starship.toml'                          = 'starship/starship.toml'
         '%LOCALAPPDATA%\nvim'                              = 'nvim'
         '~\.config\mise\config.toml'                       = 'mise/config.toml'
-        '~\.config\mise\conf.d\runtimes.toml'              = 'mise/conf.d/runtimes.toml'
         '~\.config\mise\conf.d\agents.toml'                = 'mise/conf.d/agents.toml'
         '~\.config\mise\conf.d\windows-tools.toml'         = 'mise/conf.d/windows-tools.toml'
         # A list, which a merge would replace anyway

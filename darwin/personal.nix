@@ -1,5 +1,5 @@
 # The personal Mac: Office, the Craft apps, Tailscale, Discord, and Codex and
-# Claude Code for every account. Mise adds the runtimes in my account only.
+# Claude Code for every account.
 # Uncomment the games to add them back.
 { config, ... }:
 
@@ -28,12 +28,5 @@
     brews = [ "mise" ];
   };
 
-  home-manager.users.${config.system.primaryUser} =
-    { config, ... }:
-    {
-      imports = [ ../home/darwin-personal.nix ];
-
-      xdg.configFile."mise/conf.d/runtimes.toml".source =
-        config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/mise/conf.d/runtimes.toml";
-    };
+  home-manager.users.${config.system.primaryUser}.imports = [ ../home/darwin-personal.nix ];
 }
