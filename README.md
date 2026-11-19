@@ -89,7 +89,6 @@ over HTTPS:
 
 ```sh
 nix develop path:.
-uv sync --locked
 just check
 ```
 
