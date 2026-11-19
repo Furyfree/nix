@@ -136,10 +136,3 @@ Windows Registry Editor Version 5.00
 ; Store apps update with nupdate, not on their own
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsStore]
 "AutoDownload"=dword:00000002
-
-; Off in Settings > Apps > Startup, by each app's Run entry name; 01 is off,
-; as Settings writes it. 1Password, Tailscale and Brave's updater still start
-; at sign-in.
-[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run]
-"org.whispersystems.signal-desktop"=hex:01,00,00,00,00,00,00,00,00,00,00,00
-"Spotify"=hex:01,00,00,00,00,00,00,00,00,00,00,00
