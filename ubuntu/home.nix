@@ -64,6 +64,13 @@ in
     sshProfile = "work";
     # configs/niri/hosts/ubuntu.kdl, a fixed name rather than the laptop's own.
     host = "ubuntu";
+    # Ptyxis, Ubuntu's own terminal, in Noctalia's colours; its preferences
+    # pick the Noctalia palette once.
+    noctaliaTemplates.ptyxis = {
+      enabled = true;
+      input_path = "templates/ptyxis.palette";
+      output_path = "$XDG_DATA_HOME/org.gnome.Ptyxis/palettes/noctalia.palette";
+    };
     # AI usage, Git Companion (GitHub only; work uses GitLab), Mini Docker,
     # AirPods control, the tailnet and the screen recorder stay on NixOS.
     noctaliaPluginsOff = [
@@ -124,6 +131,8 @@ in
       # Noctalia colours that btop, Yazi and Neovim take from it.
       "xdg-terminals.list".text = "com.mitchellh.ghostty.desktop\n";
       "fastfetch/config.jsonc".source = lib.mkForce fastfetch;
+      "noctalia/templates/ptyxis.palette".source =
+        config.lib.workstation.link "noctalia/templates/ptyxis.palette";
       # Noctalia's renderer and reload hook for Ghostty, from Noctalia's .deb.
       "noctalia/templates/ghostty".source =
         config.lib.file.mkOutOfStoreSymlink "/usr/share/noctalia/assets/templates/ghostty";

@@ -29,6 +29,7 @@ installs what is missing. NixOS updates `flake.lock`; apt updates the rest.
 
 - Updates: Ubuntu's own updater, as IT has set it.
 - Auto-login, if wanted: Settings → System → Users.
+- Ptyxis, Ubuntu's own terminal: Preferences → Profile → Palette → Noctalia.
 - The Niri desktop: pick Niri at the login screen; GNOME stays there as the
   fallback. Its config is linked as on NixOS, with Ubuntu's differences in
   `configs/niri/hosts/ubuntu.kdl`.
