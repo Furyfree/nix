@@ -29,7 +29,7 @@ in
       btop = {
         name = "btop";
         exec = "launch tui btop";
-        icon = "com.github.stsdc.monitor";
+        icon = "btop";
       };
     };
     userDirs = {
