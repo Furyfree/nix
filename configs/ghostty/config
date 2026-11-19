@@ -5,6 +5,8 @@ theme = charcoal-blue
 config-file = ?themes/noctalia
 # macOS-only overrides, linked from configs/macos/ghostty on Macs only.
 config-file = ?macos
+# NixOS-only settings, which Ubuntu's older Ghostty rejects.
+config-file = ?nixos
 
 window-theme = ghostty
 window-padding-x = 14
