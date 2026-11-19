@@ -1,11 +1,12 @@
 # Install, launch, stop, inspect or remove the Windows VM, after Omarchy's
-# omarchy-windows-vm. Nix declares the Dockur container; this script owns the
-# per-machine settings, disk and launcher entry. Nix sets WINDOWS_ROOT and
-# WINDOWS_SERVICE.
+# omarchy-windows-vm. It owns the Dockur container, which the systemd service
+# runs through `windows-vm run`, and the per-machine settings, disk and
+# launcher entry. windows-vm.nix sets WINDOWS_ROOT and WINDOWS_SERVICE.
 settings=$WINDOWS_ROOT/settings.env
 storage=$WINDOWS_ROOT/storage
 shared=$WINDOWS_ROOT/shared
-entry=${XDG_DATA_HOME:-$HOME/.local/share}/applications/windows-vm.desktop
+# The service runs without HOME; only install and remove use the entry.
+entry=${XDG_DATA_HOME:-${HOME-}/.local/share}/applications/windows-vm.desktop
 
 die() {
   gum log --level error "$*"
@@ -87,11 +88,12 @@ EOF
   echo "Afterwards, open Windows from the launcher or run: windows-vm launch"
 }
 
-# Root step: create and mount the subvolume, turn off copy-on-write for the
-# disk, store the settings from stdin and link an optional ISO.
+# Root step: on btrfs, create and mount the subvolume and turn off
+# copy-on-write for the disk; then store the settings from stdin and link an
+# optional ISO.
 root_prepare() {
   local source top iso answer
-  if ! findmnt -n "$WINDOWS_ROOT" >/dev/null; then
+  if [[ $(findmnt -n -o FSTYPE -T /) == btrfs ]] && ! findmnt -n "$WINDOWS_ROOT" >/dev/null; then
     source=$(findmnt -n -o SOURCE -T /)
     top=$(mktemp -d)
     mount -o subvolid=5 "${source%%[*}" "$top"
@@ -101,7 +103,7 @@ root_prepare() {
     systemctl start "$(systemd-escape --path --suffix mount "$WINDOWS_ROOT")"
   fi
   install -d -m 0700 "$storage"
-  chattr +C "$storage"
+  [[ $(findmnt -n -o FSTYPE -T "$storage") != btrfs ]] || chattr +C "$storage"
   install -d -m 2775 -g docker "$shared"
   (umask 0027 && cat >"$settings")
   chgrp docker "$settings"
@@ -308,6 +310,27 @@ cmd_remove() {
   echo "Windows VM removed; shared files remain in $shared."
 }
 
+# The Dockur container in the foreground, for the systemd service. settings.env
+# adds RAM_SIZE, CPU_CORES, DISK_SIZE, USERNAME, PASSWORD and TZ; a
+# storage/custom.iso replaces the VERSION download.
+cmd_run() {
+  local options=(
+    --name=windows --rm --log-driver=journald --pull=missing
+    -e VERSION=11 -e KEYBOARD=da-DK -e REGION=en-DK
+    # The web console asks for the Windows username and password.
+    -e PROTECT=Y
+    # Windows keeps the hardware clock in local time.
+    -e "ARGUMENTS=-rtc base=localtime,clock=host,driftfix=slew"
+    --env-file "$settings"
+    -p 127.0.0.1:8006:8006 -p 127.0.0.1:3389:3389/tcp -p 127.0.0.1:3389:3389/udp
+    -v "$storage:/storage" -v "$shared:/shared"
+    --device=/dev/kvm --device=/dev/net/tun --cap-add=NET_ADMIN
+    # Time for Windows to shut down cleanly.
+    --stop-timeout=120
+  )
+  exec docker run "${options[@]}" docker.io/dockurr/windows:6.06
+}
+
 root_remove() {
   rm -rf -- "$storage"
   rm -f -- "$settings"
@@ -319,6 +342,7 @@ case ${1-} in
   stop) systemctl stop "$WINDOWS_SERVICE" ;;
   status) cmd_status ;;
   remove) cmd_remove ;;
+  run) cmd_run ;;
   root-prepare) root_prepare "${2-}" ;;
   root-remove) root_remove ;;
   *) usage ;;

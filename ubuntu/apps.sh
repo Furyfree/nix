@@ -122,6 +122,24 @@ if [[ $(getent passwd "$USER" | cut -d: -f7) != /usr/bin/zsh ]]; then
   sudo chsh -s /usr/bin/zsh "$USER"
 fi
 
+# The Windows VM's service and polkit rule, which Home Manager builds
+# (ubuntu/home.nix); a changed one replaces the old.
+vm=${XDG_DATA_HOME:-$HOME/.local/share}/windows-vm
+if [[ -e $vm/docker-windows.service ]] && ! cmp -s "$vm/docker-windows.service" /etc/systemd/system/docker-windows.service; then
+  log 'Windows VM service'
+  sudo install -m 0644 "$vm/docker-windows.service" /etc/systemd/system/docker-windows.service
+  sudo systemctl daemon-reload
+fi
+# Users cannot read polkit's rules folder, so a stamp with the rule's store
+# path tells whether it changed.
+stamp=${XDG_STATE_HOME:-$HOME/.local/state}/windows-vm-rules
+if [[ -e $vm/windows-vm.rules && $(readlink -f "$vm/windows-vm.rules") != "$(cat "$stamp" 2>/dev/null)" ]]; then
+  log 'Windows VM polkit rule'
+  sudo install -m 0644 "$vm/windows-vm.rules" /etc/polkit-1/rules.d/50-windows-vm.rules
+  mkdir -p "$(dirname "$stamp")"
+  readlink -f "$vm/windows-vm.rules" >"$stamp"
+fi
+
 # docker is root-equivalent; kvm runs the VMs without root.
 for group in docker kvm; do
   if ! id -nG "$USER" | tr ' ' '\n' | grep -qx "$group"; then
