@@ -22,8 +22,5 @@ Open work only; finished work lives in Git.
 
 ## Windows and WSL
 
-Profiles, apps, links and steps live in
-[#20](https://github.com/Furyfree/nix/issues/20).
-
-Fallback: if 1Password misbehaves in WSL, relay its agent with npiperelay and
-socat.
+- Fallback: if 1Password misbehaves in WSL, relay its agent with npiperelay
+  and socat.
