@@ -10,6 +10,6 @@
     {
       workstation.sshProfile = "work";
       xdg.configFile."mise/conf.d/agents.toml".source =
-        config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/mise/conf.d/agents.toml";
+        config.lib.workstation.link "mise/conf.d/agents.toml";
     };
 }

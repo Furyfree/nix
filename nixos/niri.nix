@@ -21,9 +21,7 @@ let
     }:
 
     let
-      link =
-        path:
-        config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
+      inherit (config.lib.workstation) link;
       host = "niri/hosts/${osConfig.networking.hostName}.kdl";
       noctalia = builtins.fromTOML (builtins.readFile ../configs/noctalia/config.toml);
     in

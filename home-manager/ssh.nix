@@ -6,9 +6,7 @@
 
 let
   inherit (config.workstation) sshProfile;
-  link =
-    path:
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
+  inherit (config.lib.workstation) link;
 in
 {
   options.workstation.sshProfile = lib.mkOption {

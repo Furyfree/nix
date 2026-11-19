@@ -11,7 +11,7 @@
 
 let
   inherit (config.home) homeDirectory;
-  link = path: config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/Projects/nix/configs/${path}";
+  inherit (config.lib.workstation) link;
   # 1Password's app bundle holds its SSH agent socket and Git signer.
   onePasswordAgent = "${homeDirectory}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock";
   onePasswordSigner = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
