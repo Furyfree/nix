@@ -47,7 +47,8 @@ Every Mac:
   Itsycal.
 - Tinycast: start at login, then Settings → Backup → Settings File: turn on
   **Sync settings file**. When asked **Import the existing settings file?**,
-  choose **Import** to apply the linked `~/.config/tinycast/settings.json`.
+  choose **Import** to apply `~/.config/tinycast/settings.json`, which `nswitch`
+  merges the repository's settings into.
   **Replace** overwrites that file with Tinycast's current settings.
 - Spaces: in Mission Control (Hyper+M), add desktops until each display has
   five, for Hyper+1–5.

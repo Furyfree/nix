@@ -96,10 +96,6 @@ in
   # the Mac apps' own settings.
   xdg.configFile = {
     "ghostty/macos".source = link "macos/ghostty";
-    # Tinycast keeps this link when it saves, so its settings window writes into
-    # the checkout. Caps Lock is its Hyper key for apps and Spaces; ⌃⌥ tiles
-    # windows.
-    "tinycast/settings.json".source = link "macos/tinycast/settings.json";
     "fastfetch/config.jsonc".source = lib.mkForce fastfetchConfig;
     # Apps started from the Dock or Finder do not get the shell's PATH, so Git
     # names 1Password's signer by its full path.
@@ -124,8 +120,9 @@ in
   };
 
   # VSCodium: the shared settings with GitHub Dark, since Noctalia's theme
-  # colors exist only on Linux. Merged like Zed's, so settings changed in
-  # VSCodium's window stay on that Mac.
+  # colors exist only on Linux. Tinycast: Caps Lock is its Hyper key for apps
+  # and Spaces; ⌃⌥ tiles windows. Both save their settings themselves, so the
+  # repository's are merged and changes in their windows stay on that Mac.
   workstation.settingMerges =
     let
       settings = "${homeDirectory}/Library/Application Support/VSCodium/User/settings.json";
@@ -136,6 +133,7 @@ in
     ''
       merge "${settings}" ${../configs/vscodium/settings.json} json
       merge "${settings}" ${theme} json
+      merge ${config.xdg.configHome}/tinycast/settings.json ${../configs/macos/tinycast/settings.json} json
     '';
 
   targets.darwin = {
