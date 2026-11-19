@@ -6,9 +6,8 @@ preferences and generation rollback.
 
 My Linux workstations run NixOS with integrated Home Manager, and every Mac runs
 nix-darwin with Home Manager from the one `macos` host. Windows runs one
-PowerShell profile, basic, vm or desktop, through winget, Mise and `.reg` files;
-desktop adds NixOS in WSL. Extend compatible user configuration through
-Home Manager one tool at a time. `docs/PLAN.md` holds the open work.
+PowerShell profile, basic, vm or desktop, through winget, Mise and `.reg` files.
+Extend compatible user configuration through Home Manager one tool at a time. `docs/PLAN.md` holds the open work.
 
 ## What must not break
 
@@ -64,16 +63,14 @@ Docs and comments state no current versions or status; open work lives in
   hardware and installation data, on NixOS an optional `desktop.nix` that
   picks the compositor and an empty `limine-windows`, which `nswitch` creates
   when the firmware lists Windows (`components/limine-windows.nix`), on macOS
-  `user.nix` with the account and profile, in WSL `user.nix` with the account,
-  and on Windows `profile` with its name.
+  `user.nix` with the account and profile, and on Windows `profile` with its
+  name.
   Shared policy belongs above it.
 - `windows/`: `bootstrap.ps1` prepares a fresh Windows and clones the
   checkout; `apply.ps1` applies the layers in `profiles/`, whose keys
   `common.psd1` lists, with the settings in `registry/`. A Windows app or
   setting goes in the layer that needs it; `configs/windows/` holds the
-  PowerShell, Terminal, WSL, Office and taskbar files.
-- `hosts/wsl/`, `home/wsl.nix`: NixOS in WSL for desktop; `apply.ps1` installs
-  it.
+  PowerShell, Terminal, Office and taskbar files.
 - `configs/hypr/hosts/<host>.lua`, `configs/niri/hosts/<host>.kdl`: per-host
   monitors, workspaces and keys, linked as `host.lua` or `host.kdl` by
   `home/hyprland.nix` or `home/niri.nix` after the hostname.

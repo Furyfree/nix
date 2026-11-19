@@ -528,68 +528,6 @@ elseif ($want.Wsl.Distribution -eq 'Ubuntu') {
         }
     }
 }
-elseif ($want.Wsl.Distribution -eq 'NixOS') {
-    Invoke-Step 'NixOS' {
-        $env:WSL_UTF8 = '1'
-        # Linux account names are lowercase letters, digits, - and _.
-        $user = $env:USERNAME.ToLower()
-        if ($user -notmatch '^[a-z_][a-z0-9_-]*$') { throw "$env:USERNAME is no Linux account name." }
-        $shell = '/run/current-system/sw/bin/sh'
-        # Done once the account has its checkout; nswitch inside NixOS applies
-        # later changes. Until then each run redoes the steps still missing.
-        # wsl.exe prints its own errors to stdout.
-        wsl --distribution NixOS --user $user --exec $shell -c 'test -f ~/Projects/nix/hosts/wsl/local/user.nix' *> $null
-        if ($LASTEXITCODE -eq 0) { return }
-        # A new NixOS has no SSH key for GitHub, so its clones use HTTPS;
-        # INSTALLATION.md switches the checkout to SSH afterwards.
-        $url = (git -C $root remote get-url origin) -replace '^git@github\.com:', 'https://github.com/'
-        $branch = git -C $root branch --show-current
-        if (-not $branch) { $branch = 'main' }
-
-        if ((wsl --list --quiet 2> $null) -notcontains 'NixOS') {
-            $image = Join-Path ([IO.Path]::GetTempPath()) 'nixos.wsl'
-            try {
-                Write-Host 'download NixOS-WSL'
-                Invoke-WebRequest $want.Wsl.Image -OutFile $image
-                if ((Get-FileHash $image).Hash -ne $want.Wsl.Sha256) { throw "$image does not match its checksum." }
-                Write-Host 'install  NixOS'
-                wsl --install --from-file $image --no-launch
-                if ($LASTEXITCODE -ne 0) { throw "wsl --install ($LASTEXITCODE)" }
-            }
-            finally { Remove-Item $image -ErrorAction Ignore }
-        }
-
-        # A login shell, since wsl --exec starts without NixOS' PATH. Git may
-        # check this file out with CRLF, which sh reads as part of each line.
-        function Invoke-NixOS([string] $account, [string] $script, [string[]] $arguments) {
-            wsl --distribution NixOS --user $account --exec $shell -lc ($script -replace "`r") sh @arguments
-            if ($LASTEXITCODE -ne 0) { throw "in NixOS as $account ($LASTEXITCODE)" }
-        }
-        $userNix = "{ wsl.defaultUser = `"$user`"; }"
-        # NixOS-WSL's steps for a new account, until it exists: build the boot
-        # generation as root, then start it once as root and stop it.
-        wsl --distribution NixOS --user $user --exec $shell -c true *> $null
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "build    NixOS for $user"
-            Invoke-NixOS root @'
-export NIX_CONFIG='experimental-features = nix-command flakes'
-rm -rf /tmp/nix &&
-nix run nixpkgs#git -- clone --branch "$1" "$2" /tmp/nix &&
-mkdir -p /tmp/nix/hosts/wsl/local && printf '%s\n' "$3" > /tmp/nix/hosts/wsl/local/user.nix &&
-nixos-rebuild boot --flake path:/tmp/nix#wsl
-'@ @($branch, $url, $userNix)
-            wsl --terminate NixOS
-            Invoke-NixOS root 'true'
-            wsl --terminate NixOS
-        }
-        # The checkout in the account's home, as on Linux
-        Invoke-NixOS $user @'
-{ [ -d ~/Projects/nix/.git ] || git clone --branch "$1" "$2" ~/Projects/nix; } &&
-mkdir -p ~/Projects/nix/hosts/wsl/local && printf '%s\n' "$3" > ~/Projects/nix/hosts/wsl/local/user.nix
-'@ @($branch, $url, $userNix)
-    }
-}
-
 if ($work.Registry.Count -gt @(Get-RegistryChanges).Count) {
     # The taskbar and Explorer read their settings at start; Windows restarts it.
     Write-Host 'restart  Explorer'

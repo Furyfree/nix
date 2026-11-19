@@ -10,9 +10,6 @@ repo=${NH_FLAKE#path:}
 
 darwin=false
 [[ $OSTYPE == darwin* ]] && darwin=true
-# NixOS in WSL: no Snapper, firmware or compositor. WSL sets this variable.
-wsl=false
-[[ -n ${WSL_DISTRO_NAME-} ]] && wsl=true
 
 help() {
   case ${1-} in
@@ -31,8 +28,6 @@ never removed by itself; delete it to drop the entry.
 On macOS: build the Mac's nix-darwin configuration, show the changes, ask,
 then switch (nh darwin switch --ask). The switch installs missing Homebrew
 apps and writes the macOS settings.
-
-In WSL: the same without Snapper (nh os switch --ask).
 EOF
       ;;
     update)
@@ -45,8 +40,8 @@ without switching, and list what was updated; nswitch applies it. It never
 asks or uses sudo, so an agent can run it. Nothing new skips the build. A
 failed step leaves the updated files in place and prints the undo command.
 
-On macOS and in WSL, the pinned apps are skipped. On macOS, nix flake check
-replaces just check, which needs Linux tools.
+On macOS, the pinned apps are skipped, and nix flake check replaces just
+check, which needs Linux tools.
 EOF
       ;;
     pin)
@@ -56,8 +51,8 @@ usage: nix-workstation pin [APP...]   (alias: npin)
 Bump the apps in pins/nvfetcher.toml, or only the named ones, to their
 newest release with nvfetcher. Claude Desktop's download must match
 Anthropic's signed index. Then check and build as update does. To hold an
-app at its current version, add pinned = true to its table. Linux desktops
-only: macOS and WSL do not install these apps.
+app at its current version, add pinned = true to its table. NixOS only: macOS
+does not install these apps.
 EOF
       ;;
     info)
@@ -192,10 +187,6 @@ mark_windows() {
 booted=false
 cmd_switch() {
   local mode=${1-switch} label=${2-nswitch} answer description pre result=0
-  if $wsl; then
-    nh os switch --ask --hostname wsl
-    return
-  fi
   mark_windows
   nh os build
   if [[ $mode == boot ]]; then
@@ -342,11 +333,7 @@ build() {
     nh darwin build --hostname macos
   else
     (cd -- "$repo" && nix develop path:. -c just check)
-    if $wsl; then
-      nh os build --hostname wsl
-    else
-      nh os build
-    fi
+    nh os build
   fi
 }
 
@@ -392,7 +379,7 @@ cmd_update() {
   check_names 'flake input' "$@" < <(jq -r '.nodes.root.inputs | keys[]' "$repo/flake.lock")
   prepare
   nix flake update "$@" --flake "$NH_FLAKE"
-  if (($# == 0)) && ! $darwin && ! $wsl; then
+  if (($# == 0)) && ! $darwin; then
     bump_pins
   fi
   build
@@ -400,7 +387,6 @@ cmd_update() {
 
 cmd_pin() {
   $darwin && die 'pinned apps are Linux only'
-  $wsl && die 'WSL does not install the pinned apps'
   check_names 'pinned app' "$@" < <(sed -n 's/^\[\(.*\)\]$/\1/p' "$repo/pins/nvfetcher.toml")
   prepare
   bump_pins "$@"
@@ -441,16 +427,13 @@ case $command in
         switch) (($# == 0)) || usage switch; cmd_switch ;;
         info) nh os info "$@" ;;
         desktop)
-          $wsl && die 'WSL has no compositor'
           (($# <= 1)) || usage desktop
           cmd_desktop "$@"
           ;;
         rollback)
-          $wsl && die 'in WSL, roll back with sudo nixos-rebuild switch --rollback'
           die 'on Linux, roll back from the boot menu or a Snapper snapshot'
           ;;
         firmware)
-          $wsl && die 'in WSL, Windows installs the firmware'
           (($# == 0)) || usage firmware
           # --force: a plain refresh fails when the metadata is recent.
           fwupdmgr refresh --force && fwupdmgr update

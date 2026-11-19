@@ -12,12 +12,7 @@ Open work only; finished work lives in Git.
 - USB recovery. The standard ISO needs Secure Boot off; decide whether that is
   enough or a signed recovery image is needed.
 
-## Windows and WSL
+## Windows
 
 Profiles, apps, links and steps live in
 [#20](https://github.com/Furyfree/nix/issues/20).
-
-Fallbacks:
-
-- 1Password misbehaves in WSL: relay its agent with npiperelay and socat.
-- NixOS-WSL disappoints: Ubuntu with standalone Home Manager reuses `home/`.
