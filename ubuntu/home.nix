@@ -10,6 +10,22 @@
 }:
 
 let
+  # The shared fastfetch layout with Ubuntu's logo, as darwin/home.nix gives
+  # the Mac its own; a switch applies edits.
+  fastfetch =
+    let
+      shared = lib.importJSON ../configs/fastfetch/config.jsonc;
+    in
+    pkgs.writeText "fastfetch-config.jsonc" (
+      builtins.toJSON (
+        shared
+        // {
+          logo = shared.logo // {
+            source = "ubuntu";
+          };
+        }
+      )
+    );
   # Docker and systemd come from apt, so the script uses theirs.
   windows-vm = import ../bin/windows-vm.nix { inherit pkgs; };
 in
@@ -72,25 +88,48 @@ in
   programs.zed-editor.package = null;
 
   xdg = {
-    # The Windows VM's system service and polkit rule, as on NixOS; apps.sh
-    # installs them.
-    dataFile = {
-      "windows-vm/${windows-vm.service}.service".text = lib.generators.toINI { } (
-        windows-vm.passthru.unit {
-          exe = lib.getExe windows-vm;
-          docker = "/usr/bin/docker";
-        }
-      );
-      "windows-vm/windows-vm.rules".text = windows-vm.passthru.polkitRule;
+    dataFile =
+      # Hidden as on NixOS: settings tools, helpers and Noctalia itself, which
+      # runs already. Hidden=true deletes an entry for this account.
+      lib.genAttrs
+        (map (name: "applications/${name}.desktop") [
+          "qt5ct"
+          "qt6ct"
+          "mpv"
+          "org.freedesktop.IBus.Setup"
+          "gnome-language-selector"
+          "dev.noctalia.Noctalia"
+          "nvim"
+          "yazi"
+        ])
+        (_: {
+          text = "[Desktop Entry]\nHidden=true\n";
+        })
+      // {
+        # The Windows VM's system service and polkit rule, as on NixOS; apps.sh
+        # installs them.
+        "windows-vm/${windows-vm.service}.service".text = lib.generators.toINI { } (
+          windows-vm.passthru.unit {
+            exe = lib.getExe windows-vm;
+            docker = "/usr/bin/docker";
+          }
+        );
+        "windows-vm/windows-vm.rules".text = windows-vm.passthru.polkitRule;
+      };
+    configFile = {
+      # Ubuntu opens Terminal=true apps in its own terminal; Ghostty has the
+      # Noctalia colours that btop, Yazi and Neovim take from it.
+      "xdg-terminals.list".text = "com.mitchellh.ghostty.desktop\n";
+      "fastfetch/config.jsonc".source = lib.mkForce fastfetch;
+      # Noctalia's renderer and reload hook for Ghostty, from Noctalia's .deb.
+      "noctalia/templates/ghostty".source =
+        config.lib.file.mkOutOfStoreSymlink "/usr/share/noctalia/assets/templates/ghostty";
+      # niri.service starts XDG autostart entries here, so 1Password's own Start
+      # at login would run a second copy beside autostart.kdl's; GNOME keeps it.
+      "systemd/user/app-com.onepassword.OnePassword@autostart.service.d/niri.conf".text = ''
+        [Unit]
+        ConditionEnvironment=!XDG_CURRENT_DESKTOP=niri
+      '';
     };
-    # Noctalia's renderer and reload hook for Ghostty, from Noctalia's .deb.
-    configFile."noctalia/templates/ghostty".source =
-      config.lib.file.mkOutOfStoreSymlink "/usr/share/noctalia/assets/templates/ghostty";
-    # niri.service starts XDG autostart entries here, so 1Password's own Start
-    # at login would run a second copy beside autostart.kdl's; GNOME keeps it.
-    configFile."systemd/user/app-com.onepassword.OnePassword@autostart.service.d/niri.conf".text = ''
-      [Unit]
-      ConditionEnvironment=!XDG_CURRENT_DESKTOP=niri
-    '';
   };
 }
