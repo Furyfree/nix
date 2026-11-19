@@ -6,7 +6,7 @@ app configs and an app list in the system's own package manager, and the rest
 is a checklist: nix-darwin on the Macs, Home Manager on its own on the Ubuntu
 work laptop, and PowerShell profiles on Windows, the desktop's with NixOS in
 WSL. I want repeatable installs and updates, shared app preferences and
-rollback where the system has it. `docs/PLAN.md` holds the open work.
+rollback where the system has it. GitHub issues hold the open work.
 
 ## What must not break
 
@@ -62,7 +62,7 @@ there, open an issue titled after that compositor.
 
 Each fact lives once: in config or code where it can, with docs pointing to it.
 Docs and comments state no current versions or status; open work lives in
-`docs/PLAN.md` or GitHub issues, and a workaround links its issue.
+GitHub issues, and a workaround links its issue.
 
 ## Map
 
