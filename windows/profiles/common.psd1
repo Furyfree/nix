@@ -2,8 +2,7 @@
 # reads them in Include order and applies each layer once. Keys:
 #   Include         layers applied first, by file name without .psd1
 #   Winget          package IDs; a hashtable adds Args (extra winget arguments;
-#                   {configs} is the checkout's configs folder) or User = $true
-#                   for an installer that refuses to run as administrator
+#                   {configs} is the checkout's configs folder)
 #   Store           Microsoft Store IDs
 #   Registry        files in windows/registry, imported in order
 #   Links           target = file or folder in configs/; ~ is the home folder,
@@ -15,10 +14,6 @@
 #   GitWindows      $true writes ~\.config\git\windows, which git/config
 #                   includes: Windows' ssh.exe and 1Password's signing program
 #   Extensions      editor command = extension IDs and configs/ files of them
-#   Downloads       apps without a winget package, installed as yourself:
-#                   name = @{ Url of the installer; Signer, the name its
-#                   valid signature must carry; Args for a silent install;
-#                   Path, a file that exists once it is installed }
 #   Taskbar         a configs/ taskbar layout for the Start Layout policy;
 #                   Windows replaces the pins at the next sign-in
 #   QuickAccess     folders to pin in Explorer's sidebar, after its own pins
@@ -33,8 +28,6 @@
     Winget   = @(
         'Git.Git'
         'Microsoft.PowerShell'
-        'Microsoft.PowerToys'
-        'T3Tools.T3Code'
         # The C and C++ compiler and linker; Rust and Cargo builds need them.
         @{
             Id   = 'Microsoft.VisualStudio.BuildTools'

@@ -5,6 +5,8 @@
     Include          = @('common')
     Winget           = @(
         'Brave.Brave'
+        'Microsoft.PowerToys'
+        'T3Tools.T3Code'
         'Microsoft.VisualStudioCode'
         'Anthropic.ClaudeCode'
         'OpenAI.Codex'

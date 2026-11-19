@@ -53,7 +53,7 @@ foreach ($layer in $layers) {
     }
 }
 foreach ($key in 'Winget', 'Store', 'Registry') { if ($null -eq $want[$key]) { $want[$key] = @() } }
-foreach ($key in 'Links', 'Merges', 'Extensions', 'Power', 'Services', 'Wsl', 'Downloads') {
+foreach ($key in 'Links', 'Merges', 'Extensions', 'Power', 'Services', 'Wsl') {
     if ($null -eq $want[$key]) { $want[$key] = @{} }
 }
 $packages = foreach ($entry in $want.Winget) { if ($entry -is [string]) { @{ Id = $entry } } else { $entry } }
@@ -108,7 +108,7 @@ function Test-Wsl {
 # What needs administrator, worked out the same way in both halves
 function Get-AdminWork($installed) {
     @{
-        Packages   = @($packages | Where-Object { -not $_.User -and $installed -notcontains $_.Id })
+        Packages   = @($packages | Where-Object { $installed -notcontains $_.Id })
         Store      = @($want.Store | Where-Object { $installed -notcontains $_ })
         Registry   = @(Get-RegistryChanges)
         Power      = @($want.Power.Keys | Where-Object {
@@ -305,36 +305,9 @@ if ($Update -or (Test-Work $work)) {
         [Environment]::GetEnvironmentVariable('Path', 'User')
 }
 
-foreach ($package in $packages | Where-Object { $_.User -and $installed -notcontains $_.Id }) {
-    Install-Package $package.Id @('--source', 'winget')
-}
-
 # ~ and %NAME% in the profiles' targets
 function Resolve-Target([string] $path) {
     [Environment]::ExpandEnvironmentVariables(($path -replace '^~', $HOME))
-}
-
-# Apps without a winget package, from their publisher, as yourself; each
-# updates itself.
-foreach ($name in $want.Downloads.Keys) {
-    $download = $want.Downloads[$name]
-    if (Test-Path (Resolve-Target $download.Path)) { continue }
-    Invoke-Step "install $name" {
-        Write-Host "install  $name"
-        $installer = Join-Path ([IO.Path]::GetTempPath()) "nix-workstation-$name.exe"
-        Invoke-WebRequest $download.Url -OutFile $installer
-        $signature = Get-AuthenticodeSignature $installer
-        $signer = if ($signature.SignerCertificate) {
-            $signature.SignerCertificate.GetNameInfo([Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false)
-        }
-        if ($signature.Status -ne 'Valid' -or $signer -ne $download.Signer) {
-            Remove-Item $installer
-            throw "the installer is not signed by $($download.Signer)."
-        }
-        $process = Start-Process $installer -ArgumentList $download.Args -Wait -PassThru
-        Remove-Item $installer
-        if ($process.ExitCode -ne 0) { throw "the installer exited with $($process.ExitCode)." }
-    }
 }
 
 # A write under a linked folder lands in what it points to, such as the

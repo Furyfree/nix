@@ -272,12 +272,11 @@ one with `reg import FILE`.
    again; it carries on. When it installed WSL, restart Windows and run
    `~\Projects\nix\windows\apply.ps1` in PowerShell 7. The desktop's taskbar
    pins appear at the next sign-in.
-3. vm and desktop: sign in to Tailscale in the window it opens. 1Password:
-   sign in, then in Settings → Developer turn on the SSH agent, and in
-   Settings → Security unlock with Windows Hello, so `op`, SSH and Git signing
-   ask for the Windows PIN instead of the account password; Windows Hello
-   needs a PIN from Settings → Accounts → Sign-in options. In PowerShell
-   7, fetch the SSH files into `~\.ssh` as in step 6 of
+3. vm and desktop: sign in to 1Password, then in Settings → Developer turn on
+   the SSH agent, and in Settings → Security unlock with Windows Hello, so
+   `op`, SSH and Git signing ask for the Windows PIN instead of the account
+   password; Windows Hello needs a PIN from Settings → Accounts → Sign-in
+   options. In PowerShell 7, fetch the SSH files into `~\.ssh` as in step 6 of
    [First boot](#first-boot), run `gh auth login` and switch the checkout to
    SSH.
 4. Desktop: store the BitLocker recovery key from
@@ -294,8 +293,7 @@ one with `reg import FILE`.
   `git@github.com:Furyfree/wow-ui.git` to `~\Projects\wow-ui` and set it up as
   its README says, so addon settings and keybindings follow you between
   computers; WowUp installs the addons.
-- Sign-ins: Microsoft 365, Fastmail, Spotify, Signal, ChatGPT, Claude,
-  JetBrains, Tailscale and Brave Origin's licence; on the desktop also Steam,
+- Sign-ins: Microsoft 365 and Brave Origin's licence; on the desktop also Steam,
   Battle.net, Ubisoft Connect, Epic, Riot, Discord and the NVIDIA App.
 - Settings, which Windows keeps out of reach of a `.reg` file: the PC's
   nearby-sharing name (System → Nearby sharing); Brave Origin as the default
