@@ -74,12 +74,6 @@ in
         exec = "launch focus-webapp https://www.google.com/maps";
         icon = "webapp-google-maps";
       };
-      # Replaces the package's entry; window rules float and centre it.
-      btop = {
-        name = "btop";
-        exec = "launch tui btop";
-        icon = "com.github.stsdc.monitor";
-      };
       # Watch, pause or help an agent in its hidden desktop.
       agent-workspace = {
         name = "Agent Workspace";
