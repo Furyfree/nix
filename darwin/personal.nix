@@ -28,5 +28,5 @@
     brews = [ "mise" ];
   };
 
-  home-manager.users.${config.system.primaryUser}.imports = [ ../home/darwin-personal.nix ];
+  home-manager.users.${config.system.primaryUser}.imports = [ ./home-personal.nix ];
 }

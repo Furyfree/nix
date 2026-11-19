@@ -77,7 +77,7 @@ catch {
         git clone --branch $Branch https://github.com/Furyfree/nix.git $repo
         if ($LASTEXITCODE -ne 0) { throw 'git clone failed.' }
     }
-    $local = Join-Path $repo 'hosts\windows\local'
+    $local = Join-Path $repo 'windows\local'
     New-Item -ItemType Directory -Force $local | Out-Null
     Set-Content (Join-Path $local 'profile') $choice
 

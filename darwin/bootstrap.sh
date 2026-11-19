@@ -9,7 +9,7 @@
 set -euo pipefail
 
 repo=$HOME/Projects/nix
-user_file=$repo/hosts/macos/local/user.nix
+user_file=$repo/darwin/local/user.nix
 saved=${XDG_STATE_HOME:-$HOME/.local/state}/nix-workstation/macos-before
 nix_bin=/nix/var/nix/profiles/default/bin
 
@@ -84,7 +84,7 @@ write_user() {
     read -rp 'Which Mac is this: personal or work? ' profile </dev/tty
   done
   mkdir -p "${user_file%/*}"
-  printf '{\n  imports = [ ../../../darwin/%s.nix ];\n  system.primaryUser = "%s";\n}\n' \
+  printf '{\n  imports = [ ../%s.nix ];\n  system.primaryUser = "%s";\n}\n' \
     "$profile" "$(id -un)" >"$user_file"
   say "Wrote $user_file"
 }

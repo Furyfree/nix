@@ -28,7 +28,7 @@ if ($admin -ne $Elevated.IsPresent) {
 }
 
 # bootstrap.ps1 writes basic, vm or desktop here.
-$ProfileName = (Get-Content (Join-Path $root 'hosts\windows\local\profile') -Raw).Trim()
+$ProfileName = (Get-Content (Join-Path $root 'windows\local\profile') -Raw).Trim()
 
 # Each layer once, after the layers it includes. Lists add up, tables merge
 # and single values take the last layer's.

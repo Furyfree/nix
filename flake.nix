@@ -35,7 +35,7 @@
       mkHost =
         name:
         let
-          host = ./hosts + "/${name}";
+          host = ./nixos/hosts + "/${name}";
           localHardware = host + "/local/hardware-configuration.nix";
           localInstallation = host + "/local/installation.nix";
           localDesktop = host + "/local/desktop.nix";
@@ -44,7 +44,7 @@
             if builtins.pathExists localHardware && builtins.pathExists localInstallation then
               localInstallation
             else
-              throw "Incomplete hosts/${name}/local: hardware-configuration.nix and installation.nix are both required.";
+              throw "Incomplete nixos/hosts/${name}/local: hardware-configuration.nix and installation.nix are both required.";
         in
         nixpkgs.lib.optionalAttrs
           (builtins.pathExists localHardware || builtins.pathExists localInstallation)
@@ -62,7 +62,7 @@
                   }
                 ]
                 ++ nixpkgs.lib.optional (builtins.pathExists localDesktop) localDesktop
-                ++ nixpkgs.lib.optional (builtins.pathExists localWindows) ./components/limine-windows.nix;
+                ++ nixpkgs.lib.optional (builtins.pathExists localWindows) ./nixos/limine-windows.nix;
               }
             );
           };
@@ -70,11 +70,11 @@
       # Every Apple silicon Mac runs one nix-darwin host. Like the NixOS hosts, it
       # builds only once its ignored local/user.nix names the account and this
       # Mac's profile.
-      macUser = ./hosts/macos/local/user.nix;
+      macUser = ./darwin/local/user.nix;
 
       # The Ubuntu work laptop runs Home Manager on its own; it builds once its
       # ignored local/user.nix names the account.
-      ubuntuUser = ./hosts/ubuntu/local/user.nix;
+      ubuntuUser = ./ubuntu/local/user.nix;
     in
     {
       devShells.x86_64-linux.default =
@@ -110,7 +110,7 @@
       nixosConfigurations = {
         installer = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit self; };
-          modules = [ ./hosts/installer/configuration.nix ];
+          modules = [ ./nixos/installer/configuration.nix ];
         };
       }
       // mkHost "desktop"
@@ -130,7 +130,7 @@
       darwinConfigurations = nixpkgs.lib.optionalAttrs (builtins.pathExists macUser) {
         macos = nix-darwin.lib.darwinSystem {
           modules = [
-            ./hosts/macos/configuration.nix
+            ./darwin
             home-manager.darwinModules.home-manager
             macUser
             {

@@ -1,0 +1,54 @@
+# MSI Z690 desktop: Intel integrated graphics plus an NVIDIA RTX 3080, which
+# drives the monitor. The installer writes ./local with the detected
+# hardware and the chosen account; nswitch adds Windows to the boot menu.
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+
+{
+  imports = [
+    ../../default.nix
+    ../../intel-graphics.nix
+    ../../nvidia.nix
+    ../../gaming.nix
+    ../../local-ai.nix
+    ../../dtu-eduroam.nix
+    ../../secure-boot.nix
+    # SSH server: uncomment while this host needs remote access.
+    # ../../ssh.nix
+    ./local/hardware-configuration.nix
+  ];
+
+  networking.hostName = "desktop";
+
+  # The RTX 3080 runs Whisper's recommended large model; others keep small.
+  systemd.user.services.voxtype.scriptArgs = "large-v3-turbo";
+
+  # Local models on CUDA. Building for the RTX 3080 alone keeps the local CUDA
+  # build short.
+  nixpkgs.config.cudaCapabilities = [ "8.6" ];
+  services.llama-cpp.package = pkgs.llama-cpp-cuda;
+
+  # The monitor hangs on the NVIDIA card. With an Intel driver in the early
+  # boot image, Plymouth binds the unused iGPU and the unlock prompt is
+  # invisible; without one it draws on the firmware framebuffer. i915 and xe
+  # still load after unlock.
+  assertions = [
+    {
+      assertion =
+        !lib.any (
+          m:
+          lib.elem m [
+            "i915"
+            "xe"
+          ]
+        ) (config.boot.initrd.kernelModules ++ config.boot.initrd.availableKernelModules);
+      message = "desktop: keep i915 and xe out of the initrd so the unlock prompt shows on the NVIDIA monitor.";
+    }
+  ];
+
+  system.stateVersion = "26.11";
+}

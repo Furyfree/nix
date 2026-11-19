@@ -74,22 +74,22 @@ check-powershell:
     }
 
 lint:
-    uv run --locked ruff check scripts tests
-    uv run --locked ruff format --check scripts tests
-    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path './hosts/*/local/*' -not -path './pins/_sources/*' -exec nixfmt --check {} +
+    cd nixos/installer && uv run --locked ruff check .
+    cd nixos/installer && uv run --locked ruff format --check .
+    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path '*/local/*' -not -path './nixos/pins/_sources/*' -exec nixfmt --check {} +
     statix check
-    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path './hosts/*/local/*' -not -path './pins/_sources/*' -exec deadnix --fail {} +
+    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path '*/local/*' -not -path './nixos/pins/_sources/*' -exec deadnix --fail {} +
 
 typecheck:
-    uv run --locked basedpyright
+    cd nixos/installer && uv run --locked basedpyright
 
 test:
-    uv run --locked pytest
+    cd nixos/installer && uv run --locked pytest
 
 # Format Python and Nix source files
 format:
-    uv run --locked ruff format scripts tests
-    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path './hosts/*/local/*' -not -path './pins/_sources/*' -exec nixfmt {} +
+    cd nixos/installer && uv run --locked ruff format .
+    find . -type f -name '*.nix' -not -path './.venv/*' -not -path './.direnv/*' -not -path '*/local/*' -not -path './nixos/pins/_sources/*' -exec nixfmt {} +
 
 # Evaluate configurations without building or deploying a system, and each
 # NixOS host with every other compositor it can pick
@@ -136,21 +136,21 @@ eval-local:
         while IFS= read -r -d '' file; do
             # Files deleted but not yet committed are still listed.
             if [[ -e $file ]]; then
-                cp --parents -- "$file" "$temporary"
+                cp -P --parents -- "$file" "$temporary"
             fi
         done
-    mkdir -p "$temporary/hosts/macos/local"
+    mkdir -p "$temporary/darwin/local"
     for profile in personal work; do
-        printf '{ imports = [ ../../../darwin/%s.nix ]; system.primaryUser = "alice"; }\n' "$profile" \
-            >"$temporary/hosts/macos/local/user.nix"
+        printf '{ imports = [ ../%s.nix ]; system.primaryUser = "alice"; }\n' "$profile" \
+            >"$temporary/darwin/local/user.nix"
         printf 'macos (%s): ' "$profile"
         nix --extra-experimental-features 'nix-command flakes' eval --no-write-lock-file --raw \
             "path:$temporary#darwinConfigurations.macos.system.drvPath"
         echo
     done
-    mkdir -p "$temporary/hosts/ubuntu/local"
+    mkdir -p "$temporary/ubuntu/local"
     printf '{ home.username = "alice"; home.homeDirectory = "/home/alice"; }\n' \
-        >"$temporary/hosts/ubuntu/local/user.nix"
+        >"$temporary/ubuntu/local/user.nix"
     printf 'ubuntu: '
     nix --extra-experimental-features 'nix-command flakes' eval --no-write-lock-file --raw \
         "path:$temporary#homeConfigurations.ubuntu.activationPackage.drvPath"
@@ -208,4 +208,4 @@ clean-iso:
 
 # Preview the shared installer wizard without making changes
 wizard:
-    uv run --locked python scripts/install.py --dry-run
+    cd nixos/installer && uv run --locked python install.py --dry-run

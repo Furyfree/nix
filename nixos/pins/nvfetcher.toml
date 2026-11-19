@@ -1,0 +1,50 @@
+# Apps from outside nixpkgs. npin and nupdate bump them with nvfetcher, which
+# writes _sources/generated.nix and generated.json; components/ reads them. To
+# hold an app at its current version, add `pinned = true` to its table.
+
+# Checked against Anthropic's signed index by claude-desktop.sh.
+[claude-desktop]
+src.cmd = "nixos/pins/claude-desktop.sh"
+fetch.url = "https://downloads.claude.ai/claude-desktop/apt/stable/pool/main/c/claude-desktop/claude-desktop_$ver_amd64.deb"
+
+# Both binaries come from one release; computer-use.nix checks that they match,
+# so hold or bump them together.
+[computer-use-linux]
+src.github = "agent-sh/computer-use-linux"
+src.prefix = "v"
+fetch.url = "https://github.com/agent-sh/computer-use-linux/releases/download/v$ver/computer-use-linux-x86_64-unknown-linux-gnu"
+
+[computer-use-linux-indicator]
+src.github = "agent-sh/computer-use-linux"
+src.prefix = "v"
+fetch.url = "https://github.com/agent-sh/computer-use-linux/releases/download/v$ver/computer-use-linux-indicator-x86_64-unknown-linux-gnu"
+
+[agent-workspace-linux]
+src.github = "agent-sh/agent-workspace-linux"
+src.prefix = "v"
+fetch.url = "https://github.com/agent-sh/agent-workspace-linux/releases/download/v$ver/agent-workspace-linux-x86_64-unknown-linux-gnu"
+
+[filmcraft]
+src.github = "storytold/filmcraft"
+src.prefix = "v"
+fetch.url = "https://github.com/storytold/filmcraft/releases/download/v$ver/filmcraft-$ver-linux-x86_64.tar.gz"
+
+[effectcraft]
+src.github = "storytold/effectcraft"
+src.prefix = "v"
+fetch.url = "https://github.com/storytold/effectcraft/releases/download/v$ver/effectcraft-$ver-linux-x86_64.tar.gz"
+
+[soundcraft]
+src.github = "storytold/soundcraft"
+src.prefix = "v"
+fetch.url = "https://github.com/storytold/soundcraft/releases/download/v$ver/soundcraft-$ver-linux-x86_64.tar.gz"
+
+[photocraft]
+src.github = "storytold/photocraft"
+src.prefix = "v"
+fetch.url = "https://github.com/storytold/photocraft/releases/download/v$ver/photocraft-$ver-linux-x86_64.tar.gz"
+
+# The fork that Noctalia's airpods plugin uses; devices.nix patches it.
+[librepods]
+src.git = "https://github.com/harveywuk/librepods"
+fetch.github = "harveywuk/librepods"
