@@ -86,5 +86,11 @@ in
     # Noctalia's renderer and reload hook for Ghostty, from Noctalia's .deb.
     configFile."noctalia/templates/ghostty".source =
       config.lib.file.mkOutOfStoreSymlink "/usr/share/noctalia/assets/templates/ghostty";
+    # niri.service starts XDG autostart entries here, so 1Password's own Start
+    # at login would run a second copy beside autostart.kdl's; GNOME keeps it.
+    configFile."systemd/user/app-com.onepassword.OnePassword@autostart.service.d/niri.conf".text = ''
+      [Unit]
+      ConditionEnvironment=!XDG_CURRENT_DESKTOP=niri
+    '';
   };
 }
