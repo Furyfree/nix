@@ -51,6 +51,8 @@
     # Location, for night light and the time zone; WinUtil's Standard tweaks
     # disable it.
     Services    = @{ lfsvc = 'Manual' }
+    # desktop.psd1 names its own
+    Taskbar     = 'windows/taskbar-vm.xml'
     # The home and projects folders, as in the Linux file manager
     QuickAccess = @('~', '~\Projects')
     NightLight  = $true
