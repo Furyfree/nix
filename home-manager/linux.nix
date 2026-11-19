@@ -8,10 +8,9 @@ let
   inherit (config.lib.workstation) link script;
 in
 {
-  # Noctalia's AI usage widget, gh opening the browser in its own systemd unit,
-  # and VSCodium, which saves its settings itself.
+  # gh opening the browser in its own systemd unit, and VSCodium, which saves
+  # its settings itself.
   workstation.settingMerges = ''
-    merge ${config.xdg.configHome}/ai-usagebar/config.toml ${../configs/ai-usagebar/config.toml} toml
     merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/linux.yml} yaml
     merge ${config.xdg.configHome}/VSCodium/User/settings.json ${../configs/vscodium/settings.json} json
   '';

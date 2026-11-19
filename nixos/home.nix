@@ -25,11 +25,12 @@ in
     ../home-manager/linux.nix
   ];
 
-  # Merges only NixOS needs: Codex's Linux desktop tools, the agents only NixOS
-  # installs, and the default apps, which apps that set themselves as default
-  # save themselves.
+  # Merges only NixOS needs: Noctalia's AI usage widget, Codex's Linux desktop
+  # tools, the agents only NixOS installs, and the default apps, which apps that
+  # set themselves as default save themselves.
   workstation.settingMerges = ''
     merge ${config.xdg.configHome}/mimeapps.list ${../configs/mimeapps.list} ini
+    merge ${config.xdg.configHome}/ai-usagebar/config.toml ${../configs/ai-usagebar/config.toml} toml
     merge ${config.home.homeDirectory}/.codex/config.toml ${../configs/codex/linux.toml} toml
     merge ${config.home.homeDirectory}/.grok/config.toml ${../configs/grok/config.toml} toml
     merge ${config.xdg.configHome}/opencode/opencode.jsonc ${../configs/opencode/opencode.json} json

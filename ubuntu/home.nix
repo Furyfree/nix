@@ -48,8 +48,12 @@ in
     sshProfile = "work";
     # configs/niri/hosts/ubuntu.kdl, a fixed name rather than the laptop's own.
     host = "ubuntu";
+    # AI usage, Git Companion (GitHub only; work uses GitLab), Mini Docker,
     # AirPods control, the tailnet and the screen recorder stay on NixOS.
     noctaliaPluginsOff = [
+      "felipeartur/ai-usagebar"
+      "tphilippot/git_companion"
+      "8bury/mini-docker"
       "harveywuk/airpods"
       "rylos/tailnet"
       "noctalia/screen_recorder"
