@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Debloat a fresh Ubuntu 26.04 Desktop, Default selection, once.
-# Run it as the user from a terminal in the GNOME session, then reboot. It
-# removes only what ubuntu-desktop-minimal recommends, never what it depends
-# on, and stops if a removal would take a base metapackage with it.
+# Debloat a fresh Ubuntu 26.04 Desktop, Default selection, once. bootstrap.sh
+# runs it as the user from a terminal in the GNOME session, and the reboot
+# after the setup finishes it. It removes only what ubuntu-desktop-minimal
+# recommends, never what it depends on, and stops if a removal would take a
+# base metapackage with it.
 set -euo pipefail
 
 log() { printf '\n== %s\n' "$*"; }
@@ -76,4 +77,4 @@ fi
 apt_get autoremove --purge -y
 sudo dpkg --audit
 
-log 'Done; reboot now'
+log 'Done'

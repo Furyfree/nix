@@ -7,34 +7,18 @@ agents; nothing here touches them.
 ## Install
 
 1. Ubuntu Desktop 26.04, Default selection. In GNOME's terminal:
-   `sudo apt install git curl`, then clone this repository over HTTPS to
-   `~/Projects/nix`.
-2. `ubuntu/debloat.sh` once, then reboot. It removes the snaps, telemetry and
-   unused services, and stops before removing one of Ubuntu's base packages.
-3. Nix, with flakes:
 
    ```bash
-   curl -fsSL -o /tmp/nix.sh https://nixos.org/nix/install
-   sh /tmp/nix.sh --daemon --yes --no-channel-add </dev/null
-   echo 'experimental-features = nix-command flakes' | sudo tee -a /etc/nix/nix.conf
-   sudo systemctl restart nix-daemon
+   curl -fsSL https://raw.githubusercontent.com/Furyfree/nix/main/ubuntu/bootstrap.sh | bash
    ```
 
-4. The account, in the ignored `ubuntu/local/user.nix`:
-
-   ```nix
-   { home.username = "alice"; home.homeDirectory = "/home/alice"; }
-   ```
-
-5. In a new terminal, Home Manager, then the apps:
-
-   ```bash
-   nix run nixpkgs#nh -- home switch --configuration ubuntu \
-     --backup-extension before-home-manager path:$HOME/Projects/nix
-   ~/Projects/nix/ubuntu/apps.sh
-   ```
-
-6. Log out and in again, for zsh and the `docker` and `kvm` groups. Then
+   It installs Git and clones this repository over HTTPS to `~/Projects/nix`,
+   runs `debloat.sh` once, installs Nix with flakes, writes the ignored
+   `ubuntu/local/user.nix` with your account, switches Home Manager and runs
+   `apps.sh`. `debloat.sh` removes the snaps, telemetry and unused services,
+   and stops before removing one of Ubuntu's base packages. After an error,
+   run it again; it carries on.
+2. Reboot, for the debloat, zsh and the `docker` and `kvm` groups. Then
    `mise install`, and 1Password, the work machine's SSH keys and `gh` as in
    [SSH keys](../README.md#ssh-keys).
 
