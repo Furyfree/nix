@@ -3,6 +3,8 @@
 # here. Bot checks block Brave that says HeadlessChrome or sets the automation
 # flag, and Vercel's check fails without WebGL, which Brave turns off on the
 # hidden desktop's software graphics. A new profile skips the welcome page.
+# agent-browser will not add a stealth mode that would replace this:
+# https://github.com/vercel-labs/agent-browser/issues/120
 case $(uname -s) in
   Darwin)
     brave='/Applications/Brave Origin.app/Contents/MacOS/Brave Origin'
