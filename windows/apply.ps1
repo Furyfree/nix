@@ -337,6 +337,24 @@ foreach ($target in $want.Links.Keys) {
     }
 }
 
+# A link this script made that the profile no longer has goes, as Home Manager
+# does it, but only while it still points into the checkout's configs.
+Invoke-Step 'old links' {
+    $file = Join-Path $state 'links.json'
+    $configs = [IO.Path]::GetFullPath((Join-Path $root 'configs')) + [IO.Path]::DirectorySeparatorChar
+    $wanted = @($want.Links.Keys | ForEach-Object { Resolve-Target $_ })
+    $made = @(if (Test-Path $file) { Get-Content $file -Raw | ConvertFrom-Json })
+    foreach ($path in $made | Where-Object { $wanted -notcontains $_ }) {
+        $item = Get-Item $path -Force -ErrorAction Ignore
+        if ($item.LinkType -and $item.Target.StartsWith($configs, [StringComparison]::OrdinalIgnoreCase)) {
+            Write-Host "unlink   $path"
+            Remove-Item $path -Force
+        }
+    }
+    New-Item -ItemType Directory -Force $state | Out-Null
+    ConvertTo-Json -InputObject $wanted | Set-Content $file
+}
+
 if ($want.GitWindows) {
     Invoke-Step 'Git settings for Windows' {
         # Git's own ssh cannot reach 1Password's agent pipe; Windows' ssh can.
