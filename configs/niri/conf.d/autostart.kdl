@@ -2,5 +2,6 @@
 
 spawn-at-startup "udiskie" "--no-tray" "--no-notify"
 // Hidden in the tray, so its SSH agent can ask to unlock for Git signing.
-// 1Password's own Start at login does not start it in this session.
+// On NixOS, 1Password's own Start at login does not start it; on Ubuntu,
+// ubuntu/home.nix keeps that from starting a second copy.
 spawn-at-startup "1password" "--silent"
