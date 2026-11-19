@@ -22,8 +22,7 @@
 #   Taskbar         a configs/ taskbar layout for the Start Layout policy;
 #                   Windows replaces the pins at the next sign-in
 #   QuickAccess     folders to pin in Explorer's sidebar, after its own pins
-#   Wsl             Distribution, plus Apt packages for Ubuntu or the Image
-#                   URL and its Sha256 for NixOS
+#   Wsl             Distribution 'Ubuntu', plus Apt packages for it
 #   Power           powercfg values on the active plan, 'SUBGROUP SETTING' = AC
 #   Services        start types, name = 'Manual', 'Automatic' or 'Disabled'
 #   NightLight      $true schedules night light from sunset to sunrise

@@ -4,7 +4,6 @@
   config,
   lib,
   pkgs,
-  osConfig,
   ...
 }:
 
@@ -13,12 +12,10 @@ let
   link =
     path:
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
-  # NixOS on a desktop, not in WSL
-  desktopLinux = pkgs.stdenv.hostPlatform.isLinux && !(osConfig.wsl.enable or false);
   # Merges that only make sense on the Linux desktop: Noctalia's AI usage
   # widget, gh opening the browser in its own systemd unit, Codex's Linux
   # desktop tools, and the agents only Linux installs.
-  linuxSettings = lib.optionalString desktopLinux ''
+  linuxSettings = lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
     merge ${config.xdg.configHome}/ai-usagebar/config.toml ${../configs/ai-usagebar/config.toml} toml
     merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/linux.yml} yaml
     merge ${config.home.homeDirectory}/.codex/config.toml ${../configs/codex/linux.toml} toml

@@ -17,10 +17,6 @@
       url = "github:lgse/strata";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
@@ -75,10 +71,6 @@
       # builds only once its ignored local/user.nix names the account and this
       # Mac's profile.
       macUser = ./hosts/macos/local/user.nix;
-
-      # NixOS in WSL on the Windows desktop profile; it builds once
-      # windows/apply.ps1 has written the ignored local/user.nix.
-      wslUser = ./hosts/wsl/local/user.nix;
     in
     {
       devShells.x86_64-linux.default =
@@ -119,21 +111,7 @@
       }
       // mkHost "desktop"
       // mkHost "laptop"
-      // mkHost "nixos-test"
-      // nixpkgs.lib.optionalAttrs (builtins.pathExists wslUser) {
-        wsl = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs; };
-          modules = [
-            ./hosts/wsl/configuration.nix
-            home-manager.nixosModules.home-manager
-            wslUser
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-            }
-          ];
-        };
-      };
+      // mkHost "nixos-test";
 
       darwinConfigurations = nixpkgs.lib.optionalAttrs (builtins.pathExists macUser) {
         macos = nix-darwin.lib.darwinSystem {

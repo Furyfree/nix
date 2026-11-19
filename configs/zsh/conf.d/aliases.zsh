@@ -78,11 +78,6 @@ if command -v noctalia >/dev/null 2>&1; then
   alias recolor='noctalia msg templates-apply'
 fi
 
-# In WSL, Windows' ssh.exe reaches 1Password's agent; Linux's ssh cannot.
-if [[ -n ${WSL_DISTRO_NAME-} ]] && command -v ssh.exe >/dev/null 2>&1; then
-  alias ssh='ssh.exe'
-fi
-
 # Nixpkgs' 7-Zip only installs 7zz; keep the usual 7z name.
 if ! command -v 7z >/dev/null 2>&1 && command -v 7zz >/dev/null 2>&1; then
   alias 7z='7zz'
