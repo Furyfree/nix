@@ -1,5 +1,6 @@
--- Neovim's built-in plugin manager installs these on first start and pins
--- them in nvim-pack-lock.json. Update with :lua vim.pack.update().
+-- Neovim's built-in plugin manager installs these on first start at the
+-- versions in nvim-pack-lock.json. nupdate updates them and the lock file;
+-- nswitch moves every machine to the lock file's versions.
 vim.pack.add({
   "https://github.com/folke/snacks.nvim",
   "https://github.com/folke/which-key.nvim",
