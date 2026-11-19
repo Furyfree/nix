@@ -9,6 +9,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import termios
 import time
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -69,7 +70,13 @@ class CredentialTests(unittest.TestCase):
                         output += os.read(terminal, 4096)
                     except OSError:
                         continue
-                if prompts and prompts[0] in output:
+                # systemd-ask-password writes the prompt before it turns echo
+                # off; an earlier answer would be echoed back.
+                if (
+                    prompts
+                    and prompts[0] in output
+                    and not termios.tcgetattr(terminal)[3] & termios.ECHO
+                ):
                     prompts.pop(0)
                     os.write(terminal, b"disposable-tty-fixture\n")
             self.assertTrue(finished, "Native password prompt timed out")
