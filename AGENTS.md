@@ -79,8 +79,7 @@ Docs and comments state no current versions or status; open work lives in
 - `configs/`: native app preferences, linked live from the checkout; keep the
   checkout at `~/Projects/nix`. SSH hosts stay in private 1Password documents,
   never here. `configs/hypr/hosts/<host>.lua` and `configs/niri/hosts/<host>.kdl`
-  hold each host's monitors, workspaces and keys. `configs/bin` links to `bin/`
-  until every machine has switched past the move.
+  hold each host's monitors, workspaces and keys.
 - `bin/`: our own scripts, linked into `~/.local/bin`: `nix-workstation` (the
   `n*` aliases), `pull-projects`, `launch`, `agent-brave`, and `windows-vm`,
   which `windows-vm.nix` builds for NixOS and Ubuntu.
