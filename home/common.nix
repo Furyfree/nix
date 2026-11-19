@@ -101,8 +101,16 @@ in
     ".t3/userdata/settings.json".source = link "t3code/settings.json";
     ".t3/userdata/client-settings.json".source = link "t3code/client-settings.json";
     ".t3/userdata/keybindings.json".source = link "t3code/keybindings.json";
+    # agent-browser expands no ~ here, so Nix writes the paths. The profile is
+    # the agents' own, never mine: it keeps passed bot checks and sign-ins.
+    ".agent-browser/config.json".text = builtins.toJSON {
+      executablePath = "${config.home.homeDirectory}/.local/bin/agent-brave";
+      profile = "${config.xdg.dataHome}/agent-browser";
+      maxOutput = 50000;
+      idleTimeout = "10m";
+    };
   }
-  // lib.genAttrs [ "pull-projects" "nix-workstation" ] (name: {
+  // lib.genAttrs [ "pull-projects" "nix-workstation" "agent-brave" ] (name: {
     target = ".local/bin/${name}";
     source = link "bin/${name}";
   });

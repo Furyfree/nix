@@ -11,8 +11,8 @@ node = "lts"
 
 # Agentic helpers
 "npm:@llamaindex/liteparse" = "latest"
-# Upstream publishes bare binaries, none for Windows; no registry entry.
-"github:lightpanda-io/browser" = { version = "latest", bin = "lightpanda", os = ["linux", "macos"] }
+# Drives Brave Origin through agent-brave, a POSIX script; none for Windows.
+agent-browser = { version = "latest", os = ["linux", "macos"] }
 
 # Language helpers
 "npm:markdownlint-cli" = "latest"
@@ -30,10 +30,6 @@ jactionlint = "latest"
 delta = "latest"
 # Deja autosuggestions; enable together with [plugins.deja] in sheldon/plugins.toml.
 # "github:Giammarco-Ferranti/deja" = "latest"
-
-[env]
-# Lightpanda sends usage telemetry unless this is set.
-LIGHTPANDA_DISABLE_TELEMETRY = "true"
 
 [settings]
 # Nix, Homebrew or winget installs and updates Mise; Mise installs the
