@@ -7,7 +7,6 @@
     ./components/apps.nix
     ./components/boot.nix
     ./components/claude-desktop.nix
-    ./components/cli.nix
     ./components/computer-use.nix
     ./components/craft-suite.nix
     ./components/desktop.nix

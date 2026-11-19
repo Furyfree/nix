@@ -10,14 +10,10 @@
   };
 
   environment.systemPackages = with pkgs; [
-    mise
     # C compiler and linker for Rust, cgo and Neovim's tree-sitter parsers.
     gcc
-    tree-sitter
-    # Language servers tied to Nix and the C toolchain, and Metals, which Mise
-    # has no entry for; Mise installs the rest.
-    nixd
-    clang-tools
+    # Metals, which Mise has no entry for; home/cli-tools.nix has the language
+    # servers Ubuntu shares.
     metals
   ];
 }
