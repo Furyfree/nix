@@ -1,19 +1,19 @@
 #!/bin/sh
-# Fast-forward every clean Git repository directly under ~/Projects.
+# Fast-forward every clean Git repository directly under ~/Projects, all at
+# once; each prints its line when it is done.
 if [ "$#" -ne 0 ]; then
   printf '%s\n' 'usage: pull-projects' >&2
   exit 2
 fi
 
 export GIT_TERMINAL_PROMPT=0
-result=0
-for repo in "$HOME"/Projects/*/; do
-  repo=${repo%/}
-  [ -e "$repo/.git" ] || continue
+
+pull() {
+  repo=$1
   name=${repo##*/}
   if ! changes=$(git -C "$repo" status --porcelain); then
     printf '%s: failed: git status\n' "$name"
-    result=1
+    return 1
   elif [ -n "$changes" ]; then
     printf '%s: skipped: uncommitted changes\n' "$name"
   elif ! git -C "$repo" rev-parse --verify --quiet '@{upstream}' >/dev/null 2>&1; then
@@ -22,12 +22,32 @@ for repo in "$HOME"/Projects/*/; do
     before=$(git -C "$repo" rev-parse HEAD)
     if ! git -C "$repo" pull --ff-only --quiet; then
       printf '%s: failed: not a fast-forward or fetch error\n' "$name"
-      result=1
+      return 1
     elif [ "$(git -C "$repo" rev-parse HEAD)" = "$before" ]; then
       printf '%s: up to date\n' "$name"
     else
       printf '%s: updated\n' "$name"
     fi
   fi
+}
+
+pids=
+for repo in "$HOME"/Projects/*/; do
+  repo=${repo%/}
+  [ -e "$repo/.git" ] || continue
+  # In the background; its lines, Git's own messages among them, print
+  # together, so the repositories' output never mixes.
+  (
+    output=$(pull "$repo" 2>&1)
+    status=$?
+    printf '%s\n' "$output"
+    exit "$status"
+  ) &
+  pids="$pids $!"
+done
+
+result=0
+for pid in $pids; do
+  wait "$pid" || result=1
 done
 exit "$result"
