@@ -39,9 +39,8 @@ _:
       "font-inter" # Zed's interface font, as on Linux
     ];
 
-    # Command-line tools the shared configs use, as components/shell.nix,
-    # cli.nix and development.nix install them on NixOS; a tool added there goes
-    # here too.
+    # Command-line tools the shared configs use, as home/cli-tools.nix lists
+    # them for NixOS; a tool added there goes here too.
     # macOS and the Command Line Tools provide Git, clangd, clang-format, file,
     # zip and unzip; Nix installs nixd and nh, which Homebrew lacks.
     brews = [

@@ -23,6 +23,19 @@ in
 {
   imports = [ ./common.nix ];
 
+  # Merges for the Linux desktop: Noctalia's AI usage widget, gh opening the
+  # browser in its own systemd unit, Codex's Linux desktop tools, and the agents
+  # only NixOS installs.
+  workstation.settingMerges = ''
+    merge ${config.xdg.configHome}/ai-usagebar/config.toml ${../configs/ai-usagebar/config.toml} toml
+    merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/linux.yml} yaml
+    merge ${config.home.homeDirectory}/.codex/config.toml ${../configs/codex/linux.toml} toml
+    merge ${config.home.homeDirectory}/.grok/config.toml ${../configs/grok/config.toml} toml
+    merge ${config.xdg.configHome}/opencode/opencode.jsonc ${../configs/opencode/opencode.json} json
+    merge ${config.home.homeDirectory}/.pi/agent/settings.json ${../configs/pi/settings.json} json
+    merge ${config.home.homeDirectory}/.pi/agent/mcp.json ${../configs/pi/mcp.json} json
+  '';
+
   xdg = {
     dataFile =
       lib.mapAttrs'
