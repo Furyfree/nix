@@ -41,6 +41,16 @@ let
       merge "${settings}" ${../configs/vscodium/settings.json} json
       merge "${settings}" ${theme} json
     '';
+  # agent-browser expands no ~ in its config, so Nix writes the paths. The
+  # profile is the agents' own, never mine: it keeps passed bot checks and sign-ins.
+  agentBrowser = pkgs.writeText "agent-browser.json" (
+    builtins.toJSON {
+      executablePath = "${config.home.homeDirectory}/.local/bin/agent-brave";
+      profile = "${config.xdg.dataHome}/agent-browser";
+      maxOutput = 50000;
+      idleTimeout = "10m";
+    }
+  );
 in
 {
   imports = [ ./ssh.nix ];
@@ -101,14 +111,6 @@ in
     ".t3/userdata/settings.json".source = link "t3code/settings.json";
     ".t3/userdata/client-settings.json".source = link "t3code/client-settings.json";
     ".t3/userdata/keybindings.json".source = link "t3code/keybindings.json";
-    # agent-browser expands no ~ here, so Nix writes the paths. The profile is
-    # the agents' own, never mine: it keeps passed bot checks and sign-ins.
-    ".agent-browser/config.json".text = builtins.toJSON {
-      executablePath = "${config.home.homeDirectory}/.local/bin/agent-brave";
-      profile = "${config.xdg.dataHome}/agent-browser";
-      maxOutput = 50000;
-      idleTimeout = "10m";
-    };
   }
   // lib.genAttrs [ "pull-projects" "nix-workstation" "agent-brave" ] (name: {
     target = ".local/bin/${name}";
@@ -143,6 +145,7 @@ in
         merge ${config.home.homeDirectory}/.claude/settings.json ${../configs/claude/settings.json} json
         merge ${config.home.homeDirectory}/.codex/config.toml ${../configs/codex/config.toml} toml
         merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/config.yml} yaml
+        merge ${config.home.homeDirectory}/.agent-browser/config.json ${agentBrowser} json
         ${linuxSettings}
         ${darwinSettings}
       '';
