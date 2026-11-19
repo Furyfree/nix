@@ -3,6 +3,14 @@
 // and apt's apps have their own command names.
 spawn-at-startup "noctalia"
 
+// Five workspaces always exist, on the first screen; see desktop.kdl for the
+// names.
+workspace "main-1"
+workspace "main-2"
+workspace "main-3"
+workspace "main-4"
+workspace "main-5"
+
 binds {
     Mod+Shift+F hotkey-overlay-title="Open file manager" { spawn "nautilus"; }
     Mod+Shift+O hotkey-overlay-title="Focus or open Obsidian" { spawn "launch" "focus" "md.obsidian.Obsidian" "flatpak" "run" "md.obsidian.Obsidian"; }
