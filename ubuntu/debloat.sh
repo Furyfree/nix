@@ -66,7 +66,10 @@ localsearch reset --filesystem || true
 
 log 'Autoremove, keeping the password-strength check that sssd pulled in'
 sudo apt-mark manual libpam-pwquality >/dev/null
-if LANG=C apt-get -s autoremove --purge | grep -E "$base"; then
+# The dry run on its own line, so its failure stops here instead of reading as
+# nothing to remove.
+removals=$(LANG=C apt-get -s autoremove --purge)
+if grep -E "$base" <<<"$removals"; then
   echo 'debloat.sh: autoremove would remove a base metapackage; stopping' >&2
   exit 1
 fi
