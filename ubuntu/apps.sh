@@ -180,18 +180,28 @@ install_t3code() {
 }
 
 install_toolbox() {
-  [[ -e $HOME/.local/share/JetBrains/Toolbox || -d $HOME/Downloads/jetbrains-toolbox ]] && return
-  log 'JetBrains Toolbox: the tarball, checked against its sha256; its first run installs it'
-  local link sum
-  read -r link sum < <(curl -fsSL 'https://data.services.jetbrains.com/products/releases?code=TBA&latest=true&type=release' |
-    python3 -I -c 'import json,sys; d=json.load(sys.stdin)["TBA"][0]["downloads"]["linux"]; print(d["link"], d["checksumLink"])')
-  curl -fsSL "$link" -o "$tmp/toolbox.tar.gz"
-  [[ $(curl -fsSL "$sum" | cut -d' ' -f1) == $(sha256sum "$tmp/toolbox.tar.gz" | cut -d' ' -f1) ]] || {
-    echo 'Toolbox: sha256 mismatch' >&2
-    return 1
-  }
-  mkdir -p "$HOME/Downloads/jetbrains-toolbox"
-  tar -xzf "$tmp/toolbox.tar.gz" -C "$HOME/Downloads/jetbrains-toolbox" --strip-components=1
+  # Toolbox runs from where it is unpacked and points its menu and autostart
+  # entries there, so it goes beside its data, where it updates itself.
+  local dir=$HOME/.local/share/JetBrains/Toolbox/bin link sum
+  if [[ ! -x $dir/jetbrains-toolbox ]]; then
+    log 'JetBrains Toolbox: the tarball, checked against its sha256'
+    read -r link sum < <(curl -fsSL 'https://data.services.jetbrains.com/products/releases?code=TBA&latest=true&type=release' |
+      python3 -I -c 'import json,sys; d=json.load(sys.stdin)["TBA"][0]["downloads"]["linux"]; print(d["link"], d["checksumLink"])')
+    curl -fsSL "$link" -o "$tmp/toolbox.tar.gz"
+    [[ $(curl -fsSL "$sum" | cut -d' ' -f1) == $(sha256sum "$tmp/toolbox.tar.gz" | cut -d' ' -f1) ]] || {
+      echo 'Toolbox: sha256 mismatch' >&2
+      return 1
+    }
+    mkdir -p "${dir%/bin}"
+    tar -xzf "$tmp/toolbox.tar.gz" -C "${dir%/bin}" --strip-components=1
+  fi
+  # Its first start adds the menu entry; start it once where there is a
+  # desktop to show it on.
+  if [[ -n ${WAYLAND_DISPLAY-}${DISPLAY-} ]] &&
+    ! grep -qs "$dir/jetbrains-toolbox" "$HOME/.local/share/applications/jetbrains-toolbox.desktop"; then
+    log 'JetBrains Toolbox: its first start, which adds its menu entry'
+    setsid -f "$dir/jetbrains-toolbox" >/dev/null 2>&1
+  fi
 }
 
 install_daily_apps() {
