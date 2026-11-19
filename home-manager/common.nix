@@ -114,11 +114,18 @@ in
         ''
           merge() {
             local target=$1 patch=$2 format=$3 merged
+            local expression='select(fi == 0) * select(fi == 1)'
+            # A list merges entry by entry, as windows/apply.ps1 merges it: T3
+            # Code's keybindings by key and when. Entries only the machine has
+            # stay.
+            if [[ $(${lib.getExe pkgs.yq-go} -p "$format" -o yaml tag "$patch" 2>/dev/null) == '!!seq' ]]; then
+              expression='[.] | flatten(1) | group_by(.context // ((.key // "") + "|" + (.when // ""))) | map(. as $g | $g[] as $item ireduce ({}; . * $item))'
+            fi
             # Yq reads an empty file as nothing, so start those from the patch too.
             if [[ ! -s $target ]]; then
               run install -D -m 0600 "$patch" "$target"
             elif merged=$(${lib.getExe pkgs.yq-go} ea -p "$format" -o "$format" \
-              'select(fi == 0) * select(fi == 1)' "$target" "$patch"); then
+              "$expression" "$target" "$patch"); then
               # Rewrite in place to keep the file's owner and mode.
               [[ -v DRY_RUN ]] || printf '%s\n' "$merged" >"$target"
             else
