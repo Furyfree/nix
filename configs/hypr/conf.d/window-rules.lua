@@ -23,6 +23,13 @@ hl.window_rule({
     tag = "+centered-floating",
 })
 hl.window_rule({
+    name = "calculator",
+    -- Floating and centred at its own size, as on Niri.
+    match = { class = "^org\\.gnome\\.Calculator$" },
+    float = true,
+    center = true,
+})
+hl.window_rule({
     name = "steam-settings-and-friends",
     -- Steam gives these and its main window the same class and window type.
     -- Keep the app match and narrow it to these two initial titles.
