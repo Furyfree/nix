@@ -11,8 +11,6 @@
 {
   imports = [
     ../../default.nix
-    ../../intel-graphics.nix
-    ../../nvidia.nix
     ../../gaming.nix
     ../../local-ai.nix
     ../../dtu-eduroam.nix
@@ -24,12 +22,47 @@
 
   networking.hostName = "desktop";
 
+  hardware = {
+    # Intel integrated graphics: VA-API video encoding and decoding.
+    graphics.extraPackages = [ pkgs.intel-media-driver ];
+    # NVIDIA graphics with the open kernel modules, which NVIDIA recommends
+    # from the RTX 20 series on. The module also adds the VA-API video driver.
+    nvidia = {
+      open = true;
+      modesetting.enable = true;
+      # Keep video memory across suspend and hibernation.
+      powerManagement.enable = true;
+      package = config.boot.kernelPackages.nvidiaPackages.stable;
+      # Its X11 settings app does little on Wayland.
+      nvidiaSettings = false;
+    };
+  };
+  services.xserver.videoDrivers = [ "nvidia" ];
+
+  nixpkgs = {
+    # btop finds the driver's GPU library only when built with CUDA support.
+    overlays = [ (_: prev: { btop = prev.btop.override { cudaSupport = true; }; }) ];
+    config = {
+      # The driver, and the CUDA parts btop and llama.cpp build on.
+      allowUnfreePackages = [
+        "nvidia-x11"
+        "cccl"
+        "cuda_crt"
+        "cuda_cudart"
+        "cuda_nvcc"
+        "cuda_nvrtc"
+        "libcublas"
+        "libnvvm"
+      ];
+      # Local models on CUDA. Building for the RTX 3080 alone keeps the local
+      # CUDA build short.
+      cudaCapabilities = [ "8.6" ];
+    };
+  };
+
   # The RTX 3080 runs Whisper's recommended large model; others keep small.
   systemd.user.services.voxtype.scriptArgs = "large-v3-turbo";
 
-  # Local models on CUDA. Building for the RTX 3080 alone keeps the local CUDA
-  # build short.
-  nixpkgs.config.cudaCapabilities = [ "8.6" ];
   services.llama-cpp.package = pkgs.llama-cpp-cuda;
 
   # The monitor hangs on the NVIDIA card. With an Intel driver in the early

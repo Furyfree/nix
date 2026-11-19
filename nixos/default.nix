@@ -12,7 +12,6 @@
     ./desktop.nix
     ./development.nix
     ./devices.nix
-    ./editors.nix
     ./hyprland.nix
     ./networking.nix
     ./niri.nix
@@ -20,7 +19,6 @@
     ./services.nix
     ./shell.nix
     ./snapper.nix
-    ./strata.nix
     ./virtualization.nix
     ./voxtype.nix
     ./windows-vm.nix
