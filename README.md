@@ -96,4 +96,4 @@ just check
 `just --list` shows the other recipes. Build a host without activating it with
 `nh os build`.
 
-[docs/PLAN.md](docs/PLAN.md) holds the open work.
+[GitHub issues](https://github.com/Furyfree/nix/issues) hold the open work.
