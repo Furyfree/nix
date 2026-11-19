@@ -89,8 +89,9 @@ in
 
   xdg = {
     dataFile =
-      # Hidden as on NixOS: settings tools, helpers and Noctalia itself, which
-      # runs already. Hidden=true deletes an entry for this account.
+      # Hidden as on NixOS: settings tools, helpers, the terminal editors and
+      # manual reader, and Noctalia itself, which runs already. Hidden=true
+      # deletes an entry for this account.
       lib.genAttrs
         (map (name: "applications/${name}.desktop") [
           "qt5ct"
@@ -101,6 +102,8 @@ in
           "dev.noctalia.Noctalia"
           "nvim"
           "yazi"
+          "vim"
+          "info"
         ])
         (_: {
           text = "[Desktop Entry]\nHidden=true\n";
