@@ -1,4 +1,4 @@
-# Tools only the NixOS desktops install; home/linux.nix links this file.
+# Tools only the NixOS desktops install; nixos/home.nix links this file.
 [tools]
 tinymist = "latest"
 

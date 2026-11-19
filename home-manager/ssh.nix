@@ -1,7 +1,7 @@
 # Which SSH keys a machine gets. Personal machines use the GitHub, homelab and
 # personal keys; work machines the GitHub and work keys. Each profile has its
 # own SSH config and 1Password agent file in configs/; hosts stay in the
-# profile's private 1Password document (INSTALLATION.md).
+# profile's private 1Password document (README.md, SSH keys).
 { config, lib, ... }:
 
 let

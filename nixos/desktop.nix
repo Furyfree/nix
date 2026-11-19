@@ -33,7 +33,7 @@ in
       "niri"
     ];
     default = "hyprland";
-    description = "Compositor this machine runs under Noctalia; components/<desktop>.nix sets it up.";
+    description = "Compositor this machine runs under Noctalia; nixos/<desktop>.nix sets it up.";
   };
 
   config = {
@@ -111,7 +111,7 @@ in
       platformTheme = "qt5ct";
     };
     # The session environment, which login sets for the compositor, systemd
-    # and shells alike; components/<desktop>.nix adds the compositor's own.
+    # and shells alike; nixos/<desktop>.nix adds the compositor's own.
     environment.sessionVariables = {
       # The checkout's helpers, such as launch, and the tools mise installs.
       PATH = [
@@ -125,7 +125,7 @@ in
       # package leaves it unset, so the handler would start bare Electron.
       T3CODE_DESKTOP_LAUNCHER_PATH = "/run/current-system/sw/bin/t3code-desktop";
       # Prefer native Wayland, with X11 as a fallback. GTK does so by itself;
-      # components/hyprland.nix forces it there only.
+      # nixos/hyprland.nix forces it there only.
       QT_QPA_PLATFORM = "wayland;xcb";
       ELECTRON_OZONE_PLATFORM_HINT = "auto";
       # nixpkgs wrappers (Spotify, Obsidian, Vesktop, VSCodium) run natively on

@@ -116,7 +116,7 @@ in
   # of rebuilding them on every model load.
   systemd.services.llama-cpp.environment.XDG_CACHE_HOME = "/var/cache/llama-cpp";
 
-  # After home/common.nix merges configs/opencode into OpenCode's own file.
+  # After home-manager/common.nix merges configs/opencode into OpenCode's own file.
   home-manager.sharedModules = [
     (
       { config, lib, ... }:

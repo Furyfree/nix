@@ -1,6 +1,6 @@
 // Load the Niri configuration files from conf.d.
 
-// Login sets the session environment: components/desktop.nix.
+// Login sets the session environment: nixos/desktop.nix.
 include "conf.d/input.kdl"
 include "conf.d/monitors.kdl"
 include "conf.d/layout.kdl"
@@ -13,6 +13,6 @@ include "conf.d/keybinds.kdl"
 // and with the include already here, Noctalia does not add one to this file.
 include optional=true "noctalia.kdl"
 
-// Per-machine monitors and keys, linked by home/niri.nix. Last, because an
+// Per-machine monitors and keys, linked by nixos/niri.nix. Last, because an
 // include overrides only what comes before it.
 include optional=true "host.kdl"

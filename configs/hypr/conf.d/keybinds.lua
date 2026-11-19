@@ -85,7 +85,7 @@ hl.bind(
     hl.dsp.exec_cmd("launch focus com.anthropic.Claude claude-desktop"),
     { description = "Focus or open Claude" }
 )
--- Does nothing on hosts without components/local-ai.nix.
+-- Does nothing on hosts without nixos/local-ai.nix.
 hl.bind(
     mainMod .. " + SHIFT + A",
     hl.dsp.exec_cmd("gio launch /etc/profiles/per-user/$USER/share/applications/llama-cpp.desktop"),

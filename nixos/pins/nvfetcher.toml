@@ -1,5 +1,5 @@
 # Apps from outside nixpkgs. npin and nupdate bump them with nvfetcher, which
-# writes _sources/generated.nix and generated.json; components/ reads them. To
+# writes _sources/generated.nix and generated.json for the NixOS modules. To
 # hold an app at its current version, add `pinned = true` to its table.
 
 # Checked against Anthropic's signed index by claude-desktop.sh.

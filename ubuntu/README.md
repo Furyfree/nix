@@ -20,7 +20,7 @@ agents; nothing here touches them.
    sudo systemctl restart nix-daemon
    ```
 
-4. The account, in the ignored `hosts/ubuntu/local/user.nix`:
+4. The account, in the ignored `ubuntu/local/user.nix`:
 
    ```nix
    { home.username = "alice"; home.homeDirectory = "/home/alice"; }
@@ -34,8 +34,8 @@ agents; nothing here touches them.
    ```
 
 6. Log out and in again, for zsh and the `docker` and `kvm` groups. Then
-   `mise install`, and 1Password, the SSH keys and `gh` as in steps 5 and 6 of
-   [First boot](../INSTALLATION.md#first-boot), with the work machine's keys.
+   `mise install`, and 1Password, the work machine's SSH keys and `gh` as in
+   [SSH keys](../README.md#ssh-keys).
 
 After that, `git pull`, then `nswitch`: Home Manager first, then `apps.sh`
 installs what is missing. NixOS updates `flake.lock`; apt updates the rest.

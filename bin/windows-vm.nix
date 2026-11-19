@@ -1,4 +1,4 @@
-# windows-vm with its tools, for NixOS (components/windows-vm.nix) and Ubuntu
+# windows-vm with its tools, for NixOS (nixos/windows-vm.nix) and Ubuntu
 # (ubuntu/home.nix). Each adds what its own system must provide: NixOS its
 # Docker, systemd and btrfs-progs; Ubuntu uses the ones from apt.
 {

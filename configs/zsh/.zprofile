@@ -10,7 +10,7 @@ fi
 
 # Ubuntu: Nix's installer puts its profiles on PATH for interactive shells
 # only, and the Niri session takes PATH from this login shell. NixOS sets both
-# at login (components/desktop.nix).
+# at login (nixos/desktop.nix).
 if [[ $OSTYPE == linux* && ! -e /etc/NIXOS ]]; then
   if [[ -r /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
     source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
