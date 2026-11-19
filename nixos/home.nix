@@ -89,6 +89,7 @@ in
     configFile =
       lib.genAttrs
         [
+          "ghostty/nixos"
           "zathura/zathurarc"
           "mise/conf.d/nixos-tools.toml"
           "voxtype/config.toml"

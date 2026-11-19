@@ -44,6 +44,12 @@ Setups on one system share one list and differ by whole add-ons. A must-have
 is what a setup's purpose needs, and gets fixed when it breaks; a nice-to-have
 comes with a shared list and is dropped there when it breaks.
 
+A shared config holds only what the oldest version of the app on any machine
+understands; a newer option goes in that system's own include, such as
+`configs/ghostty/nixos`. A difference between machines goes in the app's own
+include where it has one (Ghostty's and git's, or Niri's and Hyprland's host
+files), else in a file merged on top.
+
 A file is one topic every machine of its system takes, or one purpose some
 machines add. What one machine alone has is lines in its host file. Split a
 file only when a machine must not get part of it; a topic under 15 lines folds
