@@ -136,3 +136,8 @@ Windows Registry Editor Version 5.00
 ; Store apps update with nupdate, not on their own
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsStore]
 "AutoDownload"=dword:00000002
+
+; The VM has no GPU, and Zed stops at start to warn about Windows' software
+; renderer unless this is set; with a GPU, Zed never reads it.
+[HKEY_CURRENT_USER\Environment]
+"ZED_ALLOW_EMULATED_GPU"="1"

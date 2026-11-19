@@ -31,7 +31,7 @@ one with `reg import FILE`.
    PowerShell 7, then for the apps, settings and WSL. After an error, run it
    again; it carries on. When it installed WSL, restart Windows and run
    `~\Projects\nix\windows\apply.ps1` in PowerShell 7; on the desktop, that
-   run installs NixOS. The desktop's taskbar pins appear at the next sign-in.
+   run installs NixOS. On vm and desktop, the taskbar pins appear at the next sign-in.
 3. vm and desktop: sign in to 1Password, then in Settings → Developer turn on
    the SSH agent, and in Settings → Security unlock with Windows Hello, so
    `op`, SSH and Git signing ask for the Windows PIN instead of the account
