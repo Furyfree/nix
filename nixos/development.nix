@@ -19,7 +19,7 @@
   environment.systemPackages = with pkgs; [
     # C compiler and linker for Rust, cgo and Neovim's tree-sitter parsers.
     gcc
-    # Metals, which Mise has no entry for; home/cli-tools.nix has the language
+    # Metals, which Mise has no entry for; home-manager/cli-tools.nix has the language
     # servers Ubuntu shares.
     metals
   ];

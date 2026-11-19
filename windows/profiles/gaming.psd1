@@ -7,7 +7,7 @@
         'WowUp.CF'
         'Ubisoft.Connect'
         'EpicGames.EpicGamesLauncher'
-        # The Riot Client comes by hand (INSTALLATION.md): winget has only
+        # The Riot Client comes by hand (windows/README.md): winget has only
         # Riot's game installers, which register their game too.
         'Discord.Discord'
         'Microsoft.VCRedist.2015+.x64'

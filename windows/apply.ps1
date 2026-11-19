@@ -211,7 +211,7 @@ function Enable-BitLockerWithKey {
     }
     # A drive Windows encrypted itself waits for its TPM protector to turn
     # protection on. One that has it and protection off was suspended for a
-    # restart, by INSTALLATION.md or an update, and resumes by itself.
+    # restart, by windows/README.md or an update, and resumes by itself.
     $volume = Get-BitLockerVolume $drive
     if (-not ($volume.KeyProtector | Where-Object KeyProtectorType -EQ 'Tpm')) {
         Add-BitLockerKeyProtector $drive -TpmProtector -WarningAction Ignore | Out-Null

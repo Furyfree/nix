@@ -12,7 +12,7 @@ pure_black_dark = false
 enable_builtin_templates = true
 enable_community_templates = true
 # Ghostty uses the user template below instead of its config-rewriting builtin.
-# home/hyprland.nix and home/niri.nix each drop the other compositor's.
+# nixos/hyprland.nix and nixos/niri.nix each drop the other compositor's.
 builtin_ids = ["btop", "gtk3", "gtk4", "hyprland", "kcolorscheme", "niri", "qt"]
 community_ids = [
     "claude-code",

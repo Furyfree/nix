@@ -3,7 +3,7 @@
 # Boot still off, nothing changes. Then once per machine: set the firmware to
 # Setup Mode, run `sudo sbctl enroll-keys -m -f` (-m and -f keep Microsoft's
 # and the firmware's keys for Windows and GPU firmware) and turn Secure Boot
-# on, as INSTALLATION.md describes. Windows asks for the BitLocker recovery key
+# on, as nixos/README.md describes. Windows asks for the BitLocker recovery key
 # once.
 { pkgs, ... }:
 

@@ -1,5 +1,5 @@
-# The command-line tools the shared configs use, from Nix: components/shell.nix
-# installs them on NixOS. A list, not a module. The Mac's brews in
+# The command-line tools the shared configs use, from Nix: nixos/shell.nix
+# installs them on NixOS and ubuntu/home.nix on Ubuntu. A list, not a module. The Mac's brews in
 # darwin/common.nix and Windows' configs/mise/conf.d/windows-tools.toml list
 # the same tools; a tool added here goes there too.
 pkgs:

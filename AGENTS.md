@@ -1,16 +1,12 @@
 # Nix workstation
 
-This is my public, personal workstation configuration for Linux, macOS and
-Windows where possible. I want repeatable installs and updates, shared desktop
-preferences and generation rollback.
-
-My Linux workstations run NixOS with integrated Home Manager, and every Mac runs
-nix-darwin with Home Manager from the one `macos` host. The Ubuntu work laptop
-runs Home Manager on its own for the terminal and app configs, and its own
-package managers for the apps. Windows runs one PowerShell profile, basic, vm
-or desktop, through winget, Mise and `.reg` files. Extend compatible user
-configuration through Home Manager one tool at a time. `docs/PLAN.md` holds
-the open work.
+This is my public, personal workstation configuration. NixOS runs the desktop
+and the laptop whole. Everywhere else this repository gives the terminal, the
+app configs and an app list in the system's own package manager, and the rest
+is a checklist: nix-darwin on the Macs, Home Manager on its own on the Ubuntu
+work laptop, and PowerShell profiles on Windows. I want repeatable installs
+and updates, shared app preferences and rollback where the system has it.
+`docs/PLAN.md` holds the open work.
 
 ## What must not break
 
@@ -28,6 +24,7 @@ the open work.
 - Macs: never remove apps (Homebrew cleanup stays off), save settings before
   the first switch, keep FileVault, SIP, Gatekeeper and the firewall on, and
   leave what IT manages off the work Mac.
+- Ubuntu: IT owns the kernel and its own agents; never touch them.
 - Windows: never uninstall apps, save registry values before their first
   import, keep Secure Boot, TPM, Defender, the firewall, UAC and Windows Update
   on, and keep BitLocker recovery keys out of output and logs.
@@ -36,11 +33,21 @@ the open work.
 
 Use pinned upstream NixOS, nix-darwin and Home Manager modules and native
 tools. This is a personal workstation configuration, not another provisioning
-framework.
+framework. Never make another system imitate NixOS; what a system cannot do
+natively goes on its checklist.
 Edit configuration in this repository and deploy through Git and a rebuild
 from the machine's checkout. Use SSH for read-only
 inspection and approved deployment/rebuild commands, never direct configuration
 patches on machines.
+
+Setups on one system share one list and differ by whole add-ons. A must-have
+is what a setup's purpose needs, and gets fixed when it breaks; a nice-to-have
+comes with a shared list and is dropped there when it breaks.
+
+A file is one topic every machine of its system takes, or one purpose some
+machines add. What one machine alone has is lines in its host file. Split a
+file only when a machine must not get part of it; a topic under 15 lines folds
+into its nearest topic.
 
 Hyprland and Niri share one desktop. Change and check the running one
 (`$XDG_CURRENT_DESKTOP`) first, then ask whether to port the change to the
@@ -53,42 +60,23 @@ Docs and comments state no current versions or status; open work lives in
 
 ## Map
 
-- `flake.nix`: inputs, system outputs and development tools.
-- `system.nix`, `components/`: shared system settings; import new components
-  through `system.nix`.
-- `darwin/`: nix-darwin for every Mac: a shared base and one profile per Mac,
-  which its `local/user.nix` imports.
-- `home/`, `configs/`: Home Manager integration and links versus native
-  application preferences: shared parts in `common.nix`, platform and profile
-  parts beside it. SSH hosts stay in private 1Password documents, never here.
-  Keep the checkout at `~/Projects/nix` for these links.
-- `hosts/`: tracked host exceptions; ignored `hosts/<host>/local/` holds detected
-  hardware and installation data, on NixOS an optional `desktop.nix` that
-  picks the compositor and an empty `limine-windows`, which `nswitch` creates
-  when the firmware lists Windows (`components/limine-windows.nix`), on macOS
-  `user.nix` with the account and profile, on Ubuntu `user.nix` with the
-  account, and on Windows `profile` with its
-  name.
-  Shared policy belongs above it.
-- `ubuntu/`: the work laptop: `home.nix`, Home Manager on its own as
-  `homeConfigurations.ubuntu`; `apps.sh`, which `nswitch` runs after it and
-  which only installs what is missing; and `debloat.sh`, run once.
-- `windows/`: `bootstrap.ps1` prepares a fresh Windows and clones the
-  checkout; `apply.ps1` applies the layers in `profiles/`, whose keys
-  `common.psd1` lists, with the settings in `registry/`. A Windows app or
-  setting goes in the layer that needs it; `configs/windows/` holds the
-  PowerShell, Terminal, Office and taskbar files.
-- `configs/hypr/hosts/<host>.lua`, `configs/niri/hosts/<host>.kdl`: per-host
-  monitors, workspaces and keys, linked as `host.lua` or `host.kdl` by
-  `home/hyprland.nix` or `home/niri.nix` after the hostname.
-- `INSTALLATION.md`: NixOS install steps, the Mac's `local/user.nix` and the
-  Windows bootstrap; update it with installer or first-boot changes.
-- `scripts/install.py`: installer launcher; `scripts/nixos_setup/` holds its
-  modules.
-- `pins/`: apps from outside nixpkgs; `nvfetcher.toml` says where each comes
-  from, and nvfetcher writes `_sources/`, which `components/` reads.
-- `tests/`, `justfile`: installer behavior checks, one file per module, and
-  local gates.
+- `flake.nix`: inputs, every system's outputs and the development tools.
+- `nixos/`, `darwin/`, `ubuntu/`, `windows/`: one folder per system, with its
+  own `AGENTS.md` for its map and checks and a README for its setup. Each keeps
+  its machine data in an ignored `local/`; NixOS one per host.
+- `home-manager/`: the Home Manager code NixOS, the Macs and Ubuntu share: the
+  terminal and app configs in `common.nix`, the SSH key sets in `ssh.nix`, and
+  the Nix CLI list in `cli-tools.nix`, which the Mac's brews and Windows'
+  `windows-tools.toml` mirror.
+- `configs/`: native app preferences, linked live from the checkout; keep the
+  checkout at `~/Projects/nix`. SSH hosts stay in private 1Password documents,
+  never here. `configs/hypr/hosts/<host>.lua` and `configs/niri/hosts/<host>.kdl`
+  hold each host's monitors, workspaces and keys. `configs/bin` links to `bin/`
+  until every machine has switched past the move.
+- `bin/`: our own scripts, linked into `~/.local/bin`: `nix-workstation` (the
+  `n*` aliases), `pull-projects`, `launch`, `agent-brave`, and `windows-vm`,
+  which `windows-vm.nix` builds for NixOS and Ubuntu.
+- `justfile`: the local gates.
 
 ## Ways to hurt yourself
 
@@ -103,8 +91,7 @@ application-data directories or overwrite GUI state while adding app preferences
 Use `nix develop` for tooling. Run focused checks while editing and `just check`
 for the repository gate; it also parses the Windows scripts and profiles.
 Evaluate active flake outputs and build system changes without activation.
-To update, run `nix-workstation update` (or `pin` for the apps in `pins/`),
-report its summary and stop; I run `nswitch`.
+To update, run `nix-workstation update` (or `pin` for the apps in
+`nixos/pins/`), report its summary and stop; I run `nswitch`.
 Installation, login, sleep/resume and rollback need machine checks; a successful
-build does not establish those behaviors. Windows changes need Windows: the VM
-from `windows-vm`, which has no WSL2, or the desktop.
+build does not establish those behaviors.

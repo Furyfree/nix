@@ -138,7 +138,7 @@ main() {
   else
     first_switch
   fi
-  say 'Done. Log out and back in, then follow the macOS steps in ~/Projects/nix/INSTALLATION.md'
+  say 'Done. Log out and back in, then follow ~/Projects/nix/darwin/README.md'
 }
 
 # Last, so a download cut short runs nothing.

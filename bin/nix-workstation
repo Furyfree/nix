@@ -226,7 +226,7 @@ cmd_switch() {
 }
 
 # The choice lives in the ignored nixos/hosts/<host>/local/desktop.nix; without it,
-# components/desktop.nix's default applies. Only the next boot changes:
+# nixos/desktop.nix's default applies. Only the next boot changes:
 # activating now would remove the running compositor from under the session.
 cmd_desktop() {
   local host state current answer
