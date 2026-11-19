@@ -54,6 +54,14 @@ in
       "rylos/tailnet"
       "noctalia/screen_recorder"
     ];
+    # Under Niri nothing names an app for folders, so xdg-open took Yazi, which
+    # needs a terminal; GNOME's own default applies only in GNOME.
+    settingMerges = ''
+      merge ${config.xdg.configHome}/mimeapps.list ${pkgs.writeText "mimeapps.list" ''
+        [Default Applications]
+        inode/directory=org.gnome.Nautilus.desktop
+      ''} ini
+    '';
   };
 
   # Zed installs and updates itself; Home Manager merges its settings.
