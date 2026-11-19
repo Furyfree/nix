@@ -1,0 +1,32 @@
+#!/bin/sh
+# Brave Origin for agent-browser, which ~/.agent-browser/config.json points
+# here. Bot checks block Brave that says HeadlessChrome or sets the automation
+# flag, and Vercel's check fails without WebGL, which Brave turns off on the
+# hidden desktop's software graphics. A new profile skips the welcome page.
+case $(uname -s) in
+  Darwin)
+    brave='/Applications/Brave Origin.app/Contents/MacOS/Brave Origin'
+    platform='Macintosh; Intel Mac OS X 10_15_7'
+    ;;
+  *)
+    brave=$(command -v brave-origin) || {
+      echo 'agent-brave: brave-origin is not installed' >&2
+      exit 127
+    }
+    platform='X11; Linux x86_64'
+    ;;
+esac
+for arg; do
+  case $arg in --user-data-dir=*) profile=${arg#*=} ;; esac
+done
+if [ -n "${profile-}" ] && [ ! -e "$profile/Local State" ]; then
+  mkdir -p "$profile" &&
+    echo '{"brave":{"origin":{"free_tier_accepted":true}}}' >"$profile/Local State"
+fi
+# "Brave Origin 157.1.99.56": the first number is Chromium's major version.
+major=$("$brave" --version | sed -n 's/^[^0-9]*\([0-9][0-9]*\)\..*/\1/p')
+exec "$brave" \
+  --user-agent="Mozilla/5.0 ($platform) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/$major.0.0.0 Safari/537.36" \
+  --disable-blink-features=AutomationControlled \
+  --enable-unsafe-swiftshader \
+  "$@"
