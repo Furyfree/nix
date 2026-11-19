@@ -24,6 +24,11 @@ in
       default = [ ];
       description = "Noctalia plugins this machine leaves out under Niri.";
     };
+    noctaliaTemplates = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
+      default = { };
+      description = "Noctalia user templates only this machine has, beside config.toml's.";
+    };
   };
 
   config = {
@@ -56,7 +61,12 @@ in
             ]
             ++ config.workstation.noctaliaPluginsOff
           ) noctalia.plugins.enabled;
-          theme.templates.builtin_ids = lib.remove "hyprland" noctalia.theme.templates.builtin_ids;
+          theme.templates = {
+            builtin_ids = lib.remove "hyprland" noctalia.theme.templates.builtin_ids;
+          }
+          // lib.optionalAttrs (config.workstation.noctaliaTemplates != { }) {
+            user = config.workstation.noctaliaTemplates;
+          };
           # Off in config.toml for Hyprland's crash (#6), which Niri does not have.
           idle.behavior.screen-off.enabled = true;
           # Number workspaces by their place on the monitor, 1 to 5 on each, as
