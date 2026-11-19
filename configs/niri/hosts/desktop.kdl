@@ -1,4 +1,4 @@
-// Desktop monitor and keyboard; home/niri.nix links this file to
+// Desktop monitor and keyboard; home-manager/niri.nix links this file to
 // ~/.config/niri/host.kdl on the host named desktop.
 
 // The BenQ XL2720Z, matched by make, model and serial as niri msg outputs

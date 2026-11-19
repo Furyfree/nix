@@ -7,64 +7,6 @@
   ...
 }:
 
-let
-  # The Home Manager half: the live checkout links and Noctalia's Niri
-  # settings. The machine's monitors and keys come from
-  # configs/niri/hosts/<hostname>.kdl.
-  home =
-    {
-      config,
-      lib,
-      osConfig,
-      pkgs,
-      ...
-    }:
-
-    let
-      inherit (config.lib.workstation) link;
-      host = "niri/hosts/${osConfig.networking.hostName}.kdl";
-      noctalia = builtins.fromTOML (builtins.readFile ../configs/noctalia/config.toml);
-    in
-    {
-      # Files, not the folder: Noctalia writes noctalia.kdl beside them.
-      xdg.configFile =
-        lib.genAttrs
-          [
-            "niri/config.kdl"
-            "niri/conf.d/input.kdl"
-            "niri/conf.d/monitors.kdl"
-            "niri/conf.d/layout.kdl"
-            "niri/conf.d/decoration.kdl"
-            "niri/conf.d/window-rules.kdl"
-            "niri/conf.d/autostart.kdl"
-            "niri/conf.d/keybinds.kdl"
-          ]
-          (name: {
-            source = link name;
-          })
-        // {
-          # Noctalia reads this after config.toml. Its lists replace the earlier
-          # ones, so they are config.toml's without the Hyprland-only plugins and
-          # Hyprland's colour template; a change there reaches Niri at the next
-          # rebuild.
-          "noctalia/niri.toml".source = (pkgs.formats.toml { }).generate "noctalia-niri.toml" {
-            plugins.enabled = lib.subtractLists [
-              "furyfree/key-promoter"
-              "profidev/hypr-screen-mirror"
-            ] noctalia.plugins.enabled;
-            theme.templates.builtin_ids = lib.remove "hyprland" noctalia.theme.templates.builtin_ids;
-            # Off in config.toml for Hyprland's crash (#6), which Niri does not have.
-            idle.behavior.screen-off.enabled = true;
-            # Number workspaces by their place on the monitor, 1 to 5 on each, as
-            # Hyprland's names do; the host files' workspace names are internal.
-            widget.workspaces.label_source = "id";
-          };
-        }
-        // lib.optionalAttrs (builtins.pathExists ../configs/${host}) {
-          "niri/host.kdl".source = link host;
-        };
-    };
-in
 {
   config = lib.mkIf (config.workstation.desktop == "niri") {
     programs.niri = {
@@ -111,6 +53,9 @@ in
         };
       };
 
-    home-manager.sharedModules = [ home ];
+    home-manager.sharedModules = [
+      ../home-manager/niri.nix
+      { workstation.host = config.networking.hostName; }
+    ];
   };
 }

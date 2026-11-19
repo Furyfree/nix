@@ -1,6 +1,7 @@
-# Home Manager settings for the NixOS desktop: Noctalia, GTK and Qt, launcher
-# entries and Linux-only tools. Builds on common.nix; the compositor's links
-# come from its component.
+# Home Manager settings only NixOS has: launcher entries, web apps, the agents
+# and tools only NixOS installs, and its apps' settings. Builds on
+# home-manager/common.nix and linux.nix; the compositor's links come from its
+# module.
 {
   config,
   lib,
@@ -9,7 +10,7 @@
 }:
 
 let
-  inherit (config.lib.workstation) link script;
+  inherit (config.lib.workstation) link;
   # A copy of a package's launcher entry, hidden from app menus but still
   # usable for file associations.
   hidden =
@@ -19,16 +20,15 @@ let
     '';
 in
 {
-  imports = [ ../home-manager/common.nix ];
+  imports = [
+    ../home-manager/common.nix
+    ../home-manager/linux.nix
+  ];
 
-  # Merges for the Linux desktop: Noctalia's AI usage widget, gh opening the
-  # browser in its own systemd unit, Codex's Linux desktop tools, and the agents
-  # only NixOS installs. VSCodium and the apps that set themselves as default
-  # save their files themselves.
+  # Merges only NixOS needs: Codex's Linux desktop tools, the agents only NixOS
+  # installs, and the default apps, which apps that set themselves as default
+  # save themselves.
   workstation.settingMerges = ''
-    merge ${config.xdg.configHome}/ai-usagebar/config.toml ${../configs/ai-usagebar/config.toml} toml
-    merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/linux.yml} yaml
-    merge ${config.xdg.configHome}/VSCodium/User/settings.json ${../configs/vscodium/settings.json} json
     merge ${config.xdg.configHome}/mimeapps.list ${../configs/mimeapps.list} ini
     merge ${config.home.homeDirectory}/.codex/config.toml ${../configs/codex/linux.toml} toml
     merge ${config.home.homeDirectory}/.grok/config.toml ${../configs/grok/config.toml} toml
@@ -86,29 +86,10 @@ in
         icon = "preferences-desktop-remote-desktop";
       };
     };
-    userDirs = {
-      enable = true;
-      createDirectories = true;
-      extraConfig = {
-        SCREENSHOTS = "${config.home.homeDirectory}/Pictures/Screenshots";
-        WALLPAPERS = "${config.home.homeDirectory}/Pictures/Wallpapers";
-        RECORDINGS = "${config.home.homeDirectory}/Videos/Recordings";
-      };
-    };
     configFile =
       lib.genAttrs
         [
-          "zsh/conf.d/noctalia.zsh"
-          "noctalia/config.toml"
-          "noctalia/vscodium.toml"
-          "noctalia/templates/vscodium-output-path.sh"
-          "noctalia/templates/strata.toml"
-          "noctalia/assets/profile-picture.jpg"
-          "noctalia/assets/profile-picture-circle.svg"
           "zathura/zathurarc"
-          "udiskie/config.yml"
-          "mise/conf.d/agents.toml"
-          "mise/conf.d/linux-tools.toml"
           "mise/conf.d/nixos-tools.toml"
           "voxtype/config.toml"
           "MangoHud/MangoHud.conf"
@@ -117,37 +98,9 @@ in
           source = link name;
         })
       // {
-        "gtk-3.0/settings.ini".source = link "gtk/gtk-3.0/settings.ini";
-        "gtk-4.0/settings.ini".source = link "gtk/gtk-4.0/settings.ini";
-        # File manager sidebar; bookmarks need absolute paths.
-        "gtk-3.0/bookmarks".text =
-          lib.concatMapStrings (path: "file://${config.home.homeDirectory}/${path} ${baseNameOf path}\n")
-            [
-              "Documents"
-              "Downloads"
-              "Projects"
-              "Pictures"
-              "Projects/dtu-bachelor"
-              "Projects/nix"
-            ];
         # Reuse the pinned renderer and reload hook, not the config-rewriting apply hook.
         "noctalia/templates/ghostty".source =
           "${config.programs.noctalia.package}/share/noctalia/assets/templates/ghostty";
-      }
-      # qtct needs an absolute palette path; Noctalia's Qt template writes the colors.
-      // lib.genAttrs [ "qt5ct" "qt6ct" ] (name: {
-        target = "${name}/${name}.conf";
-        text = ''
-          [Appearance]
-          color_scheme_path=${config.xdg.configHome}/${name}/colors/noctalia.conf
-          custom_palette=true
-          icon_theme=Papirus-Dark
-          style=Fusion
-        '';
-      })
-      // lib.mapAttrs (_: name: { source = link "vscodium/${name}"; }) {
-        "VSCodium/product.json" = "product.json";
-        "VSCodium/User/keybindings.json" = "keybindings.json";
       };
   };
 
@@ -155,7 +108,6 @@ in
     # Steam's own link, made before Noctalia's Steam template can create a real
     # folder here that stops Steam's first-run setup.
     ".steam/steam".source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/Steam";
-    ".local/bin/launch".source = script "launch";
   };
 
   # Zed's registry Grok starts its bin with Node, but Grok's npm install swaps

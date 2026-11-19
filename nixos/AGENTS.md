@@ -8,11 +8,12 @@ The desktop and the laptop, whole: system, desktop and apps. The root
 - `default.nix`: what every NixOS machine imports; a new topic module goes
   here.
 - `*.nix` beside it: one topic each, or a purpose some hosts import
-  (`gaming`, `local-ai`, `dtu-eduroam`, `secure-boot`, `ssh`). A compositor's
-  module holds its Home Manager half too. `limine-windows.nix` comes in when
+  (`gaming`, `local-ai`, `dtu-eduroam`, `secure-boot`, `ssh`). Hyprland's
+  module holds its Home Manager half; Niri's is `../home-manager/niri.nix`,
+  which Ubuntu shares. `limine-windows.nix` comes in when
   `nswitch` finds Windows in the firmware.
-- `home.nix`: Home Manager for every NixOS machine, on top of
-  `../home-manager/common.nix`.
+- `home.nix`: Home Manager only NixOS has, on top of `../home-manager/`'s
+  `common.nix` and `linux.nix`.
 - `hosts/<host>/`: each machine's own lines. The installer writes its ignored
   `local/` with the detected hardware, the account and swap; an optional
   `local/desktop.nix` picks the compositor, and an empty `local/limine-windows`

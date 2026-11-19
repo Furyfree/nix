@@ -29,7 +29,8 @@ agents; nothing here touches them.
 5. In a new terminal, Home Manager, then the apps:
 
    ```bash
-   nix run nixpkgs#nh -- home switch --configuration ubuntu path:$HOME/Projects/nix
+   nix run nixpkgs#nh -- home switch --configuration ubuntu \
+     --backup-extension before-home-manager path:$HOME/Projects/nix
    ~/Projects/nix/ubuntu/apps.sh
    ```
 
@@ -44,12 +45,6 @@ installs what is missing. NixOS updates `flake.lock`; apt updates the rest.
 
 - Updates: Ubuntu's own updater, as IT has set it.
 - Auto-login, if wanted: Settings → System → Users.
-- The Niri desktop, optional. Copy `configs/niri` to `~/.config/niri` and
-  `configs/noctalia` to `~/.config/noctalia`. In the copies:
-  - `config.kdl`: add `spawn-at-startup "noctalia"`.
-  - `conf.d/keybinds.kdl`: `strata` becomes `nautilus`, `zeditor` becomes
-    `zed`, and `t3code-desktop` becomes `t3code`.
-  - Noctalia's settings: turn off the airpods, tailnet, screen recorder,
-    key-promoter and hypr-screen-mirror plugins.
-
-  Then pick Niri at the login screen; GNOME stays there as the fallback.
+- The Niri desktop: pick Niri at the login screen; GNOME stays there as the
+  fallback. Its config is linked as on NixOS, with Ubuntu's differences in
+  `configs/niri/hosts/ubuntu.kdl`.

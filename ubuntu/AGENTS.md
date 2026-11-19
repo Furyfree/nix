@@ -7,7 +7,9 @@ rules that must not break.
 ## Map
 
 - `home.nix`: Home Manager on its own (`homeConfigurations.ubuntu`), on top of
-  `../home-manager/common.nix`; the ignored `local/user.nix` names the account.
+  `../home-manager/`'s `common.nix`, `linux.nix` and `niri.nix`; the ignored
+  `local/user.nix` names the account. Ubuntu's Niri differences, such as apt's
+  command names, go in `../configs/niri/hosts/ubuntu.kdl`.
 - `apps.sh`: the app list, which `nswitch` runs after Home Manager. It installs
   only what is missing, must-haves first; a nice-to-have that fails is
   reported and skipped. A new app goes in the part its setup needs.
