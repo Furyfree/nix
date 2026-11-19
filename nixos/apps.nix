@@ -28,6 +28,7 @@ in
   environment.systemPackages = with pkgs; [
     strata
     loupe
+    gnome-calculator
     celluloid
     mpv
     pinta
