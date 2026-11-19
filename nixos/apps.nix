@@ -1,7 +1,12 @@
 # Desktop applications that need no sign-in.
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 
 let
+  # Strata replaces Nautilus as the file manager:
+  # https://github.com/Furyfree/nix/issues/18. Its FileManager1 service answers
+  # "Show in folder". File dialogs stay GTK's, since Strata's chooser handles
+  # local files only (strata#176).
+  strata = inputs.strata.packages.${pkgs.stdenv.hostPlatform.system}.default;
   # Chrome-based apps list their contents for computer-use-linux only with this
   # flag. Signal and Fastmail stay without, so other programs cannot read them.
   accessible = pkg: pkg.override { commandLineArgs = "--force-renderer-accessibility"; };
@@ -17,9 +22,11 @@ in
   services = {
     # Phones (MTP), network shares (SMB) and trash for the file manager.
     gvfs.enable = true;
+    dbus.packages = [ strata.fileManagerService ];
   };
 
   environment.systemPackages = with pkgs; [
+    strata
     loupe
     celluloid
     mpv

@@ -2,11 +2,18 @@
 { pkgs, ... }:
 
 {
-  # Mise downloads prebuilt runtimes and tools that expect a standard ELF loader.
-  programs.nix-ld = {
-    enable = true;
-    # Added to the module's defaults; .NET needs ICU.
-    libraries = [ pkgs.icu ];
+  programs = {
+    # Mise downloads prebuilt runtimes and tools that expect a standard ELF
+    # loader.
+    nix-ld = {
+      enable = true;
+      # Added to the module's defaults; .NET needs ICU.
+      libraries = [ pkgs.icu ];
+    };
+    neovim = {
+      enable = true;
+      defaultEditor = true;
+    };
   };
 
   environment.systemPackages = with pkgs; [
