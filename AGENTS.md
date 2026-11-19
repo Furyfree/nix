@@ -5,9 +5,12 @@ Windows where possible. I want repeatable installs and updates, shared desktop
 preferences and generation rollback.
 
 My Linux workstations run NixOS with integrated Home Manager, and every Mac runs
-nix-darwin with Home Manager from the one `macos` host. Windows runs one
-PowerShell profile, basic, vm or desktop, through winget, Mise and `.reg` files.
-Extend compatible user configuration through Home Manager one tool at a time. `docs/PLAN.md` holds the open work.
+nix-darwin with Home Manager from the one `macos` host. The Ubuntu work laptop
+runs Home Manager on its own for the terminal and app configs, and its own
+package managers for the apps. Windows runs one PowerShell profile, basic, vm
+or desktop, through winget, Mise and `.reg` files. Extend compatible user
+configuration through Home Manager one tool at a time. `docs/PLAN.md` holds
+the open work.
 
 ## What must not break
 
@@ -63,9 +66,13 @@ Docs and comments state no current versions or status; open work lives in
   hardware and installation data, on NixOS an optional `desktop.nix` that
   picks the compositor and an empty `limine-windows`, which `nswitch` creates
   when the firmware lists Windows (`components/limine-windows.nix`), on macOS
-  `user.nix` with the account and profile, and on Windows `profile` with its
+  `user.nix` with the account and profile, on Ubuntu `user.nix` with the
+  account, and on Windows `profile` with its
   name.
   Shared policy belongs above it.
+- `ubuntu/`: the work laptop: `home.nix`, Home Manager on its own as
+  `homeConfigurations.ubuntu`; `apps.sh`, which `nswitch` runs after it and
+  which only installs what is missing; and `debloat.sh`, run once.
 - `windows/`: `bootstrap.ps1` prepares a fresh Windows and clones the
   checkout; `apply.ps1` applies the layers in `profiles/`, whose keys
   `common.psd1` lists, with the settings in `registry/`. A Windows app or

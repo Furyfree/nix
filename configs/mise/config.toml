@@ -1,5 +1,6 @@
 # Every machine. conf.d/ adds more by machine: agents.toml on Linux, the work
-# Mac and Windows, linux-tools.toml on Linux, windows-tools.toml on Windows.
+# Mac and Windows, linux-tools.toml on NixOS and Ubuntu, nixos-tools.toml on
+# NixOS, windows-tools.toml on Windows.
 [tools]
 # Runs the npm tools below.
 node = "lts"
