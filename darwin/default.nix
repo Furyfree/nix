@@ -1,6 +1,6 @@
-# Shared nix-darwin settings for every Mac. The host's ignored local/user.nix
-# sets system.primaryUser and imports this Mac's profile, personal.nix or
-# work.nix.
+# Shared nix-darwin settings for every Mac. The ignored local/user.nix sets
+# system.primaryUser and imports this Mac's profile, personal.nix or work.nix:
+#   { imports = [ ../personal.nix ]; system.primaryUser = "alice"; }
 {
   config,
   lib,
@@ -57,6 +57,8 @@ in
 
   # Homebrew has no nh, which switches and cleans as on NixOS.
   environment.systemPackages = [ pkgs.nh ];
+  home-manager.users.${user} = import ./home.nix;
+  system.stateVersion = 6;
 
   # Apply the new settings without a logout where macOS allows it, as System
   # Settings does, and restart Finder for its own; nix-darwin restarts the Dock.

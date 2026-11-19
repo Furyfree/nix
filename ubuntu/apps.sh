@@ -7,7 +7,7 @@
 # published hash.
 set -euo pipefail
 
-claude_key=$(dirname -- "$(realpath -- "$0")")/../pins/claude-desktop.asc
+claude_key=$(dirname -- "$(realpath -- "$0")")/../nixos/pins/claude-desktop.asc
 tmp=$(mktemp -d)
 trap 'rm -rf -- "$tmp"' EXIT
 refreshed=false

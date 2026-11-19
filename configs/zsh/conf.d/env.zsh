@@ -19,7 +19,7 @@
     export PAGER='less -R'
   fi
 
-  # path: includes the ignored machine data in hosts/<host>/local/.
+  # path: includes the ignored machine data in each system's local/.
   if [[ -d $HOME/Projects/nix ]]; then
     export NH_FLAKE="path:$HOME/Projects/nix"
   fi

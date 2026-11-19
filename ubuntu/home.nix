@@ -1,6 +1,6 @@
 # Home Manager for the Ubuntu work laptop: the terminal and app configs from
-# home/common.nix, with the work SSH keys. apps.sh installs the apps. The
-# flake adds the ignored hosts/ubuntu/local/user.nix with the account, e.g.:
+# home-manager/common.nix, with the work SSH keys. apps.sh installs the apps. The
+# flake adds the ignored ubuntu/local/user.nix with the account, e.g.:
 #   { home.username = "alice"; home.homeDirectory = "/home/alice"; }
 {
   config,
@@ -13,11 +13,14 @@ let
   link =
     path:
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/configs/${path}";
+  # A live link to one of the checkout's own scripts in bin/.
+  script =
+    name: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/nix/bin/${name}";
   # Docker and systemd come from apt, so the script uses theirs.
   windows-vm = import ../bin/windows-vm.nix { inherit pkgs; };
 in
 {
-  imports = [ ../home/common.nix ];
+  imports = [ ../home-manager/common.nix ];
 
   # Nix's profile on the session's paths. Ubuntu's own drivers serve the GUI
   # apps, which come from apt and Flatpak.
@@ -28,7 +31,7 @@ in
 
   home = {
     packages =
-      import ../home/cli-tools.nix pkgs
+      import ../home-manager/cli-tools.nix pkgs
       ++ (with pkgs; [
         # NixOS gets these two from its modules.
         neovim
@@ -39,7 +42,7 @@ in
         (writeShellScriptBin "op-ssh-sign" ''exec /opt/1Password/op-ssh-sign "$@"'')
       ])
       ++ [ windows-vm ];
-    file.".local/bin/launch".source = link "bin/launch";
+    file.".local/bin/launch".source = script "launch";
     stateVersion = "26.11";
   };
   fonts.fontconfig.enable = true;
