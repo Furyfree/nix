@@ -28,6 +28,9 @@ let
     );
   # Docker and systemd come from apt, so the script uses theirs.
   windows-vm = import ../bin/windows-vm.nix { inherit pkgs; };
+  # Ptyxis names its profiles with random IDs on first start, so this one has a
+  # fixed ID that carries Noctalia's palette (noctaliaTemplates.ptyxis).
+  ptyxisProfile = "4b6a268a8d504a9ebb29e6f66ce9780d";
 in
 {
   imports = [
@@ -57,6 +60,28 @@ in
       ])
       ++ [ windows-vm ];
     stateVersion = "26.11";
+    # Ptyxis uses only profiles in its list, which also holds those made in its
+    # own settings: add ours beside them, and make it the default until another
+    # is chosen there. Home Manager's dconf step drops its bus helper when done.
+    activation.ptyxisProfile = lib.hm.dag.entryAfter [ "dconfSettings" ] ''
+      ptyxis_dconf() {
+        if [[ -v DBUS_SESSION_BUS_ADDRESS ]]; then
+          ${lib.getExe' pkgs.dconf "dconf"} "$@"
+        else
+          ${lib.getExe' pkgs.dbus "dbus-run-session"} --dbus-daemon=${lib.getExe' pkgs.dbus "dbus-daemon"} \
+            ${lib.getExe' pkgs.dconf "dconf"} "$@"
+        fi
+      }
+      uuids=$(ptyxis_dconf read /org/gnome/Ptyxis/profile-uuids)
+      case $uuids in
+        *"'${ptyxisProfile}'"*) ;;
+        "" | "@as []") run ptyxis_dconf write /org/gnome/Ptyxis/profile-uuids "['${ptyxisProfile}']" ;;
+        *) run ptyxis_dconf write /org/gnome/Ptyxis/profile-uuids "['${ptyxisProfile}', ''${uuids#[}" ;;
+      esac
+      case $(ptyxis_dconf read /org/gnome/Ptyxis/default-profile-uuid) in
+        "" | "'''") run ptyxis_dconf write /org/gnome/Ptyxis/default-profile-uuid "'${ptyxisProfile}'" ;;
+      esac
+    '';
   };
   fonts.fontconfig.enable = true;
 
@@ -91,15 +116,7 @@ in
     '';
   };
 
-  # Ptyxis names its profile with a random ID on first start, so this one has a
-  # fixed ID that can carry Noctalia's palette (noctaliaTemplates.ptyxis).
-  dconf.settings = {
-    "org/gnome/Ptyxis" = {
-      default-profile-uuid = "4b6a268a8d504a9ebb29e6f66ce9780d";
-      profile-uuids = [ "4b6a268a8d504a9ebb29e6f66ce9780d" ];
-    };
-    "org/gnome/Ptyxis/Profiles/4b6a268a8d504a9ebb29e6f66ce9780d".palette = "noctalia";
-  };
+  dconf.settings."org/gnome/Ptyxis/Profiles/${ptyxisProfile}".palette = "noctalia";
 
   # Zed installs and updates itself; Home Manager merges its settings.
   programs.zed-editor.package = null;
