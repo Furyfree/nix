@@ -340,10 +340,24 @@ foreach ($target in $want.Links.Keys) {
 # A link this script made that the profile no longer has goes, as Home Manager
 # does it, but only while it still points into the checkout's configs.
 $configs = [IO.Path]::GetFullPath((Join-Path $root 'configs')) + [IO.Path]::DirectorySeparatorChar
+# This script kept no links.json before the layout move; without one, start
+# from the links the move took out of a profile. Delete this list once every
+# Windows machine has run this (docs/PLAN.md).
+$droppedLinks = @(
+    '~\.config\mise\conf.d\runtimes.toml'
+    '~\.wslconfig'
+    '%APPDATA%\VSCodium\product.json'
+    '%APPDATA%\VSCodium\User\keybindings.json'
+    '%APPDATA%\Zed\keymap.json'
+    '~\.t3\userdata\settings.json'
+    '~\.t3\userdata\client-settings.json'
+    '~\.t3\userdata\keybindings.json'
+)
 Invoke-Step 'old links' {
     $file = Join-Path $state 'links.json'
     $wanted = @($want.Links.Keys | ForEach-Object { Resolve-Target $_ })
-    $made = @(if (Test-Path $file) { Get-Content $file -Raw | ConvertFrom-Json })
+    $made = @(if (Test-Path $file) { Get-Content $file -Raw | ConvertFrom-Json }
+        else { $droppedLinks | ForEach-Object { Resolve-Target $_ } })
     foreach ($path in $made | Where-Object { $wanted -notcontains $_ }) {
         $item = Get-Item $path -Force -ErrorAction Ignore
         if ($item.LinkType -and $item.Target.StartsWith($configs, [StringComparison]::OrdinalIgnoreCase)) {
@@ -409,10 +423,11 @@ foreach ($target in $want.Merges.Keys) {
             New-Item $path | Out-Null
         }
         $format = @{ '.json' = 'json'; '.toml' = 'toml'; '.yml' = 'yaml' }[[IO.Path]::GetExtension($path)]
-        # A list, such as Zed's keymap, merges by context, as Home Manager's Zed
-        # module merges it.
+        # A list merges entry by entry: Zed's keymap by context, as Home Manager's
+        # Zed module merges it, and T3 Code's keybindings by key and when, as
+        # home-manager/common.nix merges them. Entries only the machine has stay.
         $expression = if ("$(Get-Content $patches[0] -Raw)".TrimStart().StartsWith('[')) {
-            '[.] | flatten(1) | group_by(.context) | map(. as $g | $g[] as $item ireduce ({}; . * $item))'
+            '[.] | flatten(1) | group_by(.context // ((.key // "") + "|" + (.when // ""))) | map(. as $g | $g[] as $item ireduce ({}; . * $item))'
         } else { '. as $item ireduce ({}; . * $item)' }
         # An empty file is no document to Yq, so the patches alone remain.
         $merged = & $yq ea -p $format -o $format $expression $path @patches
