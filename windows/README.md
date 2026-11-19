@@ -9,7 +9,8 @@ settings. Every profile clones this repository to `~\Projects\nix`.
 ## Set up Windows
 
 `apply.ps1` renames each file it replaces to `*.before-nix-workstation`, and
-stops if that backup already exists. Before it first imports a registry key,
+stops if that backup already exists. It removes a link it made once the profile
+no longer has it. Before it first imports a registry key,
 it saves the old values to `%LOCALAPPDATA%\nix-workstation\backup\`; restore
 one with `reg import FILE`.
 
