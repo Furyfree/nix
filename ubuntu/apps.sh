@@ -242,17 +242,13 @@ install_desktop() {
       sudo tee /etc/apt/preferences.d/duxlabs-dux-repo >/dev/null
     refreshed=false
   fi
-  # Noctalia: its keyring package, checked by the key inside it.
+  # Noctalia ships its key only in a keyring package; take the key alone, so
+  # nothing else in the package runs as root.
   if ! has_source pkg.noctalia.dev; then
     curl -fsSL https://pkg.noctalia.dev/deb/nickh-archive-keyring.deb -o "$tmp/nickh.deb"
     dpkg-deb -x "$tmp/nickh.deb" "$tmp/nickh"
-    mkdir -m 700 "$tmp/gnupg-nickh"
-    gpg --homedir "$tmp/gnupg-nickh" --show-keys --with-colons "$tmp/nickh/usr/share/keyrings/nickh-archive-keyring.gpg" |
-      grep -q '^fpr:::::::::C2A7E07FB3D746BDF2A245CD683B67D7BC99A9B7:' || {
-      echo 'noctalia key changed' >&2
-      return 1
-    }
-    sudo dpkg -i "$tmp/nickh.deb" >/dev/null
+    key nickh-archive-keyring "file://$tmp/nickh/usr/share/keyrings/nickh-archive-keyring.gpg" \
+      C2A7E07FB3D746BDF2A245CD683B67D7BC99A9B7
     source_file noctalia 'Types: deb' 'URIs: https://pkg.noctalia.dev/deb/' 'Suites: resolute/ resolute-backports/' \
       'Architectures: amd64' 'Signed-By: /usr/share/keyrings/nickh-archive-keyring.gpg'
   fi

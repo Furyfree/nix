@@ -372,7 +372,6 @@ $configs = [IO.Path]::GetFullPath((Join-Path $root 'configs')) + [IO.Path]::Dire
 # Windows machine has run this (docs/PLAN.md).
 $droppedLinks = @(
     '~\.config\mise\conf.d\runtimes.toml'
-    '~\.wslconfig'
     '%APPDATA%\VSCodium\product.json'
     '%APPDATA%\VSCodium\User\keybindings.json'
     '%APPDATA%\Zed\keymap.json'
