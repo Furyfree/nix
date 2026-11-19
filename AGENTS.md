@@ -4,9 +4,9 @@ This is my public, personal workstation configuration. NixOS runs the desktop
 and the laptop whole. Everywhere else this repository gives the terminal, the
 app configs and an app list in the system's own package manager, and the rest
 is a checklist: nix-darwin on the Macs, Home Manager on its own on the Ubuntu
-work laptop, and PowerShell profiles on Windows. I want repeatable installs
-and updates, shared app preferences and rollback where the system has it.
-`docs/PLAN.md` holds the open work.
+work laptop, and PowerShell profiles on Windows, the desktop's with NixOS in
+WSL. I want repeatable installs and updates, shared app preferences and
+rollback where the system has it. `docs/PLAN.md` holds the open work.
 
 ## What must not break
 

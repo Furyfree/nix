@@ -48,6 +48,7 @@ On Windows, PowerShell on vm and desktop has `nswitch`, `nupdate` and `mup`;
 the first two run `windows\apply.ps1`, `nupdate` with `-Update`, which upgrades
 winget and Mise first and applies at once. basic runs
 `~\Projects\nix\windows\apply.ps1` directly.
+In NixOS in WSL, the aliases above work without Snapper.
 
 Roll back with `nh os rollback` or an older generation in the boot menu; on a
 Mac, `nrollback N` leaves apps and macOS settings as they are. Rollback

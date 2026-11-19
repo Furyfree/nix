@@ -17,6 +17,7 @@
         }
         # Not from Mise; configs/mise/conf.d/windows-tools.toml says why.
         '7zip.7zip'
+        'Gyan.FFmpeg'
     )
     Registry    = @('personal.reg')
     Links       = @{
@@ -39,7 +40,7 @@
         '~\.codex\config.toml'                             = 'codex/config.toml'
         '%APPDATA%\GitHub CLI\config.yml'                  = 'gh/config.yml'
         # Windows Terminal adds its own profiles to this file. Its new-tab menu
-        # lists profiles by name; the others hide.
+        # lists profiles by name, NixOS second on desktop; the others hide.
         '%LOCALAPPDATA%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json' =
         'windows/terminal/settings.json'
     }

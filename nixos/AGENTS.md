@@ -1,7 +1,8 @@
 # NixOS
 
-The desktop and the laptop, whole: system, desktop and apps. The root
-`AGENTS.md` holds the rules that must not break.
+The desktop and the laptop, whole: system, desktop and apps; and NixOS in WSL
+on the Windows desktop. The root `AGENTS.md` holds the rules that must not
+break.
 
 ## Map
 
@@ -18,6 +19,9 @@ The desktop and the laptop, whole: system, desktop and apps. The root
   `local/` with the detected hardware, the account and swap; an optional
   `local/desktop.nix` picks the compositor, and an empty `local/limine-windows`
   adds Windows to the boot menu.
+- `hosts/wsl/`: NixOS in WSL on the Windows desktop, with only the shell,
+  development tools and `../home-manager/common.nix`. `windows/apply.ps1`
+  installs it and writes its ignored `local/user.nix` with the account.
 - `installer/`: the ISO (`configuration.nix`), the launcher `install.py`, its
   `nixos_setup/` modules and their tests, one file per module. It clones
   `main` from GitHub, so a layout change installs only once it is merged.
