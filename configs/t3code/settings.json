@@ -22,6 +22,7 @@
     }
   ],
   "projectSettingsFolded": true,
+  "idleCompaction": "onReturn",
   "providerInstances": {
     "opencode": {
       "driver": "opencode",
