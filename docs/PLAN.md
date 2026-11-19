@@ -14,10 +14,6 @@ Open work only; finished work lives in Git.
 
 ## Layout move
 
-- Delete `configs/bin`, the link to `bin/`, and its line in `AGENTS.md` once
-  every machine has switched past the move.
-- Delete `$droppedLinks` in `windows/apply.ps1` once every Windows machine has
-  run `nswitch` past the move.
 - Install from USB on a spare disk with the new layout.
 
 ## Windows and WSL
