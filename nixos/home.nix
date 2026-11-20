@@ -118,15 +118,6 @@ in
   };
 
   home.activation = {
-    # Opt out of Toolbox's default autostart before its first launch, then leave
-    # the setting to Toolbox.
-    jetbrainsToolboxAutostart = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      settings="${config.xdg.dataHome}/JetBrains/Toolbox/.settings.json"
-      if [[ ! -e $settings ]]; then
-        run install -D -m 0644 /dev/stdin "$settings" <<<'{ "autostart": false }'
-      fi
-    '';
-
     # Prism picks the bundled Java each instance needs; a chosen Java is a store
     # path that breaks when Prism updates. Yq would drop the quotes Qt needs, so
     # change only this line.

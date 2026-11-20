@@ -90,5 +90,15 @@ in
       };
   };
 
-  home.file.".local/bin/launch".source = script "launch";
+  home = {
+    file.".local/bin/launch".source = script "launch";
+    # Opt out of Toolbox's default autostart before its first launch, then leave
+    # the setting to Toolbox.
+    activation.jetbrainsToolboxAutostart = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      settings="${config.xdg.dataHome}/JetBrains/Toolbox/.settings.json"
+      if [[ ! -e $settings ]]; then
+        run install -D -m 0644 /dev/stdin "$settings" <<<'{ "autostart": false }'
+      fi
+    '';
+  };
 }
