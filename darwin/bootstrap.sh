@@ -5,9 +5,12 @@
 # nix-darwin. Each step checks first, so running it again carries on where it
 # stopped. On a new Mac, in Terminal:
 #   curl -fsSL https://raw.githubusercontent.com/Furyfree/nix/main/darwin/bootstrap.sh | bash
+# To try a branch before it is merged, fetch it from that branch and name it:
+#   curl -fsSL https://raw.githubusercontent.com/Furyfree/nix/BRANCH/darwin/bootstrap.sh | bash -s -- BRANCH
 # Written for macOS's own bash 3.2, which runs it there.
 set -euo pipefail
 
+branch=${1:-main}
 repo=$HOME/Projects/nix
 user_file=$repo/darwin/local/user.nix
 saved=${XDG_STATE_HOME:-$HOME/.local/state}/nix-workstation/macos-before
@@ -72,8 +75,8 @@ install_tools() {
 # Over HTTPS: the SSH keys arrive later through 1Password.
 clone() {
   [[ ! -e $repo ]] || return 0
-  say "Cloning this repository to $repo"
-  git clone https://github.com/Furyfree/nix.git "$repo"
+  say "Cloning this repository's $branch to $repo"
+  git clone --branch "$branch" https://github.com/Furyfree/nix.git "$repo"
 }
 
 write_user() {

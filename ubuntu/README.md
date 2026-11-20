@@ -17,7 +17,11 @@ agents; nothing here touches them.
    the ignored `ubuntu/local/user.nix` with your account, switches Home Manager
    and runs `apps.sh`. `debloat.sh` removes the snaps, telemetry and unused
    services, and stops before removing one of Ubuntu's base packages. After an
-   error, run it again; it carries on.
+   error, run it again; it carries on. To try a branch before it is merged:
+
+   ```bash
+   wget -qO- https://raw.githubusercontent.com/Furyfree/nix/BRANCH/ubuntu/bootstrap.sh | bash -s -- BRANCH
+   ```
 2. Reboot, for the debloat, zsh and the `docker` and `kvm` groups. Then
    `mise install`, and 1Password, the work machine's SSH keys and `gh` as in
    [SSH keys](../README.md#ssh-keys).

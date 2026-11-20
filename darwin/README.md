@@ -26,6 +26,12 @@ stops if that backup already exists.
    saves the settings it changes to
    `~/.local/state/nix-workstation/macos-before/`; restore one with
    `defaults import DOMAIN FILE`. After an error, run it again; it carries on.
+   To try a branch before it is merged:
+
+   ```sh
+   curl -fsSL \
+     https://raw.githubusercontent.com/Furyfree/nix/BRANCH/darwin/bootstrap.sh | bash -s -- BRANCH
+   ```
 3. Log out and back in, for the settings that wait for it.
 4. 1Password, the SSH keys and `gh`, as in [SSH keys](../README.md#ssh-keys).
 5. In a new terminal, `mise install`.

@@ -5,8 +5,11 @@
 # it again carries on where it stopped. On a fresh Ubuntu, which has wget but
 # not curl, in GNOME's terminal:
 #   wget -qO- https://raw.githubusercontent.com/Furyfree/nix/main/ubuntu/bootstrap.sh | bash
+# To try a branch before it is merged, fetch it from that branch and name it:
+#   wget -qO- https://raw.githubusercontent.com/Furyfree/nix/BRANCH/ubuntu/bootstrap.sh | bash -s -- BRANCH
 set -euo pipefail
 
+branch=${1:-main}
 repo=$HOME/Projects/nix
 user_file=$repo/ubuntu/local/user.nix
 nix_bin=/nix/var/nix/profiles/default/bin
@@ -37,8 +40,8 @@ clone() {
     sudo env DEBIAN_FRONTEND=noninteractive apt-get install -qy git curl </dev/null
   fi
   [[ ! -e $repo ]] || return 0
-  say "Cloning this repository to $repo"
-  git clone https://github.com/Furyfree/nix.git "$repo"
+  say "Cloning this repository's $branch to $repo"
+  git clone --branch "$branch" https://github.com/Furyfree/nix.git "$repo"
 }
 
 # Until it has finished once; a run cut short repeats it, which is safe.

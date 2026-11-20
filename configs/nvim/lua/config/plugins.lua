@@ -1,6 +1,19 @@
 -- Neovim's built-in plugin manager installs these on first start at the
 -- versions in nvim-pack-lock.json. nupdate updates them and the lock file;
 -- nswitch moves every machine to the lock file's versions.
+-- Parsers follow nvim-treesitter's updates. Both update in a headless Neovim
+-- that quits right after, so this waits for the parsers to build.
+vim.api.nvim_create_autocmd("PackChanged", {
+  callback = function(event)
+    if event.data.spec.name ~= "nvim-treesitter" or event.data.kind ~= "update" then
+      return
+    end
+    if not event.data.active then
+      vim.cmd.packadd("nvim-treesitter")
+    end
+    require("nvim-treesitter").update():wait(300000)
+  end,
+})
 vim.pack.add({
   "https://github.com/folke/snacks.nvim",
   "https://github.com/folke/which-key.nvim",

@@ -19,6 +19,10 @@ check-hyprland:
 check-niri:
     scripts/check-niri.sh
 
+# Lint every shell script, found by its #! line, at warning level
+check-shell:
+    git ls-files -z | xargs -0 awk 'FNR == 1 && /^#!.*[/ ](ba|da)?sh( |$)/ { print FILENAME } { nextfile }' | xargs -d '\n' shellcheck -S warning
+
 # Parse the Windows scripts and check the files each Windows profile names
 check-powershell:
     scripts/check-powershell.ps1
