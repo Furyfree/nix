@@ -91,7 +91,26 @@ in
   };
 
   home = {
-    file.".local/bin/launch".source = script "launch";
+    file = {
+      ".local/bin/launch".source = script "launch";
+      # What xdg-open opens gets a scope of its own, as from Niri's launcher:
+      # Ghostty runs as a service, and stopping it took a browser it had
+      # started along. Outside a terminal the output goes nowhere, since
+      # Ubuntu's Ghostty 1.3 reads only 50 KB of it and loses a browser that
+      # logs more (fixed in Ghostty 1.4, ghostty-org/ghostty@bb375a2;
+      # Furyfree/nix#49).
+      ".local/bin/xdg-open" = {
+        executable = true;
+        text = ''
+          #!/bin/sh
+          for real in /usr/bin/xdg-open /run/current-system/sw/bin/xdg-open; do
+            [ -x "$real" ] && break
+          done
+          [ -t 2 ] && exec systemd-run --user --scope --collect --quiet -- "$real" "$@"
+          exec systemd-run --user --scope --collect --quiet -- "$real" "$@" >/dev/null 2>&1
+        '';
+      };
+    };
     # Opt out of Toolbox's default autostart before its first launch, then leave
     # the setting to Toolbox.
     activation.jetbrainsToolboxAutostart = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

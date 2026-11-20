@@ -60,18 +60,6 @@ in
       ])
       ++ [ windows-vm ];
     stateVersion = "26.11";
-    # Ghostty 1.3 collects only 50 KB of its opener's output, so a browser that
-    # a Ctrl+click starts dies once it has logged more (fixed in Ghostty 1.4,
-    # ghostty-org/ghostty@bb375a2; Furyfree/nix#49). Outside a terminal, the
-    # opener's and the started app's output go nowhere, so Ghostty sees its end.
-    file.".local/bin/xdg-open" = {
-      executable = true;
-      text = ''
-        #!/bin/sh
-        [ -t 2 ] && exec /usr/bin/xdg-open "$@"
-        exec /usr/bin/xdg-open "$@" >/dev/null 2>&1
-      '';
-    };
     # Ptyxis uses only profiles in its list, which also holds those made in its
     # own settings: add ours beside them, and make it the default until another
     # is chosen there. Home Manager's dconf step drops its bus helper when done.
