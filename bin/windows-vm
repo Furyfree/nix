@@ -10,7 +10,38 @@ entry=${XDG_DATA_HOME:-${HOME-}/.local/share}/applications/windows-vm.desktop
 
 die() {
   gum log --level error "$*"
+  notify "$*" --urgency=critical >/dev/null
+  # Keep the error on screen when launch closes its notification at exit.
+  notice_id=
   exit 1
+}
+
+# The launcher shows no terminal, so launch also tells its progress in one
+# desktop notification, replaced at each step: notify BODY [OPTION...].
+# Root has no desktop to notify. The running launch shares the notification's
+# id in notice_share, so a launch waiting for it updates the same one.
+notice_id=
+notice_share=
+notify() {
+  notify-send --print-id ${notice_id:+"--replace-id=$notice_id"} --app-name="Windows VM" \
+    --icon=distributor-logo-windows "${@:2}" "Windows VM" "$1" 2>/dev/null || true
+}
+
+# Print and notify for TIMEOUT milliseconds; 0 keeps it until replaced or closed.
+notice() {
+  local timeout=$1
+  shift
+  echo "$*"
+  notice_id=$(notify "$*" --expire-time="$timeout")
+  [[ -z $notice_share ]] || echo "$notice_id" >"$notice_share"
+}
+
+close_notice() {
+  [[ -z $notice_id ]] || busctl --user call org.freedesktop.Notifications \
+    /org/freedesktop/Notifications org.freedesktop.Notifications \
+    CloseNotification u "$notice_id" >/dev/null 2>&1 || true
+  notice_id=
+  [[ -z $notice_share ]] || : >"$notice_share"
 }
 
 usage() {
@@ -226,8 +257,38 @@ EOF
 
 cmd_launch() {
   [[ -r $settings ]] || die "The Windows VM is not installed; run windows-vm install."
-  local keep_alive=false scale username password started attempt status
+  local keep_alive=false scale username password started since attempt status pid lock
   [[ ${1-} == --keep-alive ]] && keep_alive=true
+  # The window is FreeRDP's "Windows VM", seen through Niri or Hyprland.
+  window_open() {
+    if [[ -n ${NIRI_SOCKET-} ]]; then
+      niri msg --json windows
+    else
+      hyprctl clients -j
+    fi 2>/dev/null | jq -e 'any(.[]; .title == "Windows VM")' >/dev/null 2>&1
+  }
+
+  # One launcher at a time: a second one would connect to the same Windows,
+  # or to one shutting down. A launch during another one waits: it opens
+  # Windows again once the other ends after a shutdown, and leaves it to the
+  # other once that one's window is open.
+  exec {lock}>"$XDG_RUNTIME_DIR/windows-vm.lock"
+  if ! flock --nonblock "$lock"; then
+    if window_open; then
+      notice 4000 "Windows is already open."
+      exit 0
+    fi
+    until flock --nonblock "$lock"; do
+      window_open && exit 0
+      if [[ -z $notice_id ]] && ! systemctl is-active --quiet "$WINDOWS_SERVICE"; then
+        notice_id=$(cat "$XDG_RUNTIME_DIR/windows-vm.notice" 2>/dev/null) || true
+        notice 0 "Windows is still shutting down; it opens again once it's off."
+      fi
+      sleep 1
+    done
+  fi
+  notice_share=$XDG_RUNTIME_DIR/windows-vm.notice
+  : >"$notice_share"
   username=$(setting USERNAME)
   password=$(setting PASSWORD)
 
@@ -243,10 +304,22 @@ cmd_launch() {
         --why="The Windows VM window is open" xfreerdp /args-from:stdin
   }
 
-  systemctl start "$WINDOWS_SERVICE"
-  if ! $keep_alive; then
-    trap 'systemctl stop "$WINDOWS_SERVICE"' EXIT
+  # Stop the VM, telling so while Windows shuts down.
+  stop_vm() {
+    if systemctl is-active --quiet "$WINDOWS_SERVICE"; then
+      notice 0 "Windows is shutting down…"
+      systemctl stop "$WINDOWS_SERVICE"
+    fi
+    close_notice
+  }
+
+  notice 0 "Starting Windows…"
+  if $keep_alive; then
+    trap close_notice EXIT
+  else
+    trap stop_vm EXIT
   fi
+  systemctl start "$WINDOWS_SERVICE"
   # Wait for Dockur's boot message from this start, as Omarchy does; FreeRDP's
   # /auth-only probe can crash while Windows is still starting.
   # The service creates a fresh container a moment after it starts.
@@ -254,7 +327,9 @@ cmd_launch() {
     systemctl is-active --quiet "$WINDOWS_SERVICE" || die "The Windows VM stopped."
     sleep 1
   done
-  until docker logs --since "$started" windows 2>&1 | grep -qi "windows started successfully"; do
+  # grep reads all of the log: -q would end the pipe early, and pipefail would
+  # count docker's broken pipe as no match.
+  until docker logs --since "$started" windows 2>&1 | grep -i "windows started successfully" >/dev/null; do
     systemctl is-active --quiet "$WINDOWS_SERVICE" || die "The Windows VM stopped."
     sleep 2
   done
@@ -276,15 +351,42 @@ cmd_launch() {
     "/scale-desktop:${scale:-100}" "/drive:Shared,$shared")
   # Booted is not yet ready for Remote Desktop: retry while FreeRDP cannot
   # connect, but not after a closed window or a rejected login.
-  for attempt in {1..30}; do
+  notice 0 "Connecting…"
+  attempt=0
+  while ((++attempt <= 30)); do
+    since=$(date +%Y-%m-%dT%H:%M:%S.%N%:z)
+    rdp "${args[@]}" &
+    pid=$!
+    # The notice ends once the window is open.
+    while [[ -n $notice_id ]] && kill -0 "$pid" 2>/dev/null; do
+      window_open && close_notice
+      sleep 1
+    done
     status=0
-    rdp "${args[@]}" || status=$?
+    wait "$pid" || status=$?
     case $status in
-      131 | 133 | 137 | 141 | 143) ;;
+      # Windows ended the session for a restart or a shutdown: a new boot in
+      # Dockur's log is a restart, a stopped service a shutdown.
+      1)
+        notice 0 "Windows is shutting down or restarting…"
+        until docker logs --since "$since" windows 2>&1 | grep "BdsDxe: loading" >/dev/null; do
+          if ! systemctl is-active --quiet "$WINDOWS_SERVICE"; then
+            close_notice
+            echo "Windows shut down."
+            return 0
+          fi
+          sleep 1
+        done
+        notice 0 "Windows is restarting…"
+        attempt=0
+        continue
+        ;;
+      131 | 133 | 137 | 141 | 143 | 147) ;;
       *) return "$status" ;;
     esac
     systemctl is-active --quiet "$WINDOWS_SERVICE" || die "The Windows VM stopped."
-    echo "Windows is not ready for Remote Desktop yet (attempt $attempt of 30)."
+    notice 0 "Windows is starting up or installing updates (attempt $attempt of 30)." \
+      "Screen: http://localhost:8006"
     sleep 10
   done
   die "Windows did not accept Remote Desktop; check http://localhost:8006."
