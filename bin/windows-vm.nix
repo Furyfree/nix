@@ -21,6 +21,7 @@ pkgs.writeShellApplication {
       gawk
       gum
       jq
+      libnotify
       util-linux
       xmlstarlet
     ]
