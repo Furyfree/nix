@@ -30,15 +30,35 @@ on its own disk and joins the boot menu at the first `nswitch`.
 
 ## First boot
 
-1. Secure Boot: in the firmware settings, clear the Secure Boot keys (Setup
-   Mode). In NixOS run `sudo sbctl enroll-keys -m -f`, which keeps Microsoft's
-   and the firmware's own keys for Windows and firmware. Before turning Secure
-   Boot back on, `nix run nixpkgs#mokutil -- --db | grep 'Windows UEFI CA
-   2023'` must find the certificate that signs Windows' boot manager. `sbctl
-   status` should show Setup Mode disabled and Secure Boot enabled. On the HP
-   laptop, confirm the code that disables Sure Start Secure Boot Keys
-   Protection, which otherwise restores HP's keys; HP then turns Secure Boot
-   on by itself. Set a firmware administrator password afterwards.
+1. Secure Boot, once per machine:
+   1. Desktop: the BitLocker recovery key is in 1Password (`manage-bde
+      -protectors -get C:` in an admin terminal in Windows shows it), and
+      BitLocker is paused again if Windows has restarted three times since
+      step 2 of [Before you start](#before-you-start).
+   2. In the firmware settings, clear the Secure Boot keys, not the TPM
+      (Setup Mode); on MSI boards, set Secure Boot Mode to Custom first.
+   3. In NixOS, run `sudo sbctl enroll-keys -m -f`. `-m` and `-f` keep
+      Microsoft's and the firmware's own keys, so Windows and the graphics
+      card's firmware still start. Anything else Microsoft signed starts too:
+      Secure Boot keeps the NixOS boot chain from being changed, not someone
+      at the machine from starting another system. LUKS still keeps the data
+      closed then.
+   4. `nix run nixpkgs#mokutil -- --db | grep 'Windows UEFI CA 2023'` must
+      find the certificate that signs Windows' boot manager.
+   5. MSI boards start programs that fail the check unless told otherwise
+      ([FQ0001](https://github.com/Foxboron/sbctl/wiki/FQ0001)): set Image
+      Execution Policy's Option ROM, Removable Media and Fixed Media to Deny
+      Execute, or Secure Boot Preset to Maximum Security. If the screen stays
+      black afterwards, the graphics card's firmware was refused; reset the
+      CMOS to get back in.
+   6. HP laptop: confirm the code that disables Sure Start Secure Boot Keys
+      Protection, which otherwise restores HP's keys; HP then turns Secure
+      Boot on by itself.
+   7. Turn Secure Boot on. `sbctl status` shows Setup Mode disabled and
+      Secure Boot enabled, and the installer USB stick no longer starts.
+      `sbctl verify` lists the kernels as not signed; `secure-boot.nix` says
+      why. In Windows, `msinfo32` shows Secure Boot State On.
+   8. Set a firmware administrator password.
 2. `tailscale up` to join the tailnet.
 3. `mise install` for the language runtimes and agent CLIs.
 4. Dictation: `voxtype setup --download --model <model>`, with the model that
