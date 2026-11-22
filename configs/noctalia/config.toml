@@ -207,6 +207,8 @@ enabled = true
 
 # lid-guard is a laptop toggle; without a lid it has nothing to guard.
 [plugins]
+# Only Noctalia's own plugins update themselves; update the others in its settings.
+auto_update = "official"
 enabled = [
     "noctalia/notes",
     "noctalia/screen_recorder",
