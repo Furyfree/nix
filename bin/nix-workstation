@@ -38,7 +38,7 @@ apps and writes the macOS settings.
 In WSL: the same without Snapper (nh os switch --ask).
 
 On Linux without NixOS: switch Home Manager (nh home switch --ask), then
-ubuntu/apps.sh installs the apps that are missing.
+ubuntu/apps.sh installs the apps that are missing, and the Flatpaks update.
 
 After a switch, Neovim's plugins move to the versions in
 configs/nvim/nvim-pack-lock.json, which nupdate writes on one machine.
@@ -301,6 +301,10 @@ cmd_switch_home() {
   # A file Ubuntu made where a link goes is kept with this ending, as on the Mac.
   nh home switch --ask --configuration ubuntu --backup-extension before-home-manager
   "$repo/ubuntu/apps.sh"
+  # apps.sh only installs; nothing else updates the Flatpaks.
+  if command -v flatpak >/dev/null; then
+    flatpak update --user --noninteractive
+  fi
 }
 
 # update and pin change only flake.lock and nixos/pins/_sources, then check and
