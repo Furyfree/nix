@@ -1,5 +1,5 @@
 program_options:
-  automount: true
+  automount: false # Mount by clicking the drive in Noctalia or the file manager.
   notify: true
   tray: auto # Hide the tray icon when no devices can be acted on.
   menu: flat
