@@ -14,7 +14,7 @@ for step in "${background[@]}"; do
 done
 
 failed=()
-for step in check-shell check-lua check-hyprland check-niri check-powershell lint typecheck test; do
+for step in check-secrets check-shell check-lua check-hyprland check-niri check-powershell lint typecheck test; do
     just "$step" || failed+=("$step")
 done
 for i in "${!background[@]}"; do
