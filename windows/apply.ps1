@@ -604,5 +604,10 @@ if ($work.Registry.Count -gt @(Get-RegistryChanges).Count) {
     Stop-Process -Name explorer -Force
 }
 
+# personal.reg holds Windows at 26H2, whose Home and Pro updates end then.
+if ((Get-Date) -ge [datetime]'2028-07-01') {
+    Write-Host 'note     26H2 updates end 2028-10-10: raise TargetReleaseVersionInfo in registry\personal.reg.'
+}
+
 foreach ($failure in $failures) { Write-Host "FAIL     $failure" }
 exit [int]($failures.Count -gt 0)
