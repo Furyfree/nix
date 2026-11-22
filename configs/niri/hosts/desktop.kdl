@@ -1,24 +1,37 @@
-// Desktop monitor and keyboard; home-manager/niri.nix links this file to
+// Desktop monitors and keyboard; home-manager/niri.nix links this file to
 // ~/.config/niri/host.kdl on the host named desktop.
 
-// The BenQ XL2720Z, matched by make, model and serial as niri msg outputs
-// shows them. The firmware, Limine and the unlock prompt use the RTX 3080's
-// first DisplayPort, so it goes there. Without a refresh rate, Niri picks the
-// highest.
+// BenQ XL2720Z is the main display; the Dell P2719H is to its right, only
+// until a new monitor replaces it, so Hyprland keeps one monitor. Matched
+// by make, model and serial as niri msg outputs shows them, so swapping
+// cables keeps the layout. The firmware, Limine and the unlock prompt use the
+// RTX 3080's first DisplayPort, so the BenQ goes there. Without a refresh
+// rate, Niri picks the highest.
 output "PNP(BNQ) BenQ XL2720Z SCE00737SL0" {
     mode "1920x1080"
     scale 1
+    position x=0 y=0
     focus-at-startup
 }
+output "Dell Inc. DELL P2719H FYVG223" {
+    mode "1920x1080"
+    scale 1
+    position x=1920 y=0
+}
 
-// Five workspaces always exist; the bar labels them by their place on the
-// monitor. Names must not start with a digit: Noctalia reads a numeric name
-// as Niri's internal workspace number and mixes them up.
+// Five workspaces on each monitor always exist; the bar labels them by their
+// place on the monitor. Names must not start with a digit: Noctalia reads a
+// numeric name as Niri's internal workspace number and mixes them up.
 workspace "main-1" { open-on-output "PNP(BNQ) BenQ XL2720Z SCE00737SL0"; }
 workspace "main-2" { open-on-output "PNP(BNQ) BenQ XL2720Z SCE00737SL0"; }
 workspace "main-3" { open-on-output "PNP(BNQ) BenQ XL2720Z SCE00737SL0"; }
 workspace "main-4" { open-on-output "PNP(BNQ) BenQ XL2720Z SCE00737SL0"; }
 workspace "main-5" { open-on-output "PNP(BNQ) BenQ XL2720Z SCE00737SL0"; }
+workspace "side-1" { open-on-output "Dell Inc. DELL P2719H FYVG223"; }
+workspace "side-2" { open-on-output "Dell Inc. DELL P2719H FYVG223"; }
+workspace "side-3" { open-on-output "Dell Inc. DELL P2719H FYVG223"; }
+workspace "side-4" { open-on-output "Dell Inc. DELL P2719H FYVG223"; }
+workspace "side-5" { open-on-output "Dell Inc. DELL P2719H FYVG223"; }
 
 // The NuPhy has US keycaps; AltGr+a/o/' types å/ø/æ as Option does on macOS.
 input {
