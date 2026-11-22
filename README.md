@@ -29,7 +29,7 @@ nsearch QUERY      # search packages and options
 ndesktop [NAME]    # Linux: show or pick the compositor for the next boot
 mup                # upgrade Mise tools; mise install after a switch
 fup                # Linux: install firmware updates
-brew upgrade       # Mac, in Terminal.app: upgrade apps; add --greedy for Office
+brew upgrade       # Mac, in Terminal.app: upgrade apps
 pull-projects      # fast-forward every clean repo in ~/Projects
 ```
 

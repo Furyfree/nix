@@ -7,9 +7,11 @@
   homebrew = {
     casks = [
       "codexbar" # menu bar icon issue on 27: CodexBar#4506
-      "microsoft-word" # .pkg without AutoUpdate: upgrade with --greedy
+      "microsoft-word"
       "microsoft-excel"
       "microsoft-powerpoint"
+      # The Office casks leave it out, so nothing else patches Office.
+      "microsoft-auto-update"
       "photocraft"
       "filmcraft"
       "soundcraft"
