@@ -58,25 +58,25 @@ restores the system, not files in your home folder.
 Every machine. In 1Password, sign in, then in Settings → Developer turn on the
 SSH agent and the CLI integration. The keys stay in 1Password; these public
 halves only tell SSH which key a host gets, and the profile's private document
-lists its hosts:
-
-```bash
-op item get n6imsp5vfs5nmlt5rmxgs6zdci --fields "label=public key" >~/.ssh/github.pub
-git config --file ~/.config/git/local user.signingkey ~/.ssh/github.pub
-```
+lists its hosts.
 
 Personal machines:
 
 ```bash
+op item get n6imsp5vfs5nmlt5rmxgs6zdci --fields "label=public key" >~/.ssh/github.pub
+git config --file ~/.config/git/local user.signingkey ~/.ssh/github.pub
 op item get 3ppqekfxnmjtg2iapnr5d7gewi --fields "label=public key" >~/.ssh/homelab.pub
 op item get 3psgdyql5u5zlpamsfc4xr7cbu --fields "label=public key" >~/.ssh/personal.pub
 op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf
 ```
 
-Work machines, with the work commit email:
+Work machines, with the work commit email. The work key also signs in to
+GitHub and signs commits there, so add it to the GitHub account as an
+authentication and a signing key:
 
 ```bash
 op item get cwlhpt5lcyn3dsuyx4wyms2ama --fields "label=public key" >~/.ssh/work.pub
+git config --file ~/.config/git/local user.signingkey ~/.ssh/work.pub
 op document get npl7xfsvir6kbq7jvptugkczhm --out-file ~/.ssh/local.conf
 git config --file ~/.config/git/local user.email <work email>
 ```
