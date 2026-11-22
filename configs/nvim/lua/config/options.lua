@@ -32,6 +32,11 @@ else
   vim.notify("Neovim: cannot secure undo directory; persistent undo disabled", vim.log.levels.WARN)
 end
 
+-- Words added with zg stay out of the checkout this folder is linked from.
+local spell = vim.fn.stdpath("data") .. "/spell"
+vim.fn.mkdir(spell, "p")
+opt.spellfile = spell .. "/en.utf-8.add"
+
 -- Use the terminal's ANSI palette, including Noctalia colors in themed Ghostty.
 -- No Noctalia files, hardcoded RGB palette, or generated theme watcher needed.
 opt.termguicolors = false
