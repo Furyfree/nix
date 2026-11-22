@@ -1,6 +1,6 @@
 # Windows
 
-One PowerShell profile per machine, `basic`, `vm` or `desktop`, through
+One PowerShell profile per machine, `vm` or `desktop`, through
 winget, Mise and `.reg` files. The root `AGENTS.md` holds the rules that must
 not break.
 
@@ -11,8 +11,8 @@ not break.
 - `apply.ps1`: `nswitch`; applies the profile's layers from `profiles/`, whose
   keys `common.psd1` lists, with the settings in `registry/`.
 - `profiles/`: `desktop` takes `vm` and `gaming` and adds the apps I use every
-  day and NixOS in WSL (`../nixos/hosts/wsl/`); `basic` stands apart. An app
-  or setting goes in the layer that needs it.
+  day and NixOS in WSL (`../nixos/hosts/wsl/`). An app or setting goes in the
+  layer that needs it.
 - `../configs/windows/`: the PowerShell, Terminal, WSL, VSCodium, fastfetch,
   Office and taskbar files.
 

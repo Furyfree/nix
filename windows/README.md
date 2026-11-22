@@ -1,11 +1,10 @@
 # Windows
 
 Each Windows machine runs one profile from `profiles/`, and keeps its name in
-the ignored `local/profile`: `basic`, apps
-and settings for anyone with Ubuntu in WSL; `vm`, my apps and configs for a VM
-on Linux, which has no WSL2; or `desktop`, vm with games, the apps I use
-every day, the hardware settings and NixOS in WSL. Every profile clones this
-repository to `~\Projects\nix`.
+the ignored `local/profile`: `vm`, my apps and configs for a VM on Linux,
+which has no WSL2; or `desktop`, vm with games, the apps I use every day, the
+hardware settings and NixOS in WSL. Every profile clones this repository to
+`~\Projects\nix`.
 
 ## Set up Windows
 

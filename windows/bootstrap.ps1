@@ -23,8 +23,8 @@ param(
         [Security.Principal.WindowsBuiltInRole]::Administrator)
     if ($admin) { throw 'Run this as yourself, not as administrator; it asks for administrator itself.' }
 
-    $choice = (Read-Host 'Profile: basic, vm or desktop').Trim().ToLower()
-    if (@('basic', 'vm', 'desktop') -notcontains $choice) { throw "No profile '$choice'." }
+    $choice = (Read-Host 'Profile: vm or desktop').Trim().ToLower()
+    if (@('vm', 'desktop') -notcontains $choice) { throw "No profile '$choice'." }
     $exists = Test-Path $repo
     if ($exists -and (Read-Host "$repo already exists. Pull and continue? [y/N]") -notmatch '^y(es)?$') { return }
 

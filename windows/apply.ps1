@@ -27,7 +27,7 @@ if ($admin -ne $Elevated.IsPresent) {
     throw 'Run apply.ps1 as yourself, not as administrator; it asks for administrator itself.'
 }
 
-# bootstrap.ps1 writes basic, vm or desktop here.
+# bootstrap.ps1 writes vm or desktop here.
 $ProfileName = (Get-Content (Join-Path $root 'windows\local\profile') -Raw).Trim()
 
 # Each layer once, after the layers it includes. Lists add up, tables merge
@@ -535,36 +535,6 @@ public static extern bool SystemParametersInfo(uint action, uint param, string v
 if ($work.Wsl) {
     # A new WSL works only after a restart; the distribution comes next run.
     Write-Host 'note     Restart Windows to finish WSL, then run this again.'
-}
-elseif ($want.Wsl.Distribution -eq 'Ubuntu') {
-    Invoke-Step 'Ubuntu' {
-        $env:WSL_UTF8 = '1'
-        # A WSL without distributions exits with an error here too.
-        if ((wsl --list --quiet 2> $null) -notcontains 'Ubuntu') {
-            Write-Host 'install  Ubuntu'
-            wsl --install --distribution Ubuntu --no-launch
-            if ($LASTEXITCODE -ne 0) { throw "wsl --install ($LASTEXITCODE)" }
-            Write-Host 'note     Open Ubuntu from Start to create your Linux user; then run this again.'
-        }
-        elseif (-not (wsl --distribution Ubuntu --user root --exec getent passwd 1000)) {
-            Write-Host 'note     Open Ubuntu from Start to create your Linux user; then run this again.'
-        }
-        else {
-            $apt = $want.Wsl.Apt -join ' '
-            if ($apt) { wsl --distribution Ubuntu --user root --exec sh -c "dpkg -s $apt > /dev/null 2>&1" }
-            if ($apt -and $LASTEXITCODE -ne 0) {
-                Write-Host "apt      $apt"
-                wsl --distribution Ubuntu --user root --exec sh -c "apt-get update && apt-get install -y $apt"
-                if ($LASTEXITCODE -ne 0) { throw "apt-get install ($LASTEXITCODE)" }
-            }
-            # Git in Ubuntu signs in through Git for Windows' Credential Manager.
-            $helper = '/mnt/c/Program\ Files/Git/mingw64/bin/git-credential-manager.exe'
-            if ((wsl --distribution Ubuntu --exec git config --global --get credential.helper) -ne $helper) {
-                Write-Host 'set      Git credential helper in Ubuntu'
-                wsl --distribution Ubuntu --exec git config --global credential.helper $helper
-            }
-        }
-    }
 }
 elseif ($want.Wsl.Distribution -eq 'NixOS') {
     Invoke-Step 'NixOS' {
