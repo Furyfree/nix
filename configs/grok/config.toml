@@ -1,2 +1,13 @@
 [ui]
 permission_mode = "always-approve"
+
+# Shell ask rules still apply in always-approve; the same asks as Claude's.
+[permission]
+ask = [
+  "Bash(git commit *)",
+  "Bash(git push *)",
+  "Bash(git -C * push*)",
+  "Bash(git tag *)",
+  "Bash(gh pr create *)",
+  "Bash(gh api *)",
+]
