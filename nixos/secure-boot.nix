@@ -1,10 +1,9 @@
 # Secure Boot with your own key, so Windows anti-cheat sees it on while
-# NixOS still boots. Installing creates the key and signs Limine; with Secure
-# Boot still off, nothing changes. Then once per machine: set the firmware to
-# Setup Mode, run `sudo sbctl enroll-keys -m -f` (-m and -f keep Microsoft's
-# and the firmware's keys for Windows and GPU firmware) and turn Secure Boot
-# on, as nixos/README.md describes. Windows asks for the BitLocker recovery key
-# once.
+# NixOS still boots. Installing creates the key and signs Limine. Kernels
+# and initrds carry no signature: Limine checks them against the checksums
+# in its signed config, so `sbctl verify` lists them as not signed.
+# Nothing is checked until the key is enrolled and Secure Boot is on, once
+# per machine, as nixos/README.md's first boot step describes.
 { pkgs, ... }:
 
 {
