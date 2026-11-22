@@ -30,6 +30,13 @@
     brews = [ "mise" ];
   };
 
+  # macOS ships with its firewall off; IT manages the work Mac's. Stealth mode
+  # leaves pings and probes of closed ports unanswered.
+  networking.applicationFirewall = {
+    enable = true;
+    enableStealthMode = true;
+  };
+
   # CodexBar belongs to the personal Mac; its account state stays native.
   home-manager.users.${config.system.primaryUser} =
     {
