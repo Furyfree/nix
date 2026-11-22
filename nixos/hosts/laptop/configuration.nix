@@ -19,6 +19,12 @@
   # Enroll with fprintd-enroll; password login stays available.
   services.fprintd.enable = true;
 
+  # A closed lid suspends, then hibernates after two hours, so a laptop in a
+  # bag doesn't keep the disk key in memory for days; waking from
+  # hibernation asks for the disk password again.
+  services.logind.settings.Login.HandleLidSwitch = "suspend-then-hibernate";
+  systemd.sleep.settings.Sleep.HibernateDelaySec = "2h";
+
   # Light gaming.
   programs.gamemode.enable = true;
   environment.systemPackages = with pkgs; [
