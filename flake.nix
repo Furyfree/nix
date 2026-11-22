@@ -110,6 +110,7 @@
             openssh
             powershell
             shellcheck
+            gitleaks
             # nix-workstation pin: nvfetcher, and gpgv for Claude Desktop's index
             nvfetcher
             gnupg

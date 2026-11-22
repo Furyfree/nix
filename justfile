@@ -7,6 +7,11 @@ default:
 check:
     scripts/check.sh
 
+# Look for secrets in the branches' history and in uncommitted changes
+check-secrets:
+    gitleaks git --no-banner --redact --log-opts=--branches .
+    gitleaks git --no-banner --redact --pre-commit .
+
 # Parse all native Lua configuration without executing it
 check-lua:
     find configs -type f -name '*.lua' -exec luac -p {} +

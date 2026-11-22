@@ -1,0 +1,7 @@
+# gitleaks' own rules, without T3 Code's keybindings, whose "key" fields name
+# keyboard keys.
+[extend]
+useDefault = true
+
+[allowlist]
+paths = ['''^configs/t3code/keybindings\.json$''']
