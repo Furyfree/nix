@@ -8,7 +8,7 @@ the terminal, the app configs and an app list, and the rest is a checklist.
 | NixOS desktop and laptop | [nixos/README.md](nixos/README.md) |
 | Macs, through nix-darwin | [darwin/README.md](darwin/README.md) |
 | Ubuntu work laptop | [ubuntu/README.md](ubuntu/README.md) |
-| Windows desktop, VM and Basic | [windows/README.md](windows/README.md) |
+| Windows desktop and VM | [windows/README.md](windows/README.md) |
 
 ## Daily use
 
@@ -44,10 +44,9 @@ On Ubuntu, `nswitch` switches Home Manager, then `ubuntu/apps.sh` installs the
 apps that are missing; `git pull` brings `flake.lock` from NixOS, so `nupdate`
 and `npin` run on NixOS only.
 
-On Windows, PowerShell on vm and desktop has `nswitch`, `nupdate` and `mup`;
-the first two run `windows\apply.ps1`, `nupdate` with `-Update`, which upgrades
-winget and Mise first and applies at once. basic runs
-`~\Projects\nix\windows\apply.ps1` directly.
+On Windows, PowerShell has `nswitch`, `nupdate` and `mup`; the first two run
+`windows\apply.ps1`, `nupdate` with `-Update`, which upgrades winget and Mise
+first and applies at once.
 In NixOS in WSL, the aliases above work without Snapper.
 
 Roll back with `nh os rollback` or an older generation in the boot menu; on a

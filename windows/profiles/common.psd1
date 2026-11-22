@@ -1,4 +1,4 @@
-# Every profile. basic, vm and desktop pick layers from this folder; apply.ps1
+# Every profile. vm and desktop pick layers from this folder; apply.ps1
 # reads them in Include order and applies each layer once. Keys:
 #   Include         layers applied first, by file name without .psd1
 #   Winget          package IDs; a hashtable adds Args (extra winget arguments;
@@ -22,8 +22,7 @@
 #   Taskbar        a configs/ taskbar layout for the Start Layout policy;
 #                   Windows replaces the pins at the next sign-in
 #   QuickAccess     folders to pin in Explorer's sidebar, after its own pins
-#   Wsl             Distribution, plus Apt packages for Ubuntu or the Image
-#                   URL and its Sha256 for NixOS
+#   Wsl             Distribution NixOS, with the Image URL and its Sha256
 #   Power           powercfg values on the active plan, 'SUBGROUP SETTING' = AC
 #   Services        start types, name = 'Manual', 'Automatic' or 'Disabled'
 #   NightLight      $true schedules night light from sunset to sunrise
