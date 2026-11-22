@@ -96,7 +96,7 @@ in
       input_path = "templates/ptyxis.palette";
       output_path = "$XDG_DATA_HOME/org.gnome.Ptyxis/palettes/noctalia.palette";
     };
-    # AI usage, Git Companion (GitHub only; work uses GitLab), Mini Docker,
+    # AI usage, Git Companion (GitHub only), Mini Docker,
     # AirPods control, the tailnet and the screen recorder stay on NixOS.
     noctaliaPluginsOff = [
       "felipeartur/ai-usagebar"
