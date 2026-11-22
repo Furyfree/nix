@@ -1,8 +1,5 @@
-# Keys the 1Password SSH agent offers on work machines, by item ID.
-
-# GitHub
-[[ssh-keys]]
-item = "n6imsp5vfs5nmlt5rmxgs6zdci"
+# Keys the 1Password SSH agent offers on work machines, by item ID. The work
+# key also signs in to GitHub, so the personal GitHub key stays off them.
 
 # Work
 [[ssh-keys]]
