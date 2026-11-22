@@ -411,10 +411,17 @@ bump_pins() {
   printf 'Checking pinned apps...\n'
   (
     cd -- "$repo"
+    before=$(mktemp -d)
+    trap 'rm -rf -- "$before"' EXIT
+    cp -- nixos/pins/_sources/generated.nix nixos/pins/_sources/generated.json "$before/"
     quietly nix develop path:. -c nvfetcher --config nixos/pins/nvfetcher.toml --build-dir nixos/pins/_sources "${filter[@]}"
-    quietly nix develop path:. -c nixos/pins/claude-desktop.sh \
+    if ! quietly nix develop path:. -c nixos/pins/claude-desktop.sh \
       "$(jq -r '."claude-desktop".version' nixos/pins/_sources/generated.json)" \
-      "$(jq -r '."claude-desktop".src.sha256' nixos/pins/_sources/generated.json)"
+      "$(jq -r '."claude-desktop".src.sha256' nixos/pins/_sources/generated.json)"; then
+      # Put the pins back, so the next nswitch cannot build the unchecked download.
+      cp -- "$before/generated.nix" "$before/generated.json" nixos/pins/_sources/
+      die "Claude Desktop's download failed its signature check; the pins are back as they were"
+    fi
   )
 }
 
