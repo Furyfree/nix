@@ -1,12 +1,11 @@
 # Nix workstation
 
-This is my public, personal workstation configuration. NixOS runs the desktop
-and the laptop whole. Everywhere else this repository gives the terminal, the
-app configs and an app list in the system's own package manager, and the rest
-is a checklist: nix-darwin on the Macs, Home Manager on its own on the Ubuntu
-work laptop, and PowerShell profiles on Windows, the desktop's with NixOS in
-WSL. I want repeatable installs and updates, shared app preferences and
-rollback where the system has it. GitHub issues hold the open work.
+My public, personal workstation configuration, to install and update my own
+machines quickly: NixOS on the desktop and laptop and in WSL, Windows on the
+desktop and in a VM, Home Manager on the Ubuntu work laptop, and nix-darwin on
+the family Mac and, until the Ubuntu laptop replaces it, the work Mac. Only I
+use it, and machines are set up fresh: it is not for other people's PCs and
+carries over no old data. GitHub issues hold the open work.
 
 ## What must not break
 
@@ -19,17 +18,20 @@ rollback where the system has it. GitHub issues hold the open work.
   Builds and configuration evaluation must not activate a system.
 - Keep secrets, credentials and private machine records out of this public repo.
   Use safe examples in documentation and tests.
-- "Work" may name the work Mac and its SSH key set, never the employer, its
-  apps, VPN, servers or Git identity.
-- Macs: never remove apps (Homebrew cleanup stays off), save settings before
-  the first switch, keep FileVault, SIP, Gatekeeper and the firewall on, and
-  leave what IT manages off the work Mac.
+- "Work" may name the work machines and their SSH key set, never the employer,
+  its apps, VPN, servers or Git identity.
+- Macs: never remove apps (Homebrew cleanup stays off), never turn off
+  FileVault, SIP, Gatekeeper or the firewall, and leave what IT manages off the
+  work Mac.
 - Ubuntu: IT owns the kernel and its own agents; never touch them.
-- Windows: never uninstall apps, save registry values before their first
-  import, keep Secure Boot, TPM, Defender, the firewall, UAC and Windows Update
-  on, and keep BitLocker recovery keys out of output and logs.
+- Windows: never uninstall apps, never turn off Secure Boot, TPM, Defender, the
+  firewall, UAC or Windows Update, and keep BitLocker recovery keys out of
+  output and logs.
 
 ## Approach
+
+Keep it simple: fix what breaks or what I ask for. Don't add hardening,
+checks, backups or docs for unlikely cases.
 
 Use pinned upstream NixOS, nix-darwin and Home Manager modules and native
 tools. This is a personal workstation configuration, not another provisioning
