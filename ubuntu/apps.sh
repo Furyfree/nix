@@ -267,11 +267,6 @@ install_desktop() {
   # Noctalia, its plugins' helpers, the removable-drive mounter and the theme
   apt_install noctalia udiskie grim slurp tesseract-ocr tesseract-ocr-eng qrencode sqlite3 socat ddcutil \
     bibata-cursor-theme papirus-icon-theme qt5ct qt6ct fonts-inter fonts-jetbrains-mono
-  # Upgraded on purpose only, after checking the copied config still works.
-  local package
-  for package in niri noctalia noctalia-data; do
-    apt-mark showhold | grep -qx "$package" || sudo apt-mark hold "$package" >/dev/null
-  done
 }
 
 nice_to_have 'VSCodium' install_vscodium
