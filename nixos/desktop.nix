@@ -55,9 +55,14 @@ in
         WorkingDirectory = "%h";
         ExecStart = lib.mkForce noctaliaSession;
       };
-      # Start with the session: the recorder plugin checks for the running
-      # process instead of activating it over D-Bus.
-      xdg-desktop-portal.wantedBy = [ "graphical-session.target" ];
+      xdg-desktop-portal = {
+        # Start with the session: the recorder plugin checks for the running
+        # process instead of activating it over D-Bus.
+        wantedBy = [ "graphical-session.target" ];
+        # Take the session's PATH: NixOS's short one hid every app whose entry
+        # names a bare program, so links Brave hands the portal found no app.
+        environment.PATH = lib.mkForce null;
+      };
     };
 
     services = {
