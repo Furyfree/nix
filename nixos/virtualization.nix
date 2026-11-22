@@ -21,8 +21,11 @@
     daemon.settings = {
       log-driver = "local";
       # Docker's own rules route published ports past the firewall, so they
-      # listen on localhost unless a port names another address.
+      # listen on localhost unless a port names another address: ip on the
+      # default network, the bridge option on networks Compose and
+      # `docker network create` make.
       ip = "127.0.0.1";
+      default-network-opts.bridge."com.docker.network.bridge.host_binding_ipv4" = "127.0.0.1";
     };
   };
 
