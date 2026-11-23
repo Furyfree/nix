@@ -283,9 +283,10 @@ install_desktop() {
   fi
   # Niri from the Dux PPA, without its recommends: no Alacritty or fuzzel.
   apt_install --no-install-recommends niri xwayland-satellite gnome-keyring xdg-desktop-portal-gnome xdg-desktop-portal-gtk
-  # Noctalia, its plugins' helpers, the removable-drive mounter and the theme
-  apt_install noctalia udiskie grim slurp tesseract-ocr tesseract-ocr-eng qrencode sqlite3 socat ddcutil \
-    bibata-cursor-theme papirus-icon-theme qt5ct qt6ct fonts-inter fonts-jetbrains-mono
+  # Noctalia with its external-screen brightness helper, the removable-drive
+  # mounter and the theme.
+  apt_install noctalia udiskie ddcutil bibata-cursor-theme papirus-icon-theme qt5ct qt6ct \
+    fonts-inter fonts-jetbrains-mono
 }
 
 nice_to_have 'VS Code' install_vscode
