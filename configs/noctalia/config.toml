@@ -54,7 +54,7 @@ directory = "~/Pictures/Wallpapers"
 [bar.default]
 start = ["workspaces"]
 center = ["clock", "date", "weather", "timer", "notifications"]
-end = ["ai-usage", "tailnet", "recorder", "airpods", "battery", "drives", "tray", "volume", "control-center"]
+end = ["ai-usage", "tailnet", "recorder", "airpods", "battery", "drives", "tray", "volume", "network", "control-center"]
 background_opacity = 0.80
 widget_spacing = 10
 font_family = "JetBrainsMono Nerd Font Propo"
@@ -291,6 +291,24 @@ sync_all_monitors = true
 
 [control_center.calendar]
 show_week_numbers = true
+
+[[control_center.shortcuts]]
+type = "bluetooth"
+
+[[control_center.shortcuts]]
+type = "caffeine"
+
+[[control_center.shortcuts]]
+type = "nightlight"
+
+[[control_center.shortcuts]]
+type = "notification"
+
+[[control_center.shortcuts]]
+type = "power_profile"
+
+[[control_center.shortcuts]]
+type = "mic_mute"
 
 [location]
 auto_locate = true
