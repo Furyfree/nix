@@ -81,6 +81,14 @@ in
       });
   };
 
+  # GNOME's interface settings, where Noctalia takes its app icons and GTK apps
+  # their cursor; NixOS and Ubuntu install both themes.
+  dconf.settings."org/gnome/desktop/interface" = {
+    icon-theme = "Papirus-Dark";
+    cursor-theme = "Bibata-Modern-Ice";
+    cursor-size = 24;
+  };
+
   home = {
     file = {
       ".local/bin/launch".source = script "launch";
