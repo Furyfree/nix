@@ -89,6 +89,9 @@ in
     '';
   };
   fonts.fontconfig.enable = true;
+  # Qt apps take Noctalia's colours through qt5ct, whose settings linux.nix
+  # writes, as nixos/desktop.nix sets for NixOS; qt6ct answers to the same name.
+  systemd.user.sessionVariables.QT_QPA_PLATFORMTHEME = "qt5ct";
 
   workstation = {
     sshProfile = "work";

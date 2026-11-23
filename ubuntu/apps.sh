@@ -284,7 +284,7 @@ install_desktop() {
   # Niri from the Dux PPA, without its recommends: no Alacritty or fuzzel.
   apt_install --no-install-recommends niri xwayland-satellite gnome-keyring xdg-desktop-portal-gnome xdg-desktop-portal-gtk
   # Noctalia with its external-screen brightness helper, the removable-drive
-  # mounter and the theme.
+  # mounter and the theme; qt5ct and qt6ct give Qt apps Noctalia's colours.
   apt_install noctalia udiskie ddcutil bibata-cursor-theme papirus-icon-theme qt5ct qt6ct \
     fonts-inter fonts-jetbrains-mono
 }
