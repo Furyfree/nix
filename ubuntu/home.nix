@@ -126,6 +126,19 @@ in
   programs.zed-editor.package = null;
 
   xdg = {
+    # Web apps in their own Brave window; Papirus has their icons.
+    desktopEntries = {
+      teams = {
+        name = "Teams";
+        exec = "launch focus-webapp https://teams.microsoft.com/";
+        icon = "teams";
+      };
+      outlook = {
+        name = "Outlook";
+        exec = "launch focus-webapp https://outlook.office.com/mail/";
+        icon = "ms-outlook";
+      };
+    };
     dataFile =
       # Hidden as on NixOS: settings tools, helpers, the terminal editors and
       # manual reader, and Noctalia itself, which runs already. Hidden=true
