@@ -50,9 +50,8 @@ in
     packages =
       import ../home-manager/cli-tools.nix pkgs
       ++ (with pkgs; [
-        # NixOS gets these two from its modules.
+        # NixOS gets it from its module.
         neovim
-        nh
         # Ghostty's font
         nerd-fonts.jetbrains-mono
         # Git signs with this name, which 1Password's .deb keeps in /opt.
@@ -125,6 +124,16 @@ in
 
   # Zed installs and updates itself; Home Manager merges its settings.
   programs.zed-editor.package = null;
+
+  # Old Home Manager generations and unused store paths go weekly, as
+  # nixos/shell.nix has nh do on NixOS.
+  programs.nh = {
+    enable = true;
+    clean = {
+      enable = true;
+      extraArgs = "--keep 10 --keep-since 14d";
+    };
+  };
 
   xdg = {
     # Web apps in their own Brave window; Papirus has their icons.
