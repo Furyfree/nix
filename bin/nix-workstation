@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Rebuild, update and maintain this workstation: NixOS on Linux, nix-darwin on
 # macOS, and Home Manager on its own on Linux without NixOS (Ubuntu). aliases.zsh adds nswitch, nupdate, npin, ninfo, nrollback, nclean,
-# nsearch, ndesktop, mup and fup.
+# nsearch, ndesktop, mup, vup and fup.
 set -euo pipefail
 
 # path: includes the ignored machine data in each system's local/.
@@ -39,9 +39,6 @@ In WSL: the same without Snapper (nh os switch --ask).
 
 On Linux without NixOS: switch Home Manager (nh home switch --ask), then
 ubuntu/apps.sh installs the apps that are missing.
-
-After a switch, Neovim's plugins move to the versions in
-configs/nvim/nvim-pack-lock.json, which nupdate writes on one machine.
 EOF
       ;;
     update)
@@ -50,9 +47,7 @@ usage: nix-workstation update [INPUT...]   (alias: nupdate)
 
 Update every flake input and bump the pinned apps as pin does, or update
 only the named flake inputs. Then run just check and build the system
-without switching, and list what was updated; nswitch applies it. Without
-named inputs it also updates Neovim's plugins, which apply at once, and
-their configs/nvim/nvim-pack-lock.json; commit it with flake.lock. It never
+without switching, and list what was updated; nswitch applies it. It never
 asks or uses sudo, so an agent can run it. Nothing new skips the build. A
 failed step leaves the updated files in place and prints the undo command.
 
@@ -130,6 +125,15 @@ usage: nix-workstation mise   (alias: mup)
 Upgrade the tools Mise manages (mise upgrade).
 EOF
       ;;
+    nvim)
+      cat <<'EOF'
+usage: nix-workstation nvim   (alias: vup)
+
+Update Neovim's plugins to their newest versions, rebuild the tree-sitter
+parsers, and write configs/nvim/nvim-pack-lock.json; commit it. Neovim
+installs missing plugins at the lock file's versions when it starts.
+EOF
+      ;;
     firmware)
       cat <<'EOF'
 usage: nix-workstation firmware   (alias: fup)
@@ -153,6 +157,7 @@ Commands (alias):
   search (nsearch) QUERY...    search packages and options
   desktop (ndesktop) [NAME]    show or pick the compositor for the next boot
   mise (mup)                   upgrade Mise tools
+  nvim (vup)                   update Neovim's plugins
   firmware (fup)               install firmware updates
 
 Run nix-workstation COMMAND --help for details.
@@ -306,10 +311,9 @@ cmd_switch_home() {
 # update and pin change only flake.lock and nixos/pins/_sources, then check and
 # build without switching. The copies taken first give the summary.
 saved=
-nvim_lock=$repo/configs/nvim/nvim-pack-lock.json
 prepare() {
   saved=$(mktemp -d)
-  cp -- "$repo/flake.lock" "$repo/nixos/pins/_sources/generated.json" "$nvim_lock" "$saved/"
+  cp -- "$repo/flake.lock" "$repo/nixos/pins/_sources/generated.json" "$saved/"
   trap finish EXIT
 }
 
@@ -328,10 +332,6 @@ finish() {
       to_entries[] | select($old[0][.key].version != .value.version)
       | "  \(.key): \($old[0][.key].version // "new" | short) → \(.value.version | short)"
     ' "$repo/nixos/pins/_sources/generated.json"
-    jq -r --slurpfile old "$saved/nvim-pack-lock.json" '
-      .plugins | to_entries[] | select($old[0].plugins[.key].rev != .value.rev)
-      | "  \(.key): \($old[0].plugins[.key].rev // "new" | .[:7]) → \(.value.rev[:7])"
-    ' "$nvim_lock"
   fi
   if pending; then
     if ((result)); then
@@ -339,8 +339,7 @@ finish() {
     else
       printf 'Built, not applied. Run nswitch to apply. Undo: ' >&2
     fi
-    printf 'git -C %q restore flake.lock nixos/pins/_sources configs/nvim/nvim-pack-lock.json\n' "$repo" >&2
-    printf "After an undo, the next nswitch puts Neovim's plugins back.\n" >&2
+    printf 'git -C %q restore flake.lock nixos/pins/_sources\n' "$repo" >&2
   fi
   rm -rf -- "$saved"
   return "$result"
@@ -348,13 +347,12 @@ finish() {
 
 updated() {
   ! cmp -s "$saved/flake.lock" "$repo/flake.lock" ||
-    ! cmp -s "$saved/generated.json" "$repo/nixos/pins/_sources/generated.json" ||
-    ! cmp -s "$saved/nvim-pack-lock.json" "$nvim_lock"
+    ! cmp -s "$saved/generated.json" "$repo/nixos/pins/_sources/generated.json"
 }
 
 # Changed since the last commit, by this run or an earlier one.
 pending() {
-  [[ -n $(git -C "$repo" status --porcelain -- flake.lock nixos/pins/_sources configs/nvim/nvim-pack-lock.json) ]]
+  [[ -n $(git -C "$repo" status --porcelain -- flake.lock nixos/pins/_sources) ]]
 }
 
 # Check and build the system without switching; nswitch reuses the build.
@@ -433,16 +431,7 @@ cmd_update() {
   if (($# == 0)) && ! $darwin && ! $wsl; then
     bump_pins
   fi
-  (($# != 0)) || nvim_plugins version
   build
-}
-
-# Neovim's own plugin manager, without its confirmation buffer: version takes
-# each plugin's newest and writes the lock file; lockfile moves this machine to
-# the lock file's versions, as Neovim's help syncs machines.
-nvim_plugins() {
-  command -v nvim >/dev/null || return 0
-  nvim --headless "+lua vim.pack.update(nil, { force = true, target = '$1' })" +qa
 }
 
 cmd_pin() {
@@ -477,13 +466,17 @@ case $command in
   update) cmd_update "$@" ;;
   pin) cmd_pin "$@" ;;
   mise) (($# == 0)) || usage mise; mise upgrade ;;
+  # Neovim's own plugin manager, without its confirmation buffer.
+  nvim)
+    (($# == 0)) || usage nvim
+    nvim --headless "+lua vim.pack.update(nil, { force = true })" +qa
+    ;;
   *)
     if $darwin; then
       case $command in
         switch)
           (($# == 0)) || usage switch
           cmd_switch_darwin
-          nvim_plugins lockfile
           ;;
         info) (($# == 0)) || usage info; darwin-rebuild --list-generations ;;
         rollback)
@@ -499,7 +492,6 @@ case $command in
         switch)
           (($# == 0)) || usage switch
           if $home; then cmd_switch_home; else cmd_switch; fi
-          nvim_plugins lockfile
           ;;
         info)
           if $home; then

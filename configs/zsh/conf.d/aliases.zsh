@@ -61,6 +61,7 @@ if command -v nix-workstation >/dev/null 2>&1; then
   alias nsearch='nix-workstation search'
   alias ndesktop='nix-workstation desktop'
   alias mup='nix-workstation mise'
+  alias vup='nix-workstation nvim'
   alias fup='nix-workstation firmware'
 fi
 

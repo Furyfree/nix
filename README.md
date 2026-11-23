@@ -28,6 +28,7 @@ nclean             # remove old generations
 nsearch QUERY      # search packages and options
 ndesktop [NAME]    # Linux: show or pick the compositor for the next boot
 mup                # upgrade Mise tools; mise install after a switch
+vup                # update Neovim's plugins; commit their lock file
 fup                # Linux: install firmware updates
 brew upgrade       # Mac, in Terminal.app: upgrade apps
 pull-projects      # fast-forward every clean repo in ~/Projects
@@ -44,9 +45,9 @@ On Ubuntu, `nswitch` switches Home Manager, then `ubuntu/apps.sh` installs the
 apps that are missing; `git pull` brings `flake.lock` from NixOS, so `nupdate`
 and `npin` run on NixOS only.
 
-On Windows, PowerShell has `nswitch`, `nupdate` and `mup`; the first two run
-`windows\apply.ps1`, `nupdate` with `-Update`, which upgrades winget and Mise
-first and applies at once.
+On Windows, PowerShell has `nswitch`, `nupdate`, `mup` and `vup`; the first
+two run `windows\apply.ps1`, `nupdate` with `-Update`, which upgrades winget
+and Mise first and applies at once.
 In NixOS in WSL, the aliases above work without Snapper.
 
 Roll back with `nh os rollback` or an older generation in the boot menu; on a
