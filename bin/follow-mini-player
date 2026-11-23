@@ -1,7 +1,8 @@
 #!/bin/sh
 # Niri has no window on every workspace. When you switch workspace, move
-# floating Brave windows on that monitor along without focus; Niri's window
-# rules float only the picture-in-picture window, such as Spotify's mini player.
+# Brave's picture-in-picture window, such as Spotify's mini player, on that
+# monitor along without focus. As in Niri's window rule, it is the Brave window
+# whose title lacks Brave's " - Brave Origin" suffix.
 niri msg -j event-stream |
   jq --unbuffered -r '.WorkspaceActivated // empty | select(.focused) | .id' |
   while read -r workspace; do
@@ -12,6 +13,7 @@ niri msg -j event-stream |
         | $by_id["\($id)"] as $to
         | .[]
         | select(.app_id == "brave-origin" and .is_floating and .workspace_id != $id)
+        | select(.title // "" | endswith(" - Brave Origin") | not)
         | select($by_id["\(.workspace_id)"].output == $to.output)
         | "\(.id) \($to.name // $to.idx)"' |
       while read -r window to; do
