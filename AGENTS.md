@@ -84,8 +84,8 @@ GitHub issues, and a workaround links its issue.
   never here. `configs/hypr/hosts/<host>.lua` and `configs/niri/hosts/<host>.kdl`
   hold each host's monitors, workspaces and keys.
 - `bin/`: our own scripts, linked into `~/.local/bin`: `nix-workstation` (the
-  `n*` aliases), `pull-projects`, `launch`, `agent-brave`, and `windows-vm`,
-  which `windows-vm.nix` builds for NixOS and Ubuntu.
+  `n*` aliases), `pull-projects`, `launch`, `agent-brave`, `follow-mini-player`
+  for Niri, and `windows-vm`, which `windows-vm.nix` builds for NixOS and Ubuntu.
 - `justfile`: the local gates; its longer recipes run scripts in `scripts/`.
 
 ## Ways to hurt yourself
