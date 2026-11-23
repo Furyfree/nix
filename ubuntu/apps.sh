@@ -127,6 +127,15 @@ if [[ ! -x $HOME/.local/bin/zed ]]; then
   sh "$tmp/zed.sh" </dev/null
 fi
 
+# Work projects bring their tools through pixi; its own installer lets it
+# update and downgrade itself (pixi self-update). ~/.zprofile puts ~/.pixi/bin
+# on the PATH, so the installer leaves the shell files alone.
+if [[ ! -x $HOME/.pixi/bin/pixi ]]; then
+  log 'pixi: its own install script (~/.pixi, updates itself)'
+  curl -fsSL https://pixi.sh/install.sh -o "$tmp/pixi.sh"
+  PIXI_NO_PATH_UPDATE=1 PIXI_NO_TELEMETRY=1 sh "$tmp/pixi.sh" </dev/null
+fi
+
 if [[ $(getent passwd "$USER" | cut -d: -f7) != /usr/bin/zsh ]]; then
   log 'zsh as the login shell'
   sudo chsh -s /usr/bin/zsh "$USER"
