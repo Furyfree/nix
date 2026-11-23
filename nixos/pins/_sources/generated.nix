@@ -38,6 +38,14 @@
       sha256 = "sha256-6pS62MVNqYnBkR9GXchhLhQA9gMRxIugwiOAseA1kS8=";
     };
   };
+  dockur-windows = {
+    pname = "dockur-windows";
+    version = "6.06";
+    src = fetchurl {
+      url = "https://github.com/dockur/windows/archive/refs/tags/v6.06.tar.gz";
+      sha256 = "sha256-Nqya4CjVtAGk0sQJTGR4h7eyTOee1x/3LqaRVXEOwN8=";
+    };
+  };
   effectcraft = {
     pname = "effectcraft";
     version = "0.24.1";

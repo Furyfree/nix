@@ -59,6 +59,21 @@
         },
         "version": "0.7.56"
     },
+    "dockur-windows": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "dockur-windows",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-Nqya4CjVtAGk0sQJTGR4h7eyTOee1x/3LqaRVXEOwN8=",
+            "type": "url",
+            "url": "https://github.com/dockur/windows/archive/refs/tags/v6.06.tar.gz"
+        },
+        "version": "6.06"
+    },
     "effectcraft": {
         "cargoLock": null,
         "date": null,

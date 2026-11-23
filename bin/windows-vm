@@ -1,7 +1,8 @@
 # Install, launch, stop, inspect or remove the Windows VM, after Omarchy's
 # omarchy-windows-vm. It owns the Dockur container, which the systemd service
 # runs through `windows-vm run`, and the per-machine settings, disk and
-# launcher entry. windows-vm.nix sets WINDOWS_ROOT and WINDOWS_SERVICE.
+# launcher entry. windows-vm.nix sets WINDOWS_ROOT, WINDOWS_SERVICE and
+# WINDOWS_IMAGE.
 settings=$WINDOWS_ROOT/settings.env
 storage=$WINDOWS_ROOT/storage
 shared=$WINDOWS_ROOT/shared
@@ -431,7 +432,7 @@ cmd_run() {
     # Time for Windows to shut down cleanly.
     --stop-timeout=120
   )
-  exec docker run "${options[@]}" docker.io/dockurr/windows:6.06
+  exec docker run "${options[@]}" "$WINDOWS_IMAGE"
 }
 
 root_remove() {

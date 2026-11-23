@@ -9,6 +9,8 @@
 let
   root = "/var/lib/windows";
   service = "docker-windows";
+  # npin and nupdate bump it with the other pins in nixos/pins/.
+  dockur = (pkgs.callPackage ../nixos/pins/_sources/generated.nix { }).dockur-windows;
 in
 pkgs.writeShellApplication {
   name = "windows-vm";
@@ -29,6 +31,7 @@ pkgs.writeShellApplication {
   runtimeEnv = {
     WINDOWS_ROOT = root;
     WINDOWS_SERVICE = "${service}.service";
+    WINDOWS_IMAGE = "docker.io/dockurr/windows:${dockur.version}";
   };
   text = builtins.readFile ./windows-vm;
   passthru = {
