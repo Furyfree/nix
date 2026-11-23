@@ -352,6 +352,7 @@ foreach ($name in $want.Downloads.Keys) {
 # profile's SHA-256, then copied to your font folder and registered there. A
 # stamp with the hash skips them until the profile names another release.
 $fontFolder = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows\Fonts'
+$fontKey = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts'
 foreach ($name in $want.Fonts.Keys) {
     $font = $want.Fonts[$name]
     $stamp = Join-Path $state "font-$name.sha256"
@@ -367,10 +368,12 @@ foreach ($name in $want.Fonts.Keys) {
         }
         Expand-Archive $archive $unpacked -Force
         New-Item -ItemType Directory -Force $fontFolder, $state | Out-Null
+        # A new account gets this key only with its first own font; -Force
+        # would replace an existing one, with the fonts registered there.
+        if (-not (Test-Path $fontKey)) { New-Item $fontKey | Out-Null }
         foreach ($file in Get-ChildItem $unpacked -Recurse -Include $font.Files) {
             Copy-Item $file.FullName $fontFolder -Force
-            Set-ItemProperty 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts' "$($file.BaseName) (TrueType)" `
-                (Join-Path $fontFolder $file.Name)
+            Set-ItemProperty $fontKey "$($file.BaseName) (TrueType)" (Join-Path $fontFolder $file.Name)
         }
         Remove-Item $archive, $unpacked -Recurse
         Set-Content $stamp $font.Sha256
