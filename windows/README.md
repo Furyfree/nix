@@ -58,7 +58,8 @@ one with `reg import FILE`.
    open a folder such as `/home/<you>/Projects/nix`; the editor's terminal
    runs zsh in NixOS.
 6. Desktop: store the BitLocker recovery key from
-   `~\bitlocker-recovery-<computer>.txt` in 1Password from another device.
+   `~\bitlocker-recovery-<computer>.txt` in 1Password from another device,
+   then delete the file; apply does not write it again.
 
 ## By hand
 

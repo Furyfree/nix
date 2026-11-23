@@ -5,7 +5,6 @@
     Include     = @('common')
     Winget      = @(
         'jdx.mise'
-        'DEVCOM.JetBrainsMonoNerdFont'
         'Brave.BraveOrigin'
         'AgileBits.1Password'
         'AgileBits.1Password.CLI'
@@ -19,6 +18,14 @@
         '7zip.7zip'
         'Gyan.FFmpeg'
     )
+    # The terminal and editors' font; the hash is from the release's SHA-256.txt.
+    Fonts       = @{
+        'JetBrainsMono Nerd Font' = @{
+            Url    = 'https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/JetBrainsMono.zip'
+            Sha256 = 'fab782a66f7d3019da64f6572db9fc5d3a4bcb19f9fa13e2d8a62e3693d6396e'
+            Files  = @('JetBrainsMonoNerdFont-*.ttf', 'JetBrainsMonoNerdFontMono-*.ttf')
+        }
+    }
     Registry    = @('personal.reg')
     Links       = @{
         '~\.config\git\config'                             = 'git/config'

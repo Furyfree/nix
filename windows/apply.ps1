@@ -53,7 +53,7 @@ foreach ($layer in $layers) {
     }
 }
 foreach ($key in 'Winget', 'Store', 'Registry') { if ($null -eq $want[$key]) { $want[$key] = @() } }
-foreach ($key in 'Links', 'Merges', 'Extensions', 'Power', 'Services', 'Wsl', 'Downloads') {
+foreach ($key in 'Links', 'Merges', 'Extensions', 'Power', 'Services', 'Wsl', 'Downloads', 'Fonts') {
     if ($null -eq $want[$key]) { $want[$key] = @{} }
 }
 $packages = foreach ($entry in $want.Winget) { if ($entry -is [string]) { @{ Id = $entry } } else { $entry } }
@@ -92,9 +92,11 @@ function Get-PowerAc([string] $subgroup, [string] $setting) {
 
 function Test-BitLocker {
     # 1 is on and 3 encrypting; the Shell reads this without administrator.
+    # The recovery key file plays no part, so once its key is in 1Password it
+    # is deleted for good.
     $protection = (New-Object -ComObject Shell.Application).NameSpace($env:SystemDrive).Self.ExtendedProperty(
         'System.Volume.BitLockerProtection')
-    $protection -in 1, 3 -and (Test-Path (Join-Path $HOME "bitlocker-recovery-$env:COMPUTERNAME.txt"))
+    $protection -in 1, 3
 }
 
 function Test-Wsl {
@@ -192,10 +194,16 @@ function Save-RegistryBackup([Collections.IDictionary] $names) {
 }
 
 function Enable-BitLockerWithKey {
-    # The recovery key goes to a file only; never print it.
+    # The recovery key goes to a file only while this step turns BitLocker on;
+    # never print it.
     $drive = $env:SystemDrive
+    $volume = Get-BitLockerVolume $drive
+    $tpm = $volume.KeyProtector | Where-Object KeyProtectorType -EQ 'Tpm'
+    # One with its TPM protector and protection off was suspended for a
+    # restart, by windows/README.md or an update, and resumes by itself.
+    if ($tpm -and $volume.VolumeStatus -ne 'FullyDecrypted') { return }
     $keyFile = Join-Path $HOME "bitlocker-recovery-$env:COMPUTERNAME.txt"
-    $recovery = (Get-BitLockerVolume $drive).KeyProtector | Where-Object KeyProtectorType -EQ 'RecoveryPassword' |
+    $recovery = $volume.KeyProtector | Where-Object KeyProtectorType -EQ 'RecoveryPassword' |
         Select-Object -First 1
     if (-not $recovery) {
         $recovery = (Add-BitLockerKeyProtector $drive -RecoveryPasswordProtector -WarningAction Ignore).KeyProtector |
@@ -203,22 +211,25 @@ function Enable-BitLockerWithKey {
     }
     if (-not (Test-Path $keyFile)) {
         Set-Content $keyFile $recovery.RecoveryPassword -NoNewline
-        Write-Host "BitLocker's recovery key is in $keyFile; keep it in 1Password from another device."
+        Write-Host "BitLocker's recovery key is in $keyFile; put it in 1Password from another device, then delete the file."
     }
-    if ((Get-BitLockerVolume $drive).VolumeStatus -eq 'FullyDecrypted') {
-        Enable-BitLocker $drive -EncryptionMethod XtsAes256 -UsedSpaceOnly -TpmProtector -SkipHardwareTest `
-            -WarningAction Ignore | Out-Null
+    if ($volume.VolumeStatus -eq 'FullyDecrypted') {
+        # Windows first restarts to test that the TPM unlocks the drive, and
+        # encrypts only then, so a failed unlock cannot lock the only copy of
+        # the key away.
+        if (-not $tpm) {
+            Enable-BitLocker $drive -EncryptionMethod XtsAes256 -UsedSpaceOnly -TpmProtector -WarningAction Ignore |
+                Out-Null
+        }
+        Write-Host 'note     Restart Windows: BitLocker tests the TPM unlock, then encrypts.'
+        return
     }
     # A drive Windows encrypted itself waits for its TPM protector to turn
-    # protection on. One that has it and protection off was suspended for a
-    # restart, by windows/README.md or an update, and resumes by itself.
+    # protection on.
+    Add-BitLockerKeyProtector $drive -TpmProtector -WarningAction Ignore | Out-Null
     $volume = Get-BitLockerVolume $drive
-    if (-not ($volume.KeyProtector | Where-Object KeyProtectorType -EQ 'Tpm')) {
-        Add-BitLockerKeyProtector $drive -TpmProtector -WarningAction Ignore | Out-Null
-        $volume = Get-BitLockerVolume $drive
-        if ($volume.ProtectionStatus -eq 'Off' -and $volume.VolumeStatus -eq 'FullyEncrypted') {
-            Resume-BitLocker $drive | Out-Null
-        }
+    if ($volume.ProtectionStatus -eq 'Off' -and $volume.VolumeStatus -eq 'FullyEncrypted') {
+        Resume-BitLocker $drive | Out-Null
     }
 }
 
@@ -334,6 +345,35 @@ foreach ($name in $want.Downloads.Keys) {
         $process = Start-Process $installer -ArgumentList $download.Args -Wait -PassThru
         Remove-Item $installer
         if ($process.ExitCode -ne 0) { throw "the installer exited with $($process.ExitCode)." }
+    }
+}
+
+# Fonts from their maker's release archive, for yourself: checked against the
+# profile's SHA-256, then copied to your font folder and registered there. A
+# stamp with the hash skips them until the profile names another release.
+$fontFolder = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows\Fonts'
+foreach ($name in $want.Fonts.Keys) {
+    $font = $want.Fonts[$name]
+    $stamp = Join-Path $state "font-$name.sha256"
+    if ((Get-Content $stamp -ErrorAction Ignore) -eq $font.Sha256) { continue }
+    Invoke-Step "install $name" {
+        Write-Host "install  $name"
+        $archive = Join-Path ([IO.Path]::GetTempPath()) "nix-workstation-$name.zip"
+        $unpacked = Join-Path ([IO.Path]::GetTempPath()) "nix-workstation-$name"
+        Invoke-WebRequest $font.Url -OutFile $archive
+        if ((Get-FileHash $archive -Algorithm SHA256).Hash -ne $font.Sha256) {
+            Remove-Item $archive
+            throw 'the archive does not match its SHA-256.'
+        }
+        Expand-Archive $archive $unpacked -Force
+        New-Item -ItemType Directory -Force $fontFolder, $state | Out-Null
+        foreach ($file in Get-ChildItem $unpacked -Recurse -Include $font.Files) {
+            Copy-Item $file.FullName $fontFolder -Force
+            Set-ItemProperty 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts' "$($file.BaseName) (TrueType)" `
+                (Join-Path $fontFolder $file.Name)
+        }
+        Remove-Item $archive, $unpacked -Recurse
+        Set-Content $stamp $font.Sha256
     }
 }
 
@@ -603,6 +643,23 @@ if ($work.Registry.Count -gt @(Get-RegistryChanges).Count) {
     Write-Host 'restart  Explorer'
     Stop-Process -Name explorer -Force
 }
+
+# What AGENTS.md keeps on, read without administrator; a warning only.
+$defender = Get-MpComputerStatus -ErrorAction Ignore
+$off = [ordered]@{
+    'Defender real-time protection' = $defender -and -not $defender.RealTimeProtectionEnabled
+    'Tamper Protection'             = $defender -and -not $defender.IsTamperProtected
+    'the firewall'                  = [bool](Get-NetFirewallProfile -PolicyStore ActiveStore -ErrorAction Ignore |
+            Where-Object Enabled -EQ 'False')
+    'UAC'                           = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' `
+            -ErrorAction Ignore).EnableLUA -ne 1
+    'Secure Boot'                   = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\State' `
+            -ErrorAction Ignore).UEFISecureBootEnabled -ne 1
+    'the TPM'                       = -not (Get-PnpDevice -Class SecurityDevices -Status OK -ErrorAction Ignore |
+            Where-Object FriendlyName -Like '*Trusted Platform Module*')
+    'Windows Update'                = (Get-Service wuauserv -ErrorAction Ignore).StartType -eq 'Disabled'
+}
+foreach ($feature in $off.Keys) { if ($off[$feature]) { Write-Host "warning  $feature is off." } }
 
 # Warn before the pinned Windows release stops receiving updates.
 if ((Get-Date) -ge [datetime]'2028-07-01') {

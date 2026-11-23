@@ -19,6 +19,9 @@
 #                   name = @{ Url of the installer; Signer, the name its
 #                   valid signature must carry; Args for a silent install;
 #                   Path, a file that exists once it is installed }
+#   Fonts           fonts from their maker's archive, installed as yourself:
+#                   name = @{ Url of the .zip; Sha256 it must match; Files,
+#                   the patterns of the font files in it to install }
 #   Taskbar        a configs/ taskbar layout for the Start Layout policy;
 #                   Windows replaces the pins at the next sign-in
 #   QuickAccess     folders to pin in Explorer's sidebar, after its own pins
