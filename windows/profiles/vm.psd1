@@ -17,6 +17,7 @@
         # Not from Mise; configs/mise/conf.d/windows-tools.toml says why.
         '7zip.7zip'
         'Gyan.FFmpeg'
+        'ImageMagick.ImageMagick'
     )
     # The terminal and editors' font; the hash is from the release's SHA-256.txt.
     Fonts       = @{
