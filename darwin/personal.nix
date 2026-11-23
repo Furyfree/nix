@@ -56,6 +56,8 @@
       ];
     in
     {
+      imports = [ ../home-manager/agent-browser.nix ];
+
       targets.darwin.defaults = {
         # CodexBar's display and refresh choices; account ids and usage state stay
         # out.

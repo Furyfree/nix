@@ -76,8 +76,9 @@ GitHub issues, and a workaround links its issue.
   Ubuntu take the terminal and app configs in `common.nix`, the SSH key sets
   in `ssh.nix` and the live-link helpers `config.lib.workstation.link` and
   `script`. NixOS and Ubuntu take the Noctalia desktop in `linux.nix` and Niri
-  in `niri.nix`. `cli-tools.nix` is the Nix CLI list, which the Mac's brews and
-  Windows' `windows-tools.toml` mirror.
+  in `niri.nix`; NixOS and the personal Mac add the agents' browser in
+  `agent-browser.nix`. `cli-tools.nix` is the Nix CLI list, which the Mac's
+  brews and Windows' `windows-tools.toml` mirror.
 - `configs/`: native app preferences, linked live from the checkout; keep the
   checkout at `~/Projects/nix`. SSH hosts stay in private 1Password documents,
   never here. `configs/hypr/hosts/<host>.lua` and `configs/niri/hosts/<host>.kdl`

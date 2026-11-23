@@ -23,8 +23,6 @@ golangci-lint = "latest"
 
 # Agentic helpers
 "npm:@llamaindex/liteparse" = "latest"
-# Drives Brave Origin through agent-brave, a POSIX script; none for Windows.
-agent-browser = { version = "latest", os = ["linux", "macos"] }
 
 # Language helpers
 "npm:markdownlint-cli" = "latest"
