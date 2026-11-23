@@ -94,11 +94,6 @@ if ! has_source downloads.1password.com; then
   key 1password-archive-keyring https://downloads.1password.com/linux/keys/1password.asc 3FEF9748469ADBE15DA7CA80AC2D62742012EA22
   source_file 1password 'Types: deb' 'URIs: https://downloads.1password.com/linux/debian/amd64' 'Suites: stable' \
     'Components: main' 'Architectures: amd64' 'Signed-By: /usr/share/keyrings/1password-archive-keyring.gpg'
-  # 1Password also signs its .debs; debsig-verify checks them with this policy.
-  sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22 /usr/share/debsig/keyrings/AC2D62742012EA22
-  curl -fsSL https://downloads.1password.com/linux/debian/debsig/1password.pol |
-    sudo tee /etc/debsig/policies/AC2D62742012EA22/1password.pol >/dev/null
-  sudo cp /usr/share/keyrings/1password-archive-keyring.gpg /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
 fi
 
 if ! has_source download.docker.com; then
