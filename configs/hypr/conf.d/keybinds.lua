@@ -52,8 +52,8 @@ hl.bind(
 )
 hl.bind(
     mainMod .. " + SHIFT + D",
-    hl.dsp.exec_cmd("launch focus vesktop vesktop"),
-    { description = "Focus or open Discord in Vesktop" }
+    hl.dsp.exec_cmd("launch focus discord discord"),
+    { description = "Focus or open Discord" }
 )
 hl.bind(
     mainMod .. " + SHIFT + G",

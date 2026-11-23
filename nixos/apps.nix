@@ -55,7 +55,7 @@ in
     t3code
     (accessible brave-origin)
     signal-desktop
-    vesktop
+    discord
     spotify
     (accessible obsidian)
     fastmail-desktop
@@ -65,6 +65,7 @@ in
   ];
 
   nixpkgs.config.allowUnfreePackages = [
+    "discord"
     "spotify"
     "obsidian"
     "fastmail-desktop"

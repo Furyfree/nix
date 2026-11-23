@@ -59,7 +59,7 @@ case ${1-} in
     class=$2
     shift 2
     # The exact class in any case: launcher names and desktop metadata can
-    # differ, and Vesktop's class changes case.
+    # differ.
     focus "$class" 'ascii_downcase == ($match | ascii_downcase)' || exec "$@"
     ;;
   floating-terminal)

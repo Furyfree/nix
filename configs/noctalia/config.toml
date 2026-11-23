@@ -18,7 +18,6 @@ community_ids = [
     "claude-code",
     "codex",
     "opencode",
-    "discord",
     "libreoffice",
     "obsidian",
     "vscode",

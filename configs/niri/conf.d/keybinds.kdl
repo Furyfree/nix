@@ -25,7 +25,7 @@ binds {
     Mod+Alt+Return hotkey-overlay-title="Open floating terminal" { spawn "launch" "floating-terminal"; }
     // Focus the most recently used window of the app, even on another workspace.
     Mod+Shift+O hotkey-overlay-title="Focus or open Obsidian" { spawn "launch" "focus" "md.obsidian.Obsidian" "obsidian"; }
-    Mod+Shift+D hotkey-overlay-title="Focus or open Discord in Vesktop" { spawn "launch" "focus" "vesktop" "vesktop"; }
+    Mod+Shift+D hotkey-overlay-title="Focus or open Discord" { spawn "launch" "focus" "discord" "discord"; }
     Mod+Shift+G hotkey-overlay-title="Focus or open Signal" { spawn "launch" "focus" "signal" "signal-desktop"; }
     Mod+Shift+E hotkey-overlay-title="Focus or open Fastmail" { spawn "launch" "focus" "com.fastmail.Fastmail" "fastmail"; }
     Mod+Shift+Z hotkey-overlay-title="Open Zed" { spawn "zeditor"; }
