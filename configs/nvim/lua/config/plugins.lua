@@ -95,12 +95,16 @@ map("x", "S", [[:<C-u>lua MiniSurround.add('visual')<CR>]], { silent = true, des
 map("n", "yss", "ys_", { remap = true, desc = "Surround line" })
 
 -- Parsers compile on first start with tree-sitter and a C compiler.
--- Languages without one keep ordinary syntax highlighting.
-require("nvim-treesitter").install({
+-- Languages without one keep ordinary syntax highlighting. A headless Neovim,
+-- as nswitch runs, quits right after start, so it waits for them to build.
+local parsers = require("nvim-treesitter").install({
   "bash", "c", "cpp", "diff", "go", "gomod", "json", "lua", "markdown",
   "markdown_inline", "nix", "python", "query", "rust", "toml", "typst",
   "vim", "vimdoc", "yaml",
 })
+if #vim.api.nvim_list_uis() == 0 then
+  parsers:wait(300000)
+end
 vim.api.nvim_create_autocmd("FileType", {
   group = vim.api.nvim_create_augroup("config_treesitter", { clear = true }),
   callback = function(event)
