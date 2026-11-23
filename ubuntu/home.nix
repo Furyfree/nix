@@ -202,6 +202,7 @@ in
       "fastfetch/config.jsonc".source = lib.mkForce fastfetch;
       "noctalia/templates/ptyxis.palette".source =
         config.lib.workstation.link "noctalia/templates/ptyxis.palette";
+      "noctalia/ubuntu.toml".source = config.lib.workstation.link "noctalia/ubuntu.toml";
       # Noctalia's renderer and reload hook for Ghostty, from Noctalia's .deb.
       "noctalia/templates/ghostty".source =
         config.lib.file.mkOutOfStoreSymlink "/usr/share/noctalia/assets/templates/ghostty";
