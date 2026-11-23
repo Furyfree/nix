@@ -253,7 +253,11 @@ install_daily_apps() {
     # An empty spotify.list stops the package from adding the same source.
     sudo touch /etc/apt/sources.list.d/spotify.list
   fi
-  apt_install claude-desktop spotify-client
+  # LibreOffice and Celluloid from Ubuntu, so they take the GTK theme, which a
+  # Flatpak cannot see; LibreOffice draws with GTK through its GTK plugin. Base
+  # and Math stay out, as NixOS hides them.
+  apt_install claude-desktop spotify-client libreoffice-writer libreoffice-calc libreoffice-impress \
+    libreoffice-draw libreoffice-gtk3 celluloid
 }
 
 install_flatpaks() {
@@ -261,8 +265,7 @@ install_flatpaks() {
   flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   local app missing=()
   # Verified by their makers on Flathub
-  for app in org.libreoffice.LibreOffice io.github.celluloid_player.Celluloid md.obsidian.Obsidian \
-    com.github.PintaProject.Pinta com.obsproject.Studio; do
+  for app in md.obsidian.Obsidian com.github.PintaProject.Pinta com.obsproject.Studio; do
     flatpak info --user "$app" >/dev/null 2>&1 || missing+=("$app")
   done
   ((${#missing[@]})) || return 0
@@ -305,7 +308,7 @@ install_desktop() {
 nice_to_have 'VS Code' install_vscode
 nice_to_have 'T3 Code' install_t3code
 nice_to_have 'JetBrains Toolbox' install_toolbox
-nice_to_have 'Claude Desktop and Spotify' install_daily_apps
+nice_to_have 'the daily apps' install_daily_apps
 nice_to_have 'Flatpaks' install_flatpaks
 nice_to_have 'the Niri desktop' install_desktop
 

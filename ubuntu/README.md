@@ -37,5 +37,5 @@ installs what is missing. NixOS updates `flake.lock`; apt updates the rest.
 - The Niri desktop: pick Niri at the login screen; GNOME stays there as the
   fallback. Its config is linked as on NixOS, with Ubuntu's differences in
   `configs/niri/hosts/ubuntu.kdl`.
-- VS Code: its extensions and Noctalia's colors as in NixOS'
-  [Everyday apps](../nixos/README.md#everyday-apps).
+- VS Code's extensions and Noctalia's colors, and LibreOffice's application
+  theming, as in NixOS' [Everyday apps](../nixos/README.md#everyday-apps).
