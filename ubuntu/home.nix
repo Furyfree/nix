@@ -54,6 +54,8 @@ in
         neovim
         # Ghostty's font
         nerd-fonts.jetbrains-mono
+        # GTK 3's theme, which linux.nix picks; Ubuntu's archive has none.
+        adw-gtk3
         # Git signs with this name, which 1Password's .deb keeps in /opt.
         (writeShellScriptBin "op-ssh-sign" ''exec /opt/1Password/op-ssh-sign "$@"'')
       ])
