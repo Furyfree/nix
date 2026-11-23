@@ -1,3 +1,0 @@
-# Linux CLI tools on NixOS and Ubuntu. Nix installs Sheldon.
-[tools]
-resvg = "latest"

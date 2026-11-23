@@ -1,6 +1,6 @@
 # Home Manager for every Linux machine, NixOS and Ubuntu: the Noctalia
 # desktop's settings, GTK and Qt, the removable-drive mounter, VS Code's Linux
-# paths and the Linux Mise tools. The compositor's half comes from its own
+# paths and the agent CLIs from Mise. The compositor's half comes from its own
 # module.
 { config, lib, ... }:
 
@@ -47,7 +47,6 @@ in
           "noctalia/assets/profile-picture-circle.svg"
           "udiskie/config.yml"
           "mise/conf.d/agents.toml"
-          "mise/conf.d/linux-tools.toml"
         ]
         (name: {
           source = link name;
