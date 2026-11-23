@@ -81,17 +81,31 @@ in
       });
   };
 
-  # GNOME's interface settings, where Noctalia takes its app icons, GTK 3 its
-  # theme, whose colour names Noctalia's GTK template sets, and apps their
-  # cursor and middle-click paste, which GNOME turns off by default. NixOS and
-  # Ubuntu install the themes.
-  dconf.settings."org/gnome/desktop/interface" = {
-    icon-theme = "Papirus-Dark";
-    gtk-theme = "adw-gtk3-dark";
-    cursor-theme = "Bibata-Modern-Ice";
-    cursor-size = 24;
-    gtk-enable-primary-paste = true;
-  };
+  dconf.settings =
+    let
+      # Show hidden files and folders first; open where the app is working.
+      fileChooser = {
+        show-hidden = true;
+        sort-directories-first = true;
+        startup-mode = "cwd";
+      };
+    in
+    {
+      # Where Noctalia takes its app icons, GTK 3 its theme, whose colour names
+      # Noctalia's GTK template sets, and apps their cursor and middle-click
+      # paste, which GNOME turns off by default. NixOS and Ubuntu install the
+      # themes.
+      "org/gnome/desktop/interface" = {
+        icon-theme = "Papirus-Dark";
+        gtk-theme = "adw-gtk3-dark";
+        cursor-theme = "Bibata-Modern-Ice";
+        cursor-size = 24;
+        gtk-enable-primary-paste = true;
+      };
+      "org/gnome/desktop/privacy".remember-recent-files = false;
+      "org/gtk/settings/file-chooser" = fileChooser;
+      "org/gtk/gtk4/settings/file-chooser" = fileChooser;
+    };
 
   home = {
     file = {

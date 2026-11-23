@@ -190,26 +190,14 @@ in
       '';
   };
 
-  dconf.settings =
-    let
-      # Show hidden files and folders first; open where the app is working.
-      fileChooser = {
-        show-hidden = true;
-        sort-directories-first = true;
-        startup-mode = "cwd";
-      };
-    in
-    {
-      # Apps list their buttons and fields for computer-use-linux.
-      "org/gnome/desktop/interface".toolkit-accessibility = true;
-      "org/gnome/desktop/privacy".remember-recent-files = false;
-      "org/gtk/settings/file-chooser" = fileChooser;
-      "org/gtk/gtk4/settings/file-chooser" = fileChooser;
-      # ProtonPlus keeps Proton builds updated in the background (hourly by default).
-      "com/vysp3r/ProtonPlus/State" = {
-        background-updates = true;
-        check-updates-on-boot = true;
-        check-updates-on-launch = true;
-      };
+  dconf.settings = {
+    # Apps list their buttons and fields for computer-use-linux.
+    "org/gnome/desktop/interface".toolkit-accessibility = true;
+    # ProtonPlus keeps Proton builds updated in the background (hourly by default).
+    "com/vysp3r/ProtonPlus/State" = {
+      background-updates = true;
+      check-updates-on-boot = true;
+      check-updates-on-launch = true;
     };
+  };
 }
