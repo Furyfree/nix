@@ -12,7 +12,9 @@ workspace "main-4"
 workspace "main-5"
 
 binds {
-    Mod+Shift+F hotkey-overlay-title="Open file manager" { spawn "nautilus"; }
+    // A new window each time, as Strata opens on NixOS; Nautilus alone would
+    // focus the open one.
+    Mod+Shift+F hotkey-overlay-title="Open file manager" { spawn "nautilus" "--new-window"; }
     Mod+Shift+O hotkey-overlay-title="Focus or open Obsidian" { spawn "launch" "focus" "md.obsidian.Obsidian" "flatpak" "run" "md.obsidian.Obsidian"; }
     Mod+Shift+Z hotkey-overlay-title="Open Zed" { spawn "zed"; }
     Mod+Shift+T hotkey-overlay-title="Focus or open T3 Code" { spawn "launch" "focus" "com.t3tools.T3Code" "t3code"; }
