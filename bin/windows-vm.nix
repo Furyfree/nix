@@ -57,12 +57,13 @@ pkgs.writeShellApplication {
           TimeoutStopSec = 150;
         };
       };
-    # The docker group, already root-equivalent, may start and stop it.
+    # The windows-vm group, which reads the settings and shares ~/Windows,
+    # may start and stop it.
     polkitRule = ''
       polkit.addRule(function(action, subject) {
         if (action.id == "org.freedesktop.systemd1.manage-units" &&
             action.lookup("unit") == "${service}.service" &&
-            subject.isInGroup("docker")) {
+            subject.isInGroup("windows-vm")) {
           return polkit.Result.YES;
         }
       });

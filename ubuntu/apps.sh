@@ -140,8 +140,10 @@ if [[ -e $vm/windows-vm.rules && $(readlink -f "$vm/windows-vm.rules") != "$(cat
   readlink -f "$vm/windows-vm.rules" >"$stamp"
 fi
 
-# docker is root-equivalent; kvm runs the VMs without root.
-for group in docker kvm; do
+# windows-vm reads the VM's settings and may start it; kvm runs the VMs
+# without root.
+getent group windows-vm >/dev/null || sudo groupadd --system windows-vm
+for group in windows-vm kvm; do
   if ! id -nG "$USER" | tr ' ' '\n' | grep -qx "$group"; then
     log "group $group; it applies at the next login"
     sudo usermod -aG "$group" "$USER"

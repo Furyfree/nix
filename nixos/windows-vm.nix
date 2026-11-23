@@ -48,5 +48,12 @@ in
 
   security.polkit.extraConfig = windows-vm.passthru.polkitRule;
 
+  # Installer-selected users come from Home Manager, so no username is
+  # written here.
+  users.groups.windows-vm = { };
+  users.users = lib.genAttrs (builtins.attrNames config.home-manager.users) (_: {
+    extraGroups = [ "windows-vm" ];
+  });
+
   environment.systemPackages = [ windows-vm ];
 }

@@ -135,9 +135,9 @@ root_prepare() {
   fi
   install -d -m 0700 "$storage"
   [[ $(findmnt -n -o FSTYPE -T "$storage") != btrfs ]] || chattr +C "$storage"
-  install -d -m 2775 -g docker "$shared"
+  install -d -m 2775 -g windows-vm "$shared"
   (umask 0027 && cat >"$settings")
-  chgrp docker "$settings"
+  chgrp windows-vm "$settings"
   if [[ -n ${1-} ]]; then
     cp --reflink=auto -- "$1" "$storage/custom.iso"
     # Dockur replaces an ISO's answer file with its own, which skips the
@@ -320,16 +320,15 @@ cmd_launch() {
     trap stop_vm EXIT
   fi
   systemctl start "$WINDOWS_SERVICE"
-  # Wait for Dockur's boot message from this start, as Omarchy does; FreeRDP's
-  # /auth-only probe can crash while Windows is still starting.
-  # The service creates a fresh container a moment after it starts.
-  until started=$(docker inspect --format '{{.State.StartedAt}}' windows 2>/dev/null); do
-    systemctl is-active --quiet "$WINDOWS_SERVICE" || die "The Windows VM stopped."
-    sleep 1
-  done
+  # Wait for Dockur's boot message from this run of the service, as Omarchy
+  # does; FreeRDP's /auth-only probe can crash while Windows is still starting.
+  # The container prints to the service's journal, which wheel on NixOS and
+  # adm on Ubuntu may read; the system Docker itself is root's.
+  started=$(systemctl show --property=InvocationID --value "$WINDOWS_SERVICE")
   # grep reads all of the log: -q would end the pipe early, and pipefail would
-  # count docker's broken pipe as no match.
-  until docker logs --since "$started" windows 2>&1 | grep -i "windows started successfully" >/dev/null; do
+  # count journalctl's broken pipe as no match.
+  until journalctl _SYSTEMD_INVOCATION_ID="$started" --output=cat 2>/dev/null |
+    grep -i "windows started successfully" >/dev/null; do
     systemctl is-active --quiet "$WINDOWS_SERVICE" || die "The Windows VM stopped."
     sleep 2
   done
@@ -354,7 +353,7 @@ cmd_launch() {
   notice 0 "Connecting…"
   attempt=0
   while ((++attempt <= 30)); do
-    since=$(date +%Y-%m-%dT%H:%M:%S.%N%:z)
+    since=$(date +%s)
     rdp "${args[@]}" &
     pid=$!
     # The notice ends once the window is open.
@@ -369,7 +368,8 @@ cmd_launch() {
       # Dockur's log is a restart, a stopped service a shutdown.
       1)
         notice 0 "Windows is shutting down or restarting…"
-        until docker logs --since "$since" windows 2>&1 | grep "BdsDxe: loading" >/dev/null; do
+        until journalctl --unit="$WINDOWS_SERVICE" --since="@$since" --output=cat 2>/dev/null |
+          grep "BdsDxe: loading" >/dev/null; do
           if ! systemctl is-active --quiet "$WINDOWS_SERVICE"; then
             close_notice
             echo "Windows shut down."
