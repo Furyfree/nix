@@ -1,6 +1,0 @@
-# NixOS-only Ghostty settings, linked as ~/.config/ghostty/nixos; the shared
-# config loads it when it exists. Settings Ubuntu's older Ghostty rejects go
-# here.
-# Copy selections to PRIMARY; middle-click pastes PRIMARY, not the regular
-# clipboard.
-copy-on-select = primary
