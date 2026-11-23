@@ -89,9 +89,15 @@ in
     '';
   };
   fonts.fontconfig.enable = true;
-  # Qt apps take Noctalia's colours through qt5ct, whose settings linux.nix
-  # writes, as nixos/desktop.nix sets for NixOS; qt6ct answers to the same name.
-  systemd.user.sessionVariables.QT_QPA_PLATFORMTHEME = "qt5ct";
+  # The session settings nixos/desktop.nix sets for NixOS.
+  systemd.user.sessionVariables = {
+    # Qt apps take Noctalia's colours through qt5ct, whose settings linux.nix
+    # writes; qt6ct answers to the same name.
+    QT_QPA_PLATFORMTHEME = "qt5ct";
+    # GTK combines dead keys, such as AltGr+¨ for ~, itself: no input method
+    # runs under Niri, and Ghostty leaves them to one.
+    GTK_IM_MODULE = "simple";
+  };
 
   workstation = {
     sshProfile = "work";
