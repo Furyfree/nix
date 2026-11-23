@@ -1,0 +1,20 @@
+#!/bin/sh
+# Niri has no window on every workspace. When you switch workspace, move
+# floating Brave windows on that monitor along without focus; Niri's window
+# rules float only the picture-in-picture window, such as Spotify's mini player.
+niri msg -j event-stream |
+  jq --unbuffered -r '.WorkspaceActivated // empty | select(.focused) | .id' |
+  while read -r workspace; do
+    workspaces=$(niri msg -j workspaces) || continue
+    niri msg -j windows |
+      jq -r --argjson id "$workspace" --argjson workspaces "$workspaces" '
+        INDEX($workspaces[]; .id) as $by_id
+        | $by_id["\($id)"] as $to
+        | .[]
+        | select(.app_id == "brave-origin" and .is_floating and .workspace_id != $id)
+        | select($by_id["\(.workspace_id)"].output == $to.output)
+        | "\(.id) \($to.name // $to.idx)"' |
+      while read -r window to; do
+        niri msg action move-window-to-workspace --window-id "$window" --focus false "$to"
+      done
+  done

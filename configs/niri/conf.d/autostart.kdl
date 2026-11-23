@@ -5,3 +5,4 @@ spawn-at-startup "udiskie" "--no-tray" "--no-notify"
 // On NixOS, 1Password's own Start at login does not start it; on Ubuntu,
 // ubuntu/home.nix keeps that from starting a second copy.
 spawn-at-startup "1password" "--silent"
+spawn-at-startup "follow-mini-player"

@@ -9,7 +9,7 @@
 }:
 
 let
-  inherit (config.lib.workstation) link;
+  inherit (config.lib.workstation) link script;
   host = "niri/hosts/${config.workstation.host}.kdl";
   noctalia = builtins.fromTOML (builtins.readFile ../configs/noctalia/config.toml);
 in
@@ -32,6 +32,8 @@ in
   };
 
   config = {
+    home.file.".local/bin/follow-mini-player".source = script "follow-mini-player";
+
     # Files, not the folder: Noctalia writes noctalia.kdl beside them.
     xdg.configFile =
       lib.genAttrs
