@@ -23,6 +23,7 @@ in
   imports = [
     ../home-manager/common.nix
     ../home-manager/linux.nix
+    ../home-manager/agent-browser.nix
   ];
 
   # Merges only NixOS needs: Noctalia's AI usage widget, Codex's Linux desktop

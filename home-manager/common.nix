@@ -9,16 +9,6 @@
 
 let
   inherit (config.lib.workstation) link script;
-  # agent-browser expands no ~ in its config, so Nix writes the paths. The
-  # profile is the agents' own, never mine: it keeps passed bot checks and sign-ins.
-  agentBrowser = pkgs.writeText "agent-browser.json" (
-    builtins.toJSON {
-      executablePath = "${config.home.homeDirectory}/.local/bin/agent-brave";
-      profile = "${config.xdg.dataHome}/agent-browser";
-      maxOutput = 50000;
-      idleTimeout = "10m";
-    }
-  );
 in
 {
   imports = [ ./ssh.nix ];
@@ -95,7 +85,7 @@ in
     home.file = {
       ".zshenv".source = link "zsh/.zshenv";
     }
-    // lib.genAttrs [ "pull-projects" "nix-workstation" "agent-brave" ] (name: {
+    // lib.genAttrs [ "pull-projects" "nix-workstation" ] (name: {
       target = ".local/bin/${name}";
       source = script name;
     });
@@ -135,7 +125,6 @@ in
           merge ${config.home.homeDirectory}/.claude/settings.json ${../configs/claude/settings.json} json
           merge ${config.home.homeDirectory}/.codex/config.toml ${../configs/codex/config.toml} toml
           merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/config.yml} yaml
-          merge ${config.home.homeDirectory}/.agent-browser/config.json ${agentBrowser} json
           merge ${config.home.homeDirectory}/.t3/userdata/settings.json ${../configs/t3code/settings.json} json
           merge ${config.home.homeDirectory}/.t3/userdata/client-settings.json ${../configs/t3code/client-settings.json} json
           merge ${config.home.homeDirectory}/.t3/userdata/keybindings.json ${../configs/t3code/keybindings.json} json
