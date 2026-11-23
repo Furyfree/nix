@@ -5,6 +5,10 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 
 export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
 
+# Ubuntu's /etc/zsh/zshrc runs compinit before this config runs its own; skip
+# it, as NixOS and nix-darwin do with enableGlobalCompInit = false.
+skip_global_compinit=1
+
 # Agents write bash, so run their commands in bash: the system's current one,
 # which NixOS and nix-darwin provide; /bin/bash is macOS's old one, until
 # nix-darwin's first switch.
