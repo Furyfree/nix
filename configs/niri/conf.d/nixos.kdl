@@ -12,4 +12,10 @@ binds {
     Mod+Shift+A hotkey-overlay-title="Focus or open the llama.cpp WebUI" { spawn-sh "gio launch /etc/profiles/per-user/$USER/share/applications/llama-cpp.desktop"; }
     // A Noctalia tool; Ubuntu leaves its plugin out.
     Mod+Ctrl+G hotkey-overlay-title="Open Git Companion" { spawn "noctalia" "msg" "panel-toggle" "tphilippot/git_companion:main"; }
+    // Dictation: the Voxtype daemon only listens for its native recording
+    // commands, so the compositor owns the shortcut. Toggle avoids the
+    // press/release race of push-to-talk; cancel discards a wrong take before
+    // it is typed into the focused window.
+    Mod+D repeat=false hotkey-overlay-title="Dictation: start or stop recording" { spawn "voxtype" "record" "toggle"; }
+    Mod+Shift+Escape repeat=false hotkey-overlay-title="Dictation: cancel recording" { spawn "voxtype" "record" "cancel"; }
 }
