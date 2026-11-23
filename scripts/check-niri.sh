@@ -24,5 +24,9 @@ for host in configs/niri/hosts/*.kdl; do
     copy="$temporary/niri-$name"
     cp -r configs/niri "$copy"
     cp "$host" "$copy/host.kdl"
+    # Ubuntu does not get NixOS's own keys.
+    if [[ $name == ubuntu.kdl ]]; then
+        rm -- "$copy/conf.d/nixos.kdl"
+    fi
     verify "niri (${name%.kdl})" "$copy/config.kdl"
 done

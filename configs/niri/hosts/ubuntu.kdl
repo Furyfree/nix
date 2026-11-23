@@ -1,6 +1,7 @@
 // The Ubuntu work laptop; home-manager/niri.nix links this file to
-// ~/.config/niri/host.kdl there. No systemd unit starts Noctalia on Ubuntu,
-// and apt's apps have their own command names.
+// ~/.config/niri/host.kdl there. No systemd unit starts Noctalia on Ubuntu.
+// Its apps' keys are here, as NixOS's are in conf.d/nixos.kdl, since apt's
+// apps have their own command names.
 spawn-at-startup "noctalia"
 
 // Five workspaces always exist, on the first screen; see desktop.kdl for the
