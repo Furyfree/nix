@@ -1,15 +1,18 @@
 # Home Manager for every Linux machine, NixOS and Ubuntu: the Noctalia
-# desktop's settings, GTK and Qt, the removable-drive mounter and the Linux
-# Mise tools. The compositor's half comes from its own module.
+# desktop's settings, GTK and Qt, the removable-drive mounter, VS Code's Linux
+# paths and the Linux Mise tools. The compositor's half comes from its own
+# module.
 { config, lib, ... }:
 
 let
   inherit (config.lib.workstation) link script;
 in
 {
-  # gh opening the browser in its own systemd unit.
+  # gh opening the browser in its own systemd unit, and VS Code, which saves
+  # its settings itself.
   workstation.settingMerges = ''
     merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/linux.yml} yaml
+    merge ${config.xdg.configHome}/Code/User/settings.json ${../configs/vscode/settings.json} json
   '';
 
   xdg = {
@@ -43,6 +46,8 @@ in
         [
           "zsh/conf.d/noctalia.zsh"
           "noctalia/config.toml"
+          "noctalia/vscode.toml"
+          "noctalia/templates/vscode-output-path.sh"
           "noctalia/templates/strata.toml"
           "noctalia/assets/profile-picture.jpg"
           "noctalia/assets/profile-picture-circle.svg"
@@ -56,6 +61,7 @@ in
       // {
         "gtk-3.0/settings.ini".source = link "gtk/gtk-3.0/settings.ini";
         "gtk-4.0/settings.ini".source = link "gtk/gtk-4.0/settings.ini";
+        "Code/User/keybindings.json".source = link "vscode/keybindings.json";
         # File manager sidebar; bookmarks need absolute paths.
         "gtk-3.0/bookmarks".text =
           lib.concatMapStrings (path: "file://${config.home.homeDirectory}/${path} ${baseNameOf path}\n")

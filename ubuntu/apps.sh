@@ -176,6 +176,20 @@ fi
 
 # --- Nice-to-haves ----------------------------------------------------------
 
+install_vscode() {
+  command -v code >/dev/null && return
+  # Microsoft's own names for the key and source; code's package finds them and
+  # adds no second source.
+  if ! has_source packages.microsoft.com/repos/code; then
+    key microsoft https://packages.microsoft.com/keys/microsoft.asc BC528686B50D79E339D3721CEB3E94ADBE1229CF
+    source_file vscode 'Types: deb' 'URIs: https://packages.microsoft.com/repos/code' 'Suites: stable' \
+      'Components: main' 'Architectures: amd64' 'Signed-By: /usr/share/keyrings/microsoft.gpg'
+  fi
+  # No /usr/bin/copilot, since the shared settings turn Copilot off.
+  echo 'code code/add-copilot-command boolean false' | sudo debconf-set-selections
+  apt_install code
+}
+
 install_t3code() {
   command -v t3code >/dev/null && return
   log 'T3 Code: the maker .deb, checked against its update manifest'
@@ -269,6 +283,7 @@ install_desktop() {
     bibata-cursor-theme papirus-icon-theme qt5ct qt6ct fonts-inter fonts-jetbrains-mono
 }
 
+nice_to_have 'VS Code' install_vscode
 nice_to_have 'T3 Code' install_t3code
 nice_to_have 'JetBrains Toolbox' install_toolbox
 nice_to_have 'Claude Desktop and Spotify' install_daily_apps

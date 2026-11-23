@@ -27,11 +27,10 @@ in
   ];
 
   # Merges only NixOS needs: Noctalia's AI usage widget, Codex's Linux desktop
-  # tools, the agents only NixOS installs, VS Code, and the default apps;
-  # apps save these settings themselves.
+  # tools, the agents only NixOS installs, and the default apps; apps save these
+  # settings themselves.
   workstation.settingMerges = ''
     merge ${config.xdg.configHome}/mimeapps.list ${../configs/mimeapps.list} ini
-    merge ${config.xdg.configHome}/Code/User/settings.json ${../configs/vscode/settings.json} json
     merge ${config.xdg.configHome}/ai-usagebar/config.toml ${../configs/ai-usagebar/config.toml} toml
     merge ${config.home.homeDirectory}/.codex/config.toml ${../configs/codex/linux.toml} toml
     merge ${config.home.homeDirectory}/.grok/config.toml ${../configs/grok/config.toml} toml
@@ -89,14 +88,11 @@ in
           "mise/conf.d/nixos-tools.toml"
           "voxtype/config.toml"
           "MangoHud/MangoHud.conf"
-          "noctalia/vscode.toml"
-          "noctalia/templates/vscode-output-path.sh"
         ]
         (name: {
           source = link name;
         })
       // {
-        "Code/User/keybindings.json".source = link "vscode/keybindings.json";
         # Reuse the pinned renderer and reload hook, not the config-rewriting apply hook.
         "noctalia/templates/ghostty".source =
           "${config.programs.noctalia.package}/share/noctalia/assets/templates/ghostty";
