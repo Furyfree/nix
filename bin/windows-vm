@@ -323,11 +323,12 @@ cmd_launch() {
   # Wait for Dockur's boot message from this run of the service, as Omarchy
   # does; FreeRDP's /auth-only probe can crash while Windows is still starting.
   # The container prints to the service's journal, which wheel on NixOS and
-  # adm on Ubuntu may read; the system Docker itself is root's.
-  started=$(systemctl show --property=InvocationID --value "$WINDOWS_SERVICE")
+  # adm on Ubuntu may read; the system Docker itself is root's. The service
+  # restarts a failed run, so each check asks for the current run.
   # grep reads all of the log: -q would end the pipe early, and pipefail would
   # count journalctl's broken pipe as no match.
-  until journalctl _SYSTEMD_INVOCATION_ID="$started" --output=cat 2>/dev/null |
+  until started=$(systemctl show --property=InvocationID --value "$WINDOWS_SERVICE") &&
+    journalctl _SYSTEMD_INVOCATION_ID="$started" --output=cat 2>/dev/null |
     grep -i "windows started successfully" >/dev/null; do
     systemctl is-active --quiet "$WINDOWS_SERVICE" || die "The Windows VM stopped."
     sleep 2
