@@ -4,10 +4,10 @@ Sets up Windows from this repo. Run it as yourself in Windows PowerShell:
 
     irm https://raw.githubusercontent.com/Furyfree/nix/main/windows/bootstrap.ps1 | iex
 
-It asks for a profile, enables sudo, runs WinUtil's Standard tweaks when the
-Win11 Creator ISO did not install Windows, installs Git and PowerShell 7,
-clones this repo to ~\Projects\nix and runs windows\apply.ps1, which installs
-WSL for the profiles that use it.
+It asks for a profile, enables sudo, runs WinUtil's Standard tweaks when Win
+OneShot's Win11 Creator ISO did not install Windows, installs Git and
+PowerShell 7, clones this repo to ~\Projects\nix and runs windows\apply.ps1,
+which installs WSL for the profiles that use it.
 #>
 param(
     # The branch to clone, for testing one before it is merged
