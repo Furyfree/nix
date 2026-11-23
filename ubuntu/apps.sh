@@ -107,6 +107,21 @@ if ! has_source download.docker.com; then
     'Components: stable' 'Architectures: amd64' 'Signed-By: /usr/share/keyrings/docker-archive-keyring.gpg'
 fi
 
+# The Dux PPA, which Niri's docs point to, for Ghostty, since Ubuntu's stays at
+# an older release, and for Niri below; nothing else may come from it. The pin
+# goes in first, and again whenever it changes.
+dux_pin=$(printf '%s\n' \
+  '# Take only Ghostty, Niri and xwayland-satellite from the Dux PPA.' \
+  'Package: ghostty niri xwayland-satellite' 'Pin: release o=LP-PPA-duxlabs-dux-repo' 'Pin-Priority: 500' '' \
+  'Package: *' 'Pin: release o=LP-PPA-duxlabs-dux-repo' 'Pin-Priority: -1')
+if [[ $(cat /etc/apt/preferences.d/duxlabs-dux-repo 2>/dev/null) != "$dux_pin" ]]; then
+  printf '%s\n' "$dux_pin" | sudo tee /etc/apt/preferences.d/duxlabs-dux-repo >/dev/null
+fi
+if ! has_source duxlabs/dux-repo; then
+  sudo add-apt-repository -y ppa:duxlabs/dux-repo >/dev/null
+  refreshed=false
+fi
+
 apt_install zsh git git-lfs build-essential ghostty brave-origin 1password 1password-cli \
   docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras uidmap \
   qemu-system-x86 ovmf swtpm swtpm-tools wireguard-tools
@@ -237,17 +252,6 @@ install_flatpaks() {
 }
 
 install_desktop() {
-  # Niri: the Dux PPA, which Niri's docs point to; only niri and
-  # xwayland-satellite may come from it.
-  if ! has_source duxlabs/dux-repo; then
-    sudo add-apt-repository -y ppa:duxlabs/dux-repo >/dev/null
-    printf '%s\n' \
-      '# Take only Niri and xwayland-satellite from the Dux PPA.' \
-      'Package: niri xwayland-satellite' 'Pin: release o=LP-PPA-duxlabs-dux-repo' 'Pin-Priority: 500' '' \
-      'Package: *' 'Pin: release o=LP-PPA-duxlabs-dux-repo' 'Pin-Priority: -1' |
-      sudo tee /etc/apt/preferences.d/duxlabs-dux-repo >/dev/null
-    refreshed=false
-  fi
   # Noctalia ships its key only in a keyring package; take the key alone, so
   # nothing else in the package runs as root.
   if ! has_source pkg.noctalia.dev; then
@@ -258,7 +262,7 @@ install_desktop() {
     source_file noctalia 'Types: deb' 'URIs: https://pkg.noctalia.dev/deb/' 'Suites: resolute/ resolute-backports/' \
       'Architectures: amd64' 'Signed-By: /usr/share/keyrings/nickh-archive-keyring.gpg'
   fi
-  # Without Niri's recommends: no Alacritty or fuzzel.
+  # Niri from the Dux PPA, without its recommends: no Alacritty or fuzzel.
   apt_install --no-install-recommends niri xwayland-satellite gnome-keyring xdg-desktop-portal-gnome xdg-desktop-portal-gtk
   # Noctalia, its plugins' helpers, the removable-drive mounter and the theme
   apt_install noctalia udiskie grim slurp tesseract-ocr tesseract-ocr-eng qrencode sqlite3 socat ddcutil \
