@@ -56,6 +56,13 @@
     home-manager.sharedModules = [
       ../home-manager/niri.nix
       { workstation.host = config.networking.hostName; }
+      # The keys for NixOS's own apps; Ubuntu's are in its host file.
+      (
+        { config, ... }:
+        {
+          xdg.configFile."niri/conf.d/nixos.kdl".source = config.lib.workstation.link "niri/conf.d/nixos.kdl";
+        }
+      )
     ];
   };
 }

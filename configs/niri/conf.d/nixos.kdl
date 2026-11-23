@@ -1,0 +1,15 @@
+// Keys for the apps NixOS installs or names differently from Ubuntu, whose
+// own are in hosts/ubuntu.kdl; nixos/niri.nix links this file on NixOS only.
+binds {
+    Mod+Shift+F hotkey-overlay-title="Open file manager" { spawn "strata"; }
+    Mod+Shift+Z hotkey-overlay-title="Open Zed" { spawn "zeditor"; }
+    Mod+Shift+O hotkey-overlay-title="Focus or open Obsidian" { spawn "launch" "focus" "md.obsidian.Obsidian" "obsidian"; }
+    Mod+Shift+D hotkey-overlay-title="Focus or open Discord" { spawn "launch" "focus" "discord" "discord"; }
+    Mod+Shift+G hotkey-overlay-title="Focus or open Signal" { spawn "launch" "focus" "signal" "signal-desktop"; }
+    Mod+Shift+E hotkey-overlay-title="Focus or open Fastmail" { spawn "launch" "focus" "com.fastmail.Fastmail" "fastmail"; }
+    Mod+Shift+T hotkey-overlay-title="Focus or open T3 Code" { spawn "launch" "focus" "com.t3tools.T3Code" "t3code-desktop"; }
+    // Does nothing on hosts without nixos/local-ai.nix.
+    Mod+Shift+A hotkey-overlay-title="Focus or open the llama.cpp WebUI" { spawn-sh "gio launch /etc/profiles/per-user/$USER/share/applications/llama-cpp.desktop"; }
+    // A Noctalia tool; Ubuntu leaves its plugin out.
+    Mod+Ctrl+G hotkey-overlay-title="Open Git Companion" { spawn "noctalia" "msg" "panel-toggle" "tphilippot/git_companion:main"; }
+}

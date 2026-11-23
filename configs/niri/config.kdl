@@ -8,6 +8,8 @@ include "conf.d/decoration.kdl"
 include "conf.d/window-rules.kdl"
 include "conf.d/autostart.kdl"
 include "conf.d/keybinds.kdl"
+// NixOS's keys for its own apps; nixos/niri.nix links it on NixOS only.
+include optional=true "conf.d/nixos.kdl"
 
 // Noctalia owns the generated palette. First login works before it exists,
 // and with the include already here, Noctalia does not add one to this file.
