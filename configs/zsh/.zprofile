@@ -27,3 +27,6 @@ path=(
 
 typeset -U path
 export PATH
+
+# pixi pings prefix.dev after its install and each self-update unless this is set.
+export PIXI_NO_TELEMETRY=1

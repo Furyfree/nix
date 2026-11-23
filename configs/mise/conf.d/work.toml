@@ -1,6 +1,6 @@
 # The work machines, Ubuntu and the work Mac; ubuntu/home.nix and
 # darwin/work.nix link this file. Projects bring their own tools through
-# pixi.
+# pixi, which ubuntu/apps.sh installs on Ubuntu with pixi's own installer.
 [tools]
 # Runs the npm tools below.
 node = "lts"
