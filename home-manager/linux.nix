@@ -10,7 +10,7 @@ in
   # The default apps, gh opening the browser in its own systemd unit, and VS
   # Code, which saves its settings itself. Where NixOS and Ubuntu name an app
   # differently, mimeapps.list names both, and the first one installed opens:
-  # Strata or Nautilus, NixOS's LibreOffice or the Flatpak.
+  # Strata or Nautilus, NixOS's LibreOffice or Ubuntu's.
   workstation.settingMerges = ''
     merge ${config.xdg.configHome}/mimeapps.list ${../configs/mimeapps.list} ini
     merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/linux.yml} yaml
