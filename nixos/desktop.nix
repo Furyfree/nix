@@ -156,11 +156,8 @@ in
       slurp
       socat
       glib
-      # Noctalia screenshots, text recognition, QR codes and plugin data.
+      # The computer-use skill's screenshots.
       grim
-      (tesseract.override { enableLanguages = [ "eng" ]; })
-      qrencode
-      sqlite
       # Noctalia template hooks, such as LibreOffice's.
       python3
       bibata-cursors
