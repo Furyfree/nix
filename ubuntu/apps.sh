@@ -287,6 +287,19 @@ install_desktop() {
   # mounter and the theme; qt5ct and qt6ct give Qt apps Noctalia's colours.
   apt_install noctalia udiskie ddcutil bibata-cursor-theme papirus-icon-theme qt5ct qt6ct \
     fonts-inter fonts-jetbrains-mono
+  # The session bus on dbus-broker, which Ubuntu makes the default from 26.10
+  # (LP: #2015538): dbus-daemon waits two minutes on a service that failed to
+  # start, so logging in right after a logout left the GNOME portal, and the
+  # apps waiting on it, stuck. The package switches both buses; the system bus
+  # stays on dbus-daemon for IT's services. Drop this once Ubuntu has it by
+  # default; the switch takes effect at the next boot.
+  apt_install dbus-broker
+  if systemctl is-enabled -q dbus-broker.service; then
+    sudo systemctl disable dbus-broker.service
+  fi
+  if ! systemctl --global is-enabled -q dbus-broker.service; then
+    sudo systemctl --global enable dbus-broker.service
+  fi
 }
 
 nice_to_have 'VS Code' install_vscode
