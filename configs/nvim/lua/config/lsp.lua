@@ -1,13 +1,8 @@
--- Language servers come from Mise or Nix; nvim-lspconfig only defines them.
+-- Language servers Nix installs; nvim-lspconfig only defines them. Projects
+-- and the other editors bring the rest; one added here needs its binary.
 -- Built-in keys: grn rename, grr references, gra code action, gri
 -- implementation, K documentation, gO outline, ]d/[d next/previous diagnostic.
-vim.lsp.config("lua_ls", {
-  settings = { Lua = { workspace = { library = { vim.env.VIMRUNTIME } } } },
-})
-vim.lsp.enable({
-  "bashls", "clangd", "gopls", "lua_ls", "nixd", "ruff",
-  "rust_analyzer", "taplo", "tinymist", "ty",
-})
+vim.lsp.enable({ "clangd", "nixd" })
 
 vim.diagnostic.config({ virtual_text = true })
 -- Complete as you type; the first item is selected so Enter accepts it.
