@@ -15,9 +15,10 @@ it saves the old values to `%LOCALAPPDATA%\nix-workstation\backup\`; restore
 one with `reg import FILE`.
 
 1. Install Windows, from the Win11 Creator ISO when you have it; without it,
-   the bootstrap runs WinUtil's Standard tweaks. The paid WinUtil's Win11
-   Creator makes the ISO; its download link is in 1Password under "Windows
-   Toolbox / Winutil (Paid)". For the VM, `windows-vm install` asks for the
+   the bootstrap runs WinUtil's Standard tweaks. Win OneShot, Chris Titus's
+   paid and closed-source WinUtil, makes it from Microsoft's own ISO with its
+   Win11 Creator; its download link is in 1Password under "Windows Toolbox /
+   Winutil (Paid)". For the VM, `windows-vm install` asks for the
    ISO. On the desktop, unplug the NixOS disk while Windows installs;
    otherwise Setup puts Windows' boot files on the NixOS EFI partition instead
    of making its own. Then update Windows and name the PC (System → About)

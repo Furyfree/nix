@@ -1,7 +1,8 @@
 Windows Registry Editor Version 5.00
 
-; Every profile. The Win11 Creator ISO sets many of these already; they are
-; here for installs without it, where WinUtil's Standard tweaks do the rest.
+; Every profile. Win OneShot's Win11 Creator ISO sets many of these already;
+; they are here for installs without it, where WinUtil's Standard tweaks do
+; the rest.
 
 ; Taskbar, Explorer and Start
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
