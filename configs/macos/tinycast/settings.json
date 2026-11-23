@@ -58,6 +58,11 @@
         "alias": null,
         "showInLauncher": true
       },
+      "com.microsoft.VSCode": {
+        "shortcut": "hyper+c",
+        "alias": null,
+        "showInLauncher": true
+      },
       "com.mitchellh.ghostty": {
         "shortcut": "hyper+return",
         "alias": null,
@@ -65,11 +70,6 @@
       },
       "com.t3tools.t3code": {
         "shortcut": "hyper+t",
-        "alias": null,
-        "showInLauncher": true
-      },
-      "com.vscodium": {
-        "shortcut": "hyper+c",
         "alias": null,
         "showInLauncher": true
       },

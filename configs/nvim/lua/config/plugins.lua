@@ -52,7 +52,7 @@ map("n", "<leader>e", function() Snacks.explorer() end, { desc = "File explorer"
 map("n", "<leader>sh", function() Snacks.picker.help() end, { desc = "Search help" })
 map("n", "<leader>bd", function() Snacks.bufdelete() end, { desc = "Close buffer" })
 map("n", "<leader>bo", function() Snacks.bufdelete.other() end, { desc = "Close other buffers" })
--- Shared with Zed and VSCodium.
+-- Shared with Zed and VS Code.
 map({ "n", "t" }, "<C-M-S-j>", function() Snacks.terminal.toggle() end, { desc = "Toggle terminal" })
 
 require("which-key").setup({

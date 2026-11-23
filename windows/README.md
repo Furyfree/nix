@@ -53,7 +53,7 @@ one with `reg import FILE`.
    Then ai-workflow as in step 7 of
    [First boot](../nixos/README.md#first-boot); clone the repositories you
    work on into NixOS' `~/Projects` and run their checks as their READMEs say.
-5. Desktop: open those projects from the editors on Windows. VSCodium: F1 →
+5. Desktop: open those projects from the editors on Windows. VS Code: F1 →
    "Connect to WSL using Distro…" → NixOS; the first time, it installs its
    server in NixOS. Zed: Ctrl+Shift+P → `projects: open wsl` → NixOS. Then
    open a folder such as `/home/<you>/Projects/nix`; the editor's terminal

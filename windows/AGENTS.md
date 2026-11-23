@@ -13,7 +13,7 @@ not break.
 - `profiles/`: `desktop` takes `vm` and `gaming` and adds the apps I use every
   day and NixOS in WSL (`../nixos/hosts/wsl/`). An app or setting goes in the
   layer that needs it.
-- `../configs/windows/`: the PowerShell, Terminal, WSL, VSCodium, fastfetch,
+- `../configs/windows/`: the PowerShell, Terminal, WSL, VS Code, fastfetch,
   Office and taskbar files.
 
 ## Verify

@@ -51,7 +51,7 @@ in
     celluloid
     pinta
     libreoffice
-    (accessible vscodium)
+    (accessible vscode)
     t3code
     (accessible brave-origin)
     signal-desktop
@@ -71,6 +71,7 @@ in
     "obsidian"
     "fastmail-desktop"
     "jetbrains-toolbox"
+    "vscode"
   ];
 
   # Surfer's package ships no menu entry; the icon is upstream's own (EUPL-1.2).

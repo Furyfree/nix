@@ -133,7 +133,7 @@ in
       # nixos/hyprland.nix forces it there only.
       QT_QPA_PLATFORM = "wayland;xcb";
       ELECTRON_OZONE_PLATFORM_HINT = "auto";
-      # nixpkgs wrappers (Spotify, Obsidian, Discord, VSCodium) run natively on
+      # nixpkgs wrappers (Spotify, Obsidian, Discord, VS Code) run natively on
       # Wayland only with this; otherwise they scale blurrily through XWayland.
       NIXOS_OZONE_WL = "1";
       GTK_IM_MODULE = "simple";

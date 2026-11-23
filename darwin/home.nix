@@ -119,19 +119,19 @@ in
     };
   };
 
-  # VSCodium: the shared settings with GitHub Dark, since Noctalia's theme
+  # VS Code: the shared settings with GitHub Dark, since Noctalia's theme
   # colors exist only on Linux. Tinycast: Caps Lock is its Hyper key for apps
   # and Spaces; ⌃⌥ tiles windows. Both save their settings themselves, so the
   # repository's are merged and changes in their windows stay on that Mac.
   workstation.settingMerges =
     let
-      settings = "${homeDirectory}/Library/Application Support/VSCodium/User/settings.json";
-      theme = pkgs.writeText "vscodium-macos.json" (
+      settings = "${homeDirectory}/Library/Application Support/Code/User/settings.json";
+      theme = pkgs.writeText "vscode-macos.json" (
         builtins.toJSON { "workbench.colorTheme" = "GitHub Dark"; }
       );
     in
     ''
-      merge "${settings}" ${../configs/vscodium/settings.json} json
+      merge "${settings}" ${../configs/vscode/settings.json} json
       merge "${settings}" ${theme} json
       merge ${config.xdg.configHome}/tinycast/settings.json ${../configs/macos/tinycast/settings.json} json
     '';
@@ -215,12 +215,8 @@ in
     file = {
       # The shared SSH config uses the Linux socket path.
       ".1password/agent.sock".source = config.lib.file.mkOutOfStoreSymlink onePasswordAgent;
-    }
-    # VSCodium keeps its files under Application Support on macOS; common.nix
-    # merges its settings, which take the Mac's theme.
-    // lib.mapAttrs (_: name: { source = link "vscodium/${name}"; }) {
-      "Library/Application Support/VSCodium/product.json" = "product.json";
-      "Library/Application Support/VSCodium/User/keybindings.json" = "keybindings.json";
+      # VS Code keeps its files under Application Support on macOS.
+      "Library/Application Support/Code/User/keybindings.json".source = link "vscode/keybindings.json";
     };
   };
 }

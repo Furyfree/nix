@@ -26,17 +26,9 @@ if ! command -v hx >/dev/null 2>&1 && command -v helix >/dev/null 2>&1; then
   alias hx='helix'
 fi
 
-# Install the checkout's VSCodium extensions; installed ones are skipped.
-if command -v codium >/dev/null 2>&1; then
-  alias codium-extensions='xargs -n1 codium --install-extension <~/Projects/nix/configs/vscodium/extensions.txt'
-fi
-
-if ! command -v code >/dev/null 2>&1; then
-  if command -v codium >/dev/null 2>&1; then
-    alias code='codium'
-  elif command -v vscodium >/dev/null 2>&1; then
-    alias code='vscodium'
-  fi
+# Install the checkout's VS Code extensions; installed ones are skipped.
+if command -v code >/dev/null 2>&1; then
+  alias code-extensions='xargs -n1 code --install-extension <~/Projects/nix/configs/vscode/extensions.txt'
 fi
 
 alias c='clear'
