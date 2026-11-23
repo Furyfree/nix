@@ -1,6 +1,7 @@
 # Apps from outside nixpkgs. npin and nupdate bump them with nvfetcher, which
-# writes _sources/generated.nix and generated.json for the NixOS modules. To
-# hold an app at its current version, add `pinned = true` to its table.
+# writes _sources/generated.nix and generated.json for the NixOS modules and
+# bin/windows-vm.nix. To hold an app at its current version, add
+# `pinned = true` to its table.
 
 # Checked against Anthropic's signed index by claude-desktop.sh.
 [claude-desktop]
@@ -48,3 +49,10 @@ fetch.url = "https://github.com/storytold/photocraft/releases/download/v$ver/pho
 [librepods]
 src.git = "https://github.com/harveywuk/librepods"
 fetch.github = "harveywuk/librepods"
+
+# The Windows VM's Dockur image, by its release tag; bin/windows-vm.nix uses
+# the version only, and Docker pulls the image at the VM's next start.
+[dockur-windows]
+src.github = "dockur/windows"
+src.prefix = "v"
+fetch.url = "https://github.com/dockur/windows/archive/refs/tags/v$ver.tar.gz"
