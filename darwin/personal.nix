@@ -22,8 +22,8 @@
       # "prismlauncher"
       # "battle-net" # Rosetta; run the staged installer yourself
 
-      # Mise's agents.toml installs these elsewhere; Homebrew gives them to
-      # every account here.
+      # Mise installs these elsewhere; Homebrew gives them to every account
+      # here.
       "claude-code"
       "codex"
     ];
@@ -57,6 +57,7 @@
     in
     {
       imports = [ ../home-manager/agent-browser.nix ];
+      xdg.configFile."mise/conf.d/mac.toml".source = config.lib.workstation.link "mise/conf.d/mac.toml";
 
       targets.darwin.defaults = {
         # CodexBar's display and refresh choices; account ids and usage state stay

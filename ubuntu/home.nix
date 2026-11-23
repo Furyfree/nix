@@ -170,6 +170,7 @@ in
         "windows-vm/windows-vm.rules".text = windows-vm.passthru.polkitRule;
       };
     configFile = {
+      "mise/conf.d/work.toml".source = config.lib.workstation.link "mise/conf.d/work.toml";
       # Ubuntu opens Terminal=true apps in its own terminal; Ghostty has the
       # Noctalia colours that btop, Yazi and Neovim take from it.
       "xdg-terminals.list".text = "com.mitchellh.ghostty.desktop\n";

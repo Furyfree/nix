@@ -12,7 +12,7 @@ in
   programs.zed-editor.enable = lib.mkForce false;
 
   xdg.configFile = {
-    "mise/conf.d/agents.toml".source = link "mise/conf.d/agents.toml";
+    "mise/conf.d/wsl.toml".source = link "mise/conf.d/wsl.toml";
     # git/config includes this. Windows' own ssh by path, as on Windows: Git
     # for Windows' ssh, first in PATH under Git Bash, cannot reach the agent.
     # The signing program comes through Windows' PATH.

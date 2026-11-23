@@ -1,4 +1,0 @@
-# Tools only personal machines get; home-manager/agent-browser.nix links this file.
-[tools]
-# Drives Brave Origin through agent-brave, a POSIX script.
-agent-browser = "latest"

@@ -1,0 +1,44 @@
+# The personal Mac; darwin/personal.nix links this file. Homebrew installs
+# Claude Code and Codex there, for every account.
+[tools]
+# Runs the npm tools below.
+node = "lts"
+
+# Language runtimes: current LTS families, each at its latest patch
+dotnet = "10"
+go = "latest"
+java = "corretto-25"
+rust = { version = "stable", components = "rust-analyzer" }
+uv = "latest"
+
+# Go's language server and linters, which need Go.
+"go:golang.org/x/tools/gopls" = "latest"
+staticcheck = "latest"
+golangci-lint = "latest"
+
+# ACP adapters for Obsidian's Agent Client; OpenCode and Grok speak ACP natively.
+"npm:@agentclientprotocol/claude-agent-acp" = "latest"
+"npm:@agentclientprotocol/codex-acp" = "latest"
+
+# Agentic helpers
+"npm:@llamaindex/liteparse" = "latest"
+
+# Language helpers
+"npm:markdownlint-cli" = "latest"
+ruff = "latest"
+stylua = "latest"
+ty = "latest"
+lua-language-server = "latest"
+"npm:bash-language-server" = "latest"
+
+# Shell and configuration helpers
+shellcheck = "latest"
+shfmt = "latest"
+taplo = "latest"
+jactionlint = "latest"
+delta = "latest"
+# Deja autosuggestions; enable together with [plugins.deja] in sheldon/plugins.toml.
+# "github:Giammarco-Ferranti/deja" = "latest"
+
+# Drives Brave Origin through agent-brave, a POSIX script.
+agent-browser = "latest"

@@ -1,0 +1,69 @@
+# Windows, the desktop and the VM; windows/profiles/vm.psd1 links this file.
+[tools]
+# Runs the npm tools below.
+node = "lts"
+
+# Language runtimes: current LTS families, each at its latest patch
+dotnet = "10"
+go = "latest"
+java = "corretto-25"
+rust = { version = "stable", components = "rust-analyzer" }
+uv = "latest"
+
+# Go's language server and linters, which need Go.
+"go:golang.org/x/tools/gopls" = "latest"
+staticcheck = "latest"
+golangci-lint = "latest"
+
+# ACP adapters for Obsidian's Agent Client; OpenCode and Grok speak ACP natively.
+"npm:@agentclientprotocol/claude-agent-acp" = "latest"
+"npm:@agentclientprotocol/codex-acp" = "latest"
+
+# Agentic helpers
+"npm:@llamaindex/liteparse" = "latest"
+
+# Language helpers
+"npm:markdownlint-cli" = "latest"
+ruff = "latest"
+stylua = "latest"
+ty = "latest"
+lua-language-server = "latest"
+"npm:bash-language-server" = "latest"
+
+# Shell and configuration helpers
+shellcheck = "latest"
+shfmt = "latest"
+taplo = "latest"
+jactionlint = "latest"
+delta = "latest"
+# Deja autosuggestions; enable together with [plugins.deja] in sheldon/plugins.toml.
+# "github:Giammarco-Ferranti/deja" = "latest"
+
+"npm:@openai/codex" = "latest"
+"npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = ["@anthropic-ai/claude-code"] }
+
+starship = "latest"
+fzf = "latest"
+zoxide = "latest"
+gh = "latest"
+bat = "latest"
+eza = "latest"
+yazi = "latest"
+fd = "latest"
+ripgrep = "latest"
+fastfetch = "latest"
+tealdeer = "latest"
+just = "latest"
+lazygit = "latest"
+yq = "latest"
+# pdftotext and the other Poppler tools, from conda-forge: Poppler makes no
+# Windows build.
+poppler = "latest"
+yt-dlp = "latest"
+typst = "latest"
+duf = "latest"
+# Builds with cargo, which links with the Visual Studio C++ Build Tools.
+tokei = "latest"
+gitleaks = "latest"
+neovim = "latest"
+tree-sitter = "latest"
