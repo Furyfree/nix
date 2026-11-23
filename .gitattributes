@@ -1,1 +1,4 @@
 **/tests/** linguist-detectable=false
+# Neovim rewrites its lock file with LF on every machine, Windows too, where
+# Git would otherwise check it out with CRLF and then report it changed.
+configs/nvim/nvim-pack-lock.json text eol=lf
