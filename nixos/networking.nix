@@ -9,7 +9,7 @@ _:
     wifi.backend = "iwd";
   };
 
-  # Docker orders graphical.target behind network-online.target, so auto-login
-  # would wait for the link and DHCP. Nothing here needs the network at boot.
+  # A service that asks for network-online.target would hold auto-login until
+  # the link and DHCP are up; nothing here needs the network at boot.
   systemd.services.NetworkManager-wait-online.enable = false;
 }
