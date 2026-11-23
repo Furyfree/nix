@@ -108,8 +108,6 @@ Obsidian's are missing. Run `systemctl --user restart noctalia`, then
 - Obsidian: open the vault and check its Noctalia snippet is enabled.
 - LibreOffice: on Writer's first start, turn on "Enable application theming"
   in the welcome dialog.
-- Vesktop: sign in, then Settings → Vencord → Themes → Local Themes → enable
-  Noctalia Midnight.
 - VSCodium: `codium-extensions` installs the extensions, including Noctalia's
   theme; then `noctalia msg templates-apply` and Developer: Reload Window. Zed
   and Zathura: restart after the first palette.
