@@ -66,6 +66,7 @@ in
 
   nixpkgs.config.allowUnfreePackages = [
     "discord"
+    "discord-unwrapped"
     "spotify"
     "obsidian"
     "fastmail-desktop"
