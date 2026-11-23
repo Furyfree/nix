@@ -118,8 +118,7 @@ if ! has_source duxlabs/dux-repo; then
 fi
 
 apt_install zsh git git-lfs build-essential ghostty brave-origin 1password 1password-cli \
-  docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras uidmap \
-  wireguard-tools
+  docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin wireguard-tools
 
 if [[ ! -x $HOME/.local/bin/zed ]]; then
   log "Zed: its own install script (~/.local/zed.app, updates itself)"
@@ -168,15 +167,6 @@ for group in windows-vm kvm; do
     sudo usermod -aG "$group" "$USER"
   fi
 done
-
-# This account's own Docker runs rootless, without root rights, and its
-# "rootless" CLI context makes it the default; `sudo docker` reaches the system
-# one, which runs the Windows VM. Ubuntu's AppArmor profile lets rootlesskit
-# create its user namespace.
-if [[ ! -e ${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user/docker.service ]]; then
-  log 'rootless Docker for this account'
-  dockerd-rootless-setuptool.sh install
-fi
 
 # --- Nice-to-haves ----------------------------------------------------------
 
