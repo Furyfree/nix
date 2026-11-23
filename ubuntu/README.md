@@ -15,8 +15,9 @@ agents; nothing here touches them.
    It installs Git and curl, clones this repository over HTTPS to
    `~/Projects/nix`, runs `debloat.sh` once, installs Nix with flakes, writes
    the ignored `ubuntu/local/user.nix` with your account, switches Home Manager
-   and runs `apps.sh`. `debloat.sh` removes the snaps, telemetry and unused
-   services, and stops before removing one of Ubuntu's base packages. After an
+   and runs `apps.sh`. `debloat.sh` removes telemetry, unused services and,
+   unless the TPM unlocks the disk, the snaps, and stops before removing one of
+   Ubuntu's base packages. After an
    error, run it again; it carries on. To try a branch before it is merged:
 
    ```bash
