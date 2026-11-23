@@ -23,5 +23,6 @@ pi = "latest"
 "npm:@llamaindex/liteparse" = "latest"
 # Drives Brave Origin through agent-brave, a POSIX script.
 agent-browser = "latest"
-# Usage data for Noctalia's AI usage widget.
-"cargo:ai-usagebar" = "latest"
+# Usage data for Noctalia's AI usage widget, from its release build rather
+# than compiled with Rust.
+"github:akitaonrails/ai-usagebar" = "latest"
