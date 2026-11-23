@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # The work laptop's apps from apt, Flatpak and the makers' downloads. nswitch
 # runs it after Home Manager. It installs only what is missing and never
-# upgrades or removes anything; Ubuntu's updates, the apps' own updaters and
-# home.nix's daily Flatpak update do that. Must-haves come first and stop it on
-# failure; a nice-to-have that fails is reported and skipped. Keys are checked
-# by fingerprint, downloads by their published hash.
+# upgrades or removes anything; Ubuntu's updates and the apps' own updaters do
+# that. Must-haves come first and stop it on failure; a nice-to-have that fails
+# is reported and skipped. Keys are checked by fingerprint, downloads by their
+# published hash.
 set -euo pipefail
 
 claude_key=$(dirname -- "$(realpath -- "$0")")/../nixos/pins/claude-desktop.asc

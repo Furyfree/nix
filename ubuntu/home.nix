@@ -95,32 +95,14 @@ in
     '';
   };
   fonts.fontconfig.enable = true;
-  systemd.user = {
-    # The session settings nixos/desktop.nix sets for NixOS.
-    sessionVariables = {
-      # Qt apps take Noctalia's colours through qt5ct, whose settings linux.nix
-      # writes; qt6ct answers to the same name.
-      QT_QPA_PLATFORMTHEME = "qt5ct";
-      # GTK combines dead keys, such as AltGr+¨ for ~, itself: no input method
-      # runs under Niri, and Ghostty leaves them to one.
-      GTK_IM_MODULE = "simple";
-    };
-    # The Flatpaks update daily; Ubuntu's updater updates apt's apps alone.
-    services.flatpak-update = {
-      Unit.Description = "Update the Flatpaks";
-      Service = {
-        Type = "oneshot";
-        ExecStart = "/usr/bin/flatpak update --user --noninteractive";
-      };
-    };
-    timers.flatpak-update = {
-      Unit.Description = "Update the Flatpaks daily";
-      Timer = {
-        OnCalendar = "daily";
-        Persistent = true;
-      };
-      Install.WantedBy = [ "timers.target" ];
-    };
+  # The session settings nixos/desktop.nix sets for NixOS.
+  systemd.user.sessionVariables = {
+    # Qt apps take Noctalia's colours through qt5ct, whose settings linux.nix
+    # writes; qt6ct answers to the same name.
+    QT_QPA_PLATFORMTHEME = "qt5ct";
+    # GTK combines dead keys, such as AltGr+¨ for ~, itself: no input method
+    # runs under Niri, and Ghostty leaves them to one.
+    GTK_IM_MODULE = "simple";
   };
 
   workstation = {

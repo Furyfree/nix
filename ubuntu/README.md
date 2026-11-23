@@ -28,8 +28,8 @@ agents; nothing here touches them.
    [SSH keys](../README.md#ssh-keys).
 
 After that, `git pull`, then `nswitch`: Home Manager first, then `apps.sh`
-installs what is missing. NixOS updates `flake.lock`; apt, and a daily timer
-for the Flatpaks, update the rest.
+installs what is missing. NixOS updates `flake.lock`, `flatpak update` the
+Flatpaks and apt the rest.
 
 ## By hand
 
