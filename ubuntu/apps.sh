@@ -119,7 +119,7 @@ fi
 
 apt_install zsh git git-lfs build-essential ghostty brave-origin 1password 1password-cli \
   docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras uidmap \
-  qemu-system-x86 ovmf swtpm swtpm-tools wireguard-tools
+  wireguard-tools
 
 if [[ ! -x $HOME/.local/bin/zed ]]; then
   log "Zed: its own install script (~/.local/zed.app, updates itself)"
