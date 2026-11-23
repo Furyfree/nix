@@ -78,12 +78,14 @@ in
       });
   };
 
-  # GNOME's interface settings, where Noctalia takes its app icons and GTK apps
-  # their cursor; NixOS and Ubuntu install both themes.
+  # GNOME's interface settings, where Noctalia takes its app icons and apps
+  # their cursor and middle-click paste, which GNOME turns off by default;
+  # NixOS and Ubuntu install both themes.
   dconf.settings."org/gnome/desktop/interface" = {
     icon-theme = "Papirus-Dark";
     cursor-theme = "Bibata-Modern-Ice";
     cursor-size = 24;
+    gtk-enable-primary-paste = true;
   };
 
   home = {
