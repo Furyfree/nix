@@ -48,10 +48,7 @@ binds {
     // Screen mirroring (Super+Ctrl+M) is Hyprland only; Lid Guard
     // (Super+Ctrl+L) is in the laptop's host file.
     Mod+Ctrl+G hotkey-overlay-title="Open Git Companion" { spawn "noctalia" "msg" "panel-toggle" "tphilippot/git_companion:main"; }
-    Mod+Ctrl+D hotkey-overlay-title="Open Docker manager" { spawn "noctalia" "msg" "panel-toggle" "8bury/mini-docker:manager"; }
-    Mod+Ctrl+P hotkey-overlay-title="Open port manager" { spawn "noctalia" "msg" "panel-toggle" "rxtsel/portctl:panel"; }
     Mod+Ctrl+N hotkey-overlay-title="Open notes" { spawn "noctalia" "msg" "panel-toggle" "noctalia/notes:panel"; }
-    Mod+Ctrl+S hotkey-overlay-title="Open SSH launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher" "/ssh "; }
     // Terminal tools in their own window; a second press focuses it.
     Mod+Ctrl+B hotkey-overlay-title="Open btop" { spawn "launch" "tui" "btop"; }
     Mod+Ctrl+Y hotkey-overlay-title="Open Yazi" { spawn "launch" "tui" "yazi"; }
