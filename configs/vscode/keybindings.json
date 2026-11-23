@@ -35,10 +35,5 @@
     "key": "cmd+shift+b",
     "command": "outline.focus",
     "when": "isMac"
-  },
-  {
-    "key": "ctrl+alt+g",
-    "command": "git-graph.view",
-    "when": "!terminalFocus"
   }
 ]

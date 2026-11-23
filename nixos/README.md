@@ -108,7 +108,7 @@ Obsidian's are missing. Run `systemctl --user restart noctalia`, then
 - Obsidian: open the vault and check its Noctalia snippet is enabled.
 - LibreOffice: on Writer's first start, turn on "Enable application theming"
   in the welcome dialog.
-- VSCodium: `codium-extensions` installs the extensions, including Noctalia's
+- VS Code: `code-extensions` installs the extensions, including Noctalia's
   theme; then `noctalia msg templates-apply` and Developer: Reload Window. Zed
   and Zathura: restart after the first palette.
 - Fastmail calendar, in Noctalia's settings: a CalDAV account with ID

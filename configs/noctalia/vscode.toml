@@ -1,0 +1,6 @@
+# The vscode community selection supplies and updates this input template.
+# Its fixed output path names one extension version.
+# User templates run afterwards and target the extension VS Code actually has.
+[theme.templates.user.vscode]
+input_path = "$XDG_STATE_HOME/noctalia/community-templates/vscode/vscode.json"
+output_path_dynamic = "bash '{{ config_dir }}/templates/vscode-output-path.sh'"

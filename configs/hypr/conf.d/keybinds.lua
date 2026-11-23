@@ -72,8 +72,8 @@ hl.bind(
 )
 hl.bind(
     mainMod .. " + SHIFT + V",
-    hl.dsp.exec_cmd("codium"),
-    { description = "Open VSCodium" }
+    hl.dsp.exec_cmd("code"),
+    { description = "Open VS Code" }
 )
 hl.bind(
     mainMod .. " + SHIFT + T",

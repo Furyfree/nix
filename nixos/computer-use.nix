@@ -25,7 +25,7 @@ let
   # installed apps, flags included. Signal, Fastmail and 1Password stay out
   # so agents cannot read them unseen; Ghostty and Claude Desktop stay out
   # because a shell or another Claude session would get around the agents'
-  # permission prompts. VSCodium's terminal is barred only by the skill.
+  # permission prompts. VS Code's terminal is barred only by the skill.
   permissions = pkgs.writeText "agent-workspace-permissions.json" (
     builtins.toJSON {
       apps.allow = [
@@ -33,7 +33,7 @@ let
       ]
       ++ map (name: "/run/current-system/sw/bin/${name}") [
         "obsidian"
-        "codium"
+        "code"
         "windows-vm"
       ];
     }

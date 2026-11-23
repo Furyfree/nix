@@ -25,7 +25,7 @@
         <taskbar:DesktopApp DesktopApplicationID="org.whispersystems.signal-desktop" PinGeneration="1" />
         <taskbar:DesktopApp DesktopApplicationLinkPath="%APPDATA%\Microsoft\Windows\Start Menu\Programs\Spotify.lnk" PinGeneration="1" />
         <taskbar:DesktopApp DesktopApplicationID="ZedIndustries.Zed" PinGeneration="1" />
-        <taskbar:DesktopApp DesktopApplicationID="VSCodium.VSCodium" PinGeneration="1" />
+        <taskbar:DesktopApp DesktopApplicationID="Microsoft.VisualStudioCode" PinGeneration="1" />
         <taskbar:DesktopApp DesktopApplicationID="com.squirrel.AnthropicClaude.claude" PinGeneration="1" />
         <taskbar:DesktopApp DesktopApplicationID="com.t3tools.t3code" PinGeneration="1" />
         <taskbar:DesktopApp DesktopApplicationID="com.nvidia.nvapp" PinGeneration="1" />

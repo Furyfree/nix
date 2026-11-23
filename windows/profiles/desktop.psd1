@@ -6,7 +6,7 @@
         'Microsoft.PowerToys'
         'T3Tools.T3Code'
         'Tailscale.Tailscale'
-        'VSCodium.VSCodium'
+        'Microsoft.VisualStudioCode'
         'JetBrains.Toolbox'
         'Anthropic.Claude'
         'OpenAI.ChatGPT'
@@ -28,21 +28,20 @@
     }
     Registry   = @('desktop.reg')
     Links      = @{
-        '~\.wslconfig'                             = 'windows/wslconfig'
-        '%APPDATA%\VSCodium\product.json'          = 'vscodium/product.json'
-        '%APPDATA%\VSCodium\User\keybindings.json' = 'vscodium/keybindings.json'
+        '~\.wslconfig'                         = 'windows/wslconfig'
+        '%APPDATA%\Code\User\keybindings.json' = 'vscode/keybindings.json'
     }
     Merges     = @{
         # GitHub's themes, as on the Mac; Noctalia's exist only on Linux.
-        '%APPDATA%\VSCodium\User\settings.json' = @('vscodium/settings.json', 'windows/vscodium.json')
+        '%APPDATA%\Code\User\settings.json'   = @('vscode/settings.json', 'windows/vscode.json')
         # T3 Code saves these itself, next to its threads and secrets, which stay
         # out of the checkout.
-        '~\.t3\userdata\settings.json'          = 't3code/settings.json'
-        '~\.t3\userdata\client-settings.json'   = 't3code/client-settings.json'
-        '~\.t3\userdata\keybindings.json'       = 't3code/keybindings.json'
+        '~\.t3\userdata\settings.json'        = 't3code/settings.json'
+        '~\.t3\userdata\client-settings.json' = 't3code/client-settings.json'
+        '~\.t3\userdata\keybindings.json'     = 't3code/keybindings.json'
     }
-    # VSCodium's extensions and its way into NixOS in WSL
-    Extensions = @{ codium = @('vscodium/extensions.txt', 'jeanp413.open-remote-wsl') }
+    # VS Code's extensions and its way into NixOS in WSL
+    Extensions = @{ code = @('vscode/extensions.txt', 'ms-vscode-remote.remote-wsl') }
     Taskbar    = 'windows/taskbar.xml'
     # NixOS-WSL's release image, checked against its SHA-256 before install
     Wsl        = @{

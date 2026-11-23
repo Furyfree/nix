@@ -29,7 +29,7 @@ binds {
     Mod+Shift+G hotkey-overlay-title="Focus or open Signal" { spawn "launch" "focus" "signal" "signal-desktop"; }
     Mod+Shift+E hotkey-overlay-title="Focus or open Fastmail" { spawn "launch" "focus" "com.fastmail.Fastmail" "fastmail"; }
     Mod+Shift+Z hotkey-overlay-title="Open Zed" { spawn "zeditor"; }
-    Mod+Shift+V hotkey-overlay-title="Open VSCodium" { spawn "codium"; }
+    Mod+Shift+V hotkey-overlay-title="Open VS Code" { spawn "code"; }
     Mod+Shift+T hotkey-overlay-title="Focus or open T3 Code" { spawn "launch" "focus" "com.t3tools.T3Code" "t3code-desktop"; }
     Mod+Shift+C hotkey-overlay-title="Focus or open Claude" { spawn "launch" "focus" "com.anthropic.Claude" "claude-desktop"; }
     // Does nothing on hosts without nixos/local-ai.nix.

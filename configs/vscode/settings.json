@@ -60,6 +60,8 @@
   "security.workspace.trust.untrustedFiles": "newWindow",
   "chat.tools.global.autoApprove": false,
   "telemetry.telemetryLevel": "off",
+  "workbench.enableExperiments": false,
+  "chat.disableAIFeatures": true,
   "redhat.telemetry.enabled": false,
   "python.languageServer": "None",
   "python.terminal.activateEnvironment": false

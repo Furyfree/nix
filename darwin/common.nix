@@ -13,7 +13,7 @@ _:
       # Terminal, editors and development
       "ghostty"
       "zed"
-      "vscodium"
+      "visual-studio-code"
       "jetbrains-toolbox"
       "t3-code"
 
