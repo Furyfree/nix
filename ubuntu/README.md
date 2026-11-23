@@ -22,7 +22,7 @@ agents; nothing here touches them.
    ```bash
    wget -qO- https://raw.githubusercontent.com/Furyfree/nix/BRANCH/ubuntu/bootstrap.sh | bash -s -- BRANCH
    ```
-2. Reboot, for the debloat, zsh and the `docker` and `kvm` groups. Then
+2. Reboot, for the debloat, zsh and the `windows-vm` and `kvm` groups. Then
    `mise install`, and 1Password, the work machine's SSH keys and `gh` as in
    [SSH keys](../README.md#ssh-keys).
 
