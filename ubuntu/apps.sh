@@ -260,12 +260,37 @@ install_daily_apps() {
     libreoffice-draw libreoffice-gtk3 celluloid
 }
 
+install_obs() {
+  # OBS's own Ubuntu build, from the PPA its install guide names: Ubuntu's has
+  # no Browser Source, and Flathub's cannot read the colours Noctalia writes for
+  # OBS. OBS Studio comes from that PPA alone, and nothing else does; the pin
+  # goes in first, and again whenever it changes.
+  local pin
+  pin=$(printf '%s\n' \
+    '# Take OBS Studio from the OBS PPA alone, and nothing else from it.' \
+    'Package: obs-studio' 'Pin: release o=LP-PPA-obsproject-obs-studio' 'Pin-Priority: 500' '' \
+    'Package: obs-studio' 'Pin: release o=Ubuntu' 'Pin-Priority: -1' '' \
+    'Package: *' 'Pin: release o=LP-PPA-obsproject-obs-studio' 'Pin-Priority: -1')
+  if [[ $(cat /etc/apt/preferences.d/obsproject 2>/dev/null) != "$pin" ]]; then
+    printf '%s\n' "$pin" | sudo tee /etc/apt/preferences.d/obsproject >/dev/null
+  fi
+  if ! has_source obsproject/obs-studio; then
+    key obsproject-archive-keyring \
+      'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xBC7345F522079769F5BBE987EFC71127F425E228' \
+      BC7345F522079769F5BBE987EFC71127F425E228
+    source_file obsproject 'Types: deb' 'URIs: https://ppa.launchpadcontent.net/obsproject/obs-studio/ubuntu' \
+      'Suites: resolute' 'Components: main' 'Architectures: amd64' \
+      'Signed-By: /usr/share/keyrings/obsproject-archive-keyring.gpg'
+  fi
+  apt_install obs-studio
+}
+
 install_flatpaks() {
   apt_install flatpak
   flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   local app missing=()
-  # Verified by their makers on Flathub
-  for app in md.obsidian.Obsidian com.github.PintaProject.Pinta com.obsproject.Studio; do
+  # Verified by their makers on Flathub; Ubuntu's archive has neither.
+  for app in md.obsidian.Obsidian com.github.PintaProject.Pinta; do
     flatpak info --user "$app" >/dev/null 2>&1 || missing+=("$app")
   done
   ((${#missing[@]})) || return 0
@@ -309,6 +334,7 @@ nice_to_have 'VS Code' install_vscode
 nice_to_have 'T3 Code' install_t3code
 nice_to_have 'JetBrains Toolbox' install_toolbox
 nice_to_have 'the daily apps' install_daily_apps
+nice_to_have 'OBS Studio' install_obs
 nice_to_have 'Flatpaks' install_flatpaks
 nice_to_have 'the Niri desktop' install_desktop
 
