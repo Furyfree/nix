@@ -1,4 +1,5 @@
-# Docker for development, and QEMU/KVM for guests managed with vm-curator.
+# Docker for development, and QEMU/KVM for guests managed with vm-curator
+# (nix run nixpkgs#vm-curator).
 { pkgs, ... }:
 
 let
