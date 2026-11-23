@@ -50,6 +50,8 @@
   "terminal.integrated.fontLigatures.enabled": false,
   "terminal.integrated.cwd": "${workspaceFolder}",
   "terminal.integrated.splitCwd": "workspaceRoot",
+  "nix.enableLanguageServer": true,
+  "nix.serverPath": "nixd",
   "tinymist.exportPdf": "onSave",
   "tinymist.outputPath": "$dir/$name",
 
