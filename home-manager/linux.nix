@@ -7,9 +7,12 @@ let
   inherit (config.lib.workstation) link script;
 in
 {
-  # gh opening the browser in its own systemd unit, and VS Code, which saves
-  # its settings itself.
+  # The default apps, gh opening the browser in its own systemd unit, and VS
+  # Code, which saves its settings itself. Where NixOS and Ubuntu name an app
+  # differently, mimeapps.list names both, and the first one installed opens:
+  # Strata or Nautilus, NixOS's LibreOffice or the Flatpak.
   workstation.settingMerges = ''
+    merge ${config.xdg.configHome}/mimeapps.list ${../configs/mimeapps.list} ini
     merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/linux.yml} yaml
     merge ${config.xdg.configHome}/Code/User/settings.json ${../configs/vscode/settings.json} json
   '';
