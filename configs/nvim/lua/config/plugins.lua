@@ -15,69 +15,110 @@ vim.api.nvim_create_autocmd("PackChanged", {
   end,
 })
 vim.pack.add({
-  "https://github.com/folke/snacks.nvim",
-  "https://github.com/folke/which-key.nvim",
-  "https://github.com/lewis6991/gitsigns.nvim",
   "https://github.com/nvim-mini/mini.nvim",
   "https://github.com/nvim-treesitter/nvim-treesitter",
   "https://github.com/neovim/nvim-lspconfig",
 }, { confirm = false })
+-- Delete plugins dropped from the list above, as :help vim.pack shows, so
+-- every machine's disk and the lock file follow this list.
+local dropped = vim.iter(vim.pack.get(nil, { info = false }))
+  :filter(function(plugin) return not plugin.active end)
+  :map(function(plugin) return plugin.spec.name end)
+  :totable()
+if #dropped > 0 then
+  vim.pack.del(dropped)
+end
 
--- File finder, search, file tree, terminal and buffer closing.
-require("snacks").setup({
-  explorer = { enabled = true },
-  picker = {
-    enabled = true,
-    -- Dotfiles are useful here; still respect Git ignores and hide .git.
-    sources = {
-      files = { hidden = true, exclude = { ".git" } },
-      grep = { hidden = true, exclude = { ".git" } },
-      explorer = {
-        hidden = true,
-        exclude = { ".git" },
-        layout = { preset = "sidebar", preview = false, layout = { position = "right" } },
-        -- The tree sits on the right; Ctrl+H returns to the editor.
-        win = { list = { keys = { ["<c-h>"] = function() vim.cmd.wincmd("h") end } } },
-      },
-    },
-    icons = { files = { enabled = false } },
-    win = { input = { keys = { ["<Esc>"] = { "close", mode = { "n", "i" } } } } },
-  },
-})
 local map = vim.keymap.set
-map("n", "<leader><space>", function() Snacks.picker.files() end, { desc = "Find file" })
-map("n", "<leader>/", function() Snacks.picker.grep() end, { desc = "Search file contents" })
-map("n", "<leader>,", function() Snacks.picker.buffers() end, { desc = "Open buffers" })
-map("n", "<leader>e", function() Snacks.explorer() end, { desc = "File explorer" })
-map("n", "<leader>sh", function() Snacks.picker.help() end, { desc = "Search help" })
-map("n", "<leader>bd", function() Snacks.bufdelete() end, { desc = "Close buffer" })
-map("n", "<leader>bo", function() Snacks.bufdelete.other() end, { desc = "Close other buffers" })
--- Shared with Zed and VSCodium.
-map({ "n", "t" }, "<C-M-S-j>", function() Snacks.terminal.toggle() end, { desc = "Toggle terminal" })
 
-require("which-key").setup({
-  icons = { mappings = false },
-  spec = {
-    { "<leader>b", group = "Buffer" },
-    { "<leader>c", group = "Code" },
-    { "<leader>s", group = "Search" },
-    { "<leader>g", group = "Git" },
-    { "<leader>gh", group = "Hunk" },
-  },
-})
+-- File finder and search. mini.pick leaves dotfiles to ripgrep's own config.
+vim.env.RIPGREP_CONFIG_PATH = vim.fn.stdpath("config") .. "/ripgreprc"
+require("mini.pick").setup()
+map("n", "<leader><space>", "<cmd>Pick files<cr>", { desc = "Find file" })
+map("n", "<leader>/", "<cmd>Pick grep_live<cr>", { desc = "Search file contents" })
+map("n", "<leader>,", "<cmd>Pick buffers<cr>", { desc = "Open buffers" })
+map("n", "<leader>sh", "<cmd>Pick help<cr>", { desc = "Search help" })
 
-require("gitsigns").setup({
-  on_attach = function(buf)
-    local gs = require("gitsigns")
-    local function bmap(key, action, description)
-      vim.keymap.set("n", key, action, { buffer = buf, desc = description })
+-- File tree from the working directory to the current file. Rename or delete
+-- by editing the text, then = to apply.
+require("mini.files").setup()
+map("n", "<leader>e", function()
+  local file = vim.api.nvim_buf_get_name(0)
+  MiniFiles.open(vim.fn.filereadable(file) == 1 and file or nil)
+  MiniFiles.reveal_cwd()
+end, { desc = "File explorer" })
+
+-- Close buffers but keep the window layout.
+require("mini.bufremove").setup()
+map("n", "<leader>bd", function() MiniBufremove.delete() end, { desc = "Close buffer" })
+map("n", "<leader>bo", function()
+  local current = vim.api.nvim_get_current_buf()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.bo[buf].buflisted and buf ~= current then
+      MiniBufremove.delete(buf)
     end
-    -- A hunk is a consecutive group of changed lines. No staging/reset keys.
-    bmap("]h", function() gs.nav_hunk("next") end, "Next Git hunk")
-    bmap("[h", function() gs.nav_hunk("prev") end, "Previous Git hunk")
-    bmap("<leader>ghp", gs.preview_hunk_inline, "Preview Git hunk")
-  end,
+  end
+end, { desc = "Close other buffers" })
+
+-- Terminal at the bottom; the same key hides it and keeps the shell running.
+-- Shared with Zed and VSCodium.
+local terminal
+map({ "n", "t" }, "<C-M-S-j>", function()
+  local win = terminal and vim.fn.bufwinid(terminal) or -1
+  if win ~= -1 then
+    vim.api.nvim_win_hide(win)
+    return
+  end
+  vim.cmd("botright split")
+  if terminal and vim.api.nvim_buf_is_valid(terminal) then
+    vim.api.nvim_win_set_buf(0, terminal)
+  else
+    vim.cmd.terminal()
+    terminal = vim.api.nvim_get_current_buf()
+  end
+  vim.cmd.startinsert()
+end, { desc = "Toggle terminal" })
+
+-- Key hints, as in MiniMax: the keys below open a list of what can follow.
+local clue = require("mini.clue")
+clue.setup({
+  clues = {
+    { mode = "n", keys = "<leader>b", desc = "+Buffer" },
+    { mode = "n", keys = "<leader>c", desc = "+Code" },
+    { mode = "n", keys = "<leader>s", desc = "+Search" },
+    { mode = "n", keys = "<leader>g", desc = "+Git" },
+    { mode = "n", keys = "<leader>gh", desc = "+Hunk" },
+    clue.gen_clues.builtin_completion(),
+    clue.gen_clues.g(),
+    clue.gen_clues.marks(),
+    clue.gen_clues.registers(),
+    clue.gen_clues.square_brackets(),
+    clue.gen_clues.windows({ submode_resize = true }),
+    clue.gen_clues.z(),
+  },
+  triggers = {
+    { mode = { "n", "x" }, keys = "<leader>" },
+    { mode = { "n", "x" }, keys = "[" },
+    { mode = { "n", "x" }, keys = "]" },
+    { mode = "i", keys = "<C-x>" },
+    { mode = { "n", "x" }, keys = "g" },
+    { mode = { "n", "x" }, keys = "'" },
+    { mode = { "n", "x" }, keys = "`" },
+    { mode = { "n", "x" }, keys = '"' },
+    { mode = { "i", "c" }, keys = "<C-r>" },
+    { mode = "n", keys = "<C-w>" },
+    { mode = { "n", "x" }, keys = "z" },
+  },
+  window = { delay = 200 },
 })
+
+-- Git change marks; ]h and [h jump between hunks, consecutive changed lines.
+-- No staging/reset keys.
+require("mini.diff").setup({
+  view = { style = "sign" },
+  mappings = { apply = "", reset = "" },
+})
+map("n", "<leader>ghp", function() MiniDiff.toggle_overlay() end, { desc = "Show Git changes" })
 
 -- Open files as tabs along the top.
 require("mini.tabline").setup()
