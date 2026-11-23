@@ -43,7 +43,8 @@ Set-Alias c Clear-Host
 Set-Alias f fastfetch
 Set-Alias help tldr
 
-# nix-workstation's switch, update and mise on Linux
+# nix-workstation's switch, update, mise and nvim on Linux
 function nswitch { & "$HOME\Projects\nix\windows\apply.ps1" @args }
 function nupdate { & "$HOME\Projects\nix\windows\apply.ps1" -Update @args }
 function mup { mise upgrade @args }
+function vup { nvim --headless "+lua vim.pack.update(nil, { force = true })" +qa }

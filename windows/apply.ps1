@@ -454,13 +454,6 @@ if (Get-Command mise -ErrorAction Ignore) {
     }
     mise install --yes
     if ($LASTEXITCODE -ne 0) { $failures.Add("mise install ($LASTEXITCODE)") }
-    # Neovim's plugins at the versions in configs/nvim/nvim-pack-lock.json, as
-    # nswitch moves them on the other systems.
-    if (mise which nvim 2> $null) {
-        Write-Host 'sync     Neovim plugins'
-        mise exec -- nvim --headless "+lua vim.pack.update(nil, { force = true, target = 'lockfile' })" +qa
-        if ($LASTEXITCODE -ne 0) { $failures.Add("Neovim plugins ($LASTEXITCODE)") }
-    }
 }
 
 # Apps rewrite these files, so only the repo's keys are set, as on Linux.
