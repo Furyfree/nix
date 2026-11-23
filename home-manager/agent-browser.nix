@@ -5,7 +5,7 @@
 { config, pkgs, ... }:
 
 let
-  inherit (config.lib.workstation) link script;
+  inherit (config.lib.workstation) script;
   # agent-browser expands no ~ in its config, so Nix writes the paths.
   settings = pkgs.writeText "agent-browser.json" (
     builtins.toJSON {
@@ -18,7 +18,6 @@ let
 in
 {
   home.file.".local/bin/agent-brave".source = script "agent-brave";
-  xdg.configFile."mise/conf.d/personal.toml".source = link "mise/conf.d/personal.toml";
   workstation.settingMerges = ''
     merge ${config.home.homeDirectory}/.agent-browser/config.json ${settings} json
   '';

@@ -14,7 +14,7 @@
             Id   = 'Microsoft.Office'
             Args = @('--override', '/configure "{configs}\windows\office.xml"')
         }
-        # Not from Mise; configs/mise/conf.d/windows-tools.toml says why.
+        # Not from Mise; configs/mise/conf.d/windows.toml says why.
         '7zip.7zip'
         'Gyan.FFmpeg'
         'ImageMagick.ImageMagick'
@@ -34,8 +34,7 @@
         '~\.config\starship.toml'                          = 'starship/starship.toml'
         '%LOCALAPPDATA%\nvim'                              = 'nvim'
         '~\.config\mise\config.toml'                       = 'mise/config.toml'
-        '~\.config\mise\conf.d\agents.toml'                = 'mise/conf.d/agents.toml'
-        '~\.config\mise\conf.d\windows-tools.toml'         = 'mise/conf.d/windows-tools.toml'
+        '~\.config\mise\conf.d\windows.toml'               = 'mise/conf.d/windows.toml'
         '~\.ssh\config'                                    = 'ssh/windows.conf'
         '%LOCALAPPDATA%\1Password\config\ssh\agent.toml'   = '1password/ssh/personal.toml'
         '%DOCUMENTS%\PowerShell\profile.ps1'               = 'windows/powershell/profile.ps1'

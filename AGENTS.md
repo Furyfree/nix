@@ -77,7 +77,8 @@ GitHub issues, and a workaround links its issue.
   `script`. NixOS and Ubuntu take the Noctalia desktop in `linux.nix` and Niri
   in `niri.nix`; NixOS and the personal Mac add the agents' browser in
   `agent-browser.nix`. `cli-tools.nix` is the Nix CLI list, which the Mac's
-  brews and Windows' `windows-tools.toml` mirror.
+  brews mirror. Mise reads `configs/mise/config.toml` and one file per setup
+  from `configs/mise/conf.d/`.
 - `configs/`: native app preferences, linked live from the checkout; keep the
   checkout at `~/Projects/nix`. SSH hosts stay in private 1Password documents,
   never here. `configs/hypr/hosts/<host>.lua` and `configs/niri/hosts/<host>.kdl`

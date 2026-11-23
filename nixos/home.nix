@@ -85,7 +85,7 @@ in
       lib.genAttrs
         [
           "zathura/zathurarc"
-          "mise/conf.d/nixos-tools.toml"
+          "mise/conf.d/nixos.toml"
           "voxtype/config.toml"
           "MangoHud/MangoHud.conf"
         ]

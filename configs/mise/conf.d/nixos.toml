@@ -1,0 +1,58 @@
+# The NixOS desktop and laptop; nixos/home.nix links this file.
+[tools]
+# Runs the npm tools below.
+node = "lts"
+
+# Language runtimes: current LTS families, each at its latest patch
+dotnet = "10"
+go = "latest"
+java = "corretto-25"
+rust = { version = "stable", components = "rust-analyzer" }
+uv = "latest"
+
+# Go's language server and linters, which need Go.
+"go:golang.org/x/tools/gopls" = "latest"
+staticcheck = "latest"
+golangci-lint = "latest"
+
+# ACP adapters for Obsidian's Agent Client; OpenCode and Grok speak ACP natively.
+"npm:@agentclientprotocol/claude-agent-acp" = "latest"
+"npm:@agentclientprotocol/codex-acp" = "latest"
+
+# Agentic helpers
+"npm:@llamaindex/liteparse" = "latest"
+
+# Language helpers
+"npm:markdownlint-cli" = "latest"
+ruff = "latest"
+stylua = "latest"
+ty = "latest"
+lua-language-server = "latest"
+"npm:bash-language-server" = "latest"
+
+# Shell and configuration helpers
+shellcheck = "latest"
+shfmt = "latest"
+taplo = "latest"
+jactionlint = "latest"
+delta = "latest"
+# Deja autosuggestions; enable together with [plugins.deja] in sheldon/plugins.toml.
+# "github:Giammarco-Ferranti/deja" = "latest"
+
+"npm:@openai/codex" = "latest"
+"npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = ["@anthropic-ai/claude-code"] }
+
+tinymist = "latest"
+# Usage data for Noctalia's AI usage widget.
+"cargo:ai-usagebar" = "latest"
+
+# The other agent CLIs; ai-workflow links their shared rules and skills.
+antigravity-cli = "latest"
+"npm:@xai-official/grok" = "latest"
+"npm:@opencode/cli" = { version = "latest", allow_builds = ["@opencode/cli"], allow_low_downloads = true }
+pi = "latest"
+# Pi's ACP adapter for Obsidian's Agent Client.
+"npm:pi-acp" = "latest"
+
+# Drives Brave Origin through agent-brave, a POSIX script.
+agent-browser = "latest"
