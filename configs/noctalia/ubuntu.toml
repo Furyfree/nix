@@ -1,0 +1,6 @@
+# Ubuntu's Noctalia settings; ubuntu/home.nix links this file, which loads
+# after config.toml and niri.toml. Ubuntu cannot hibernate, as its swap is
+# smaller than memory and Secure Boot forbids it, so config.toml's hibernate
+# step locks and suspends instead.
+[idle.behavior.hibernate]
+action = "lock_and_suspend"
