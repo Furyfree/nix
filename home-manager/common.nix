@@ -102,6 +102,62 @@ in
           "linkGeneration"
         ]
         ''
+          # Yq's INI output pads "key = value", which xdg-open's reader skips,
+          # and reads ";" as a comment, which mimeapps.list's lists use; merge
+          # INI line by line instead. The patch's keys replace the target's in
+          # their section, as plain key=value; everything else stays.
+          merge_ini() {
+            local target=$1 patch=$2 line section="" key value entry out=""
+            local -A patched=() merged_keys=()
+            local -a order=()
+            while IFS= read -r line || [[ -n $line ]]; do
+              if [[ $line == \[*\] ]]; then
+                section=''${line:1:-1}
+              elif [[ $line == *=* ]]; then
+                key=''${line%%=*} value=''${line#*=}
+                key=''${key%"''${key##*[![:space:]]}"} value=''${value#"''${value%%[![:space:]]*}"}
+                [[ -n ''${patched[$section/$key]+set} ]] || order+=("$section/$key")
+                patched[$section/$key]=$value
+              fi
+            done <"$patch"
+            # The patch's keys a section has not had yet go at its end.
+            merge_ini_rest() {
+              local entry
+              for entry in "''${order[@]}"; do
+                if [[ ''${entry%%/*} == "$1" && -z ''${merged_keys[$entry]+set} ]]; then
+                  out+="''${entry#*/}=''${patched[$entry]}"$'\n'
+                  merged_keys[$entry]=1
+                fi
+              done
+            }
+            section=""
+            while IFS= read -r line || [[ -n $line ]]; do
+              if [[ $line == \[*\] ]]; then
+                merge_ini_rest "$section"
+                section=''${line:1:-1}
+                out+="$line"$'\n'
+              elif [[ $line == *=* ]]; then
+                key=''${line%%=*} value=''${line#*=}
+                key=''${key%"''${key##*[![:space:]]}"} value=''${value#"''${value%%[![:space:]]*}"}
+                if [[ -n ''${patched[$section/$key]+set} ]]; then
+                  value=''${patched[$section/$key]}
+                  merged_keys[$section/$key]=1
+                fi
+                out+="$key=$value"$'\n'
+              else
+                out+="$line"$'\n'
+              fi
+            done <"$target"
+            merge_ini_rest "$section"
+            # Sections only the patch has.
+            for entry in "''${order[@]}"; do
+              [[ -z ''${merged_keys[$entry]+set} ]] || continue
+              section=''${entry%%/*}
+              out+=$'\n'"[$section]"$'\n'
+              merge_ini_rest "$section"
+            done
+            [[ -v DRY_RUN ]] || printf '%s' "$out" >"$target"
+          }
           merge() {
             local target=$1 patch=$2 format=$3 merged
             local expression='select(fi == 0) * select(fi == 1)'
@@ -114,6 +170,8 @@ in
             # Yq reads an empty file as nothing, so start those from the patch too.
             if [[ ! -s $target ]]; then
               run install -D -m 0600 "$patch" "$target"
+            elif [[ $format == ini ]]; then
+              merge_ini "$target" "$patch"
             elif merged=$(${lib.getExe pkgs.yq-go} ea -p "$format" -o "$format" \
               "$expression" "$target" "$patch"); then
               # Rewrite in place to keep the file's owner and mode.
