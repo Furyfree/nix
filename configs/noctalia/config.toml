@@ -218,11 +218,8 @@ enabled = [
     "tphilippot/git_companion",
     "profidev/hypr-screen-mirror",
     "kenn/keybind-cheatsheet",
-    "8bury/mini-docker",
     "rylos/tailnet",
     "aristides/udiskie",
-    "rxtsel/portctl",
-    "cleboost/ssh-launcher",
     "8bury/lid-guard",
     "furyfree/key-promoter",
 ]
@@ -249,9 +246,6 @@ terminal_cmd = "ghostty --class=com.mitchellh.ghostty.presentation -e"
 agent_cmd = "claude"
 agent_order = "claude, codex, grok, opencode"
 panel_open_near_click = true
-
-[plugin_settings."8bury/mini-docker"]
-manager_position = "auto"
 
 [plugin_settings."aristides/udiskie"]
 manager_open_near_click = true
