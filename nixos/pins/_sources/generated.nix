@@ -16,26 +16,26 @@
   };
   claude-desktop = {
     pname = "claude-desktop";
-    version = "5.11492.5";
+    version = "6.28899.6";
     src = fetchurl {
-      url = "https://downloads.claude.ai/claude-desktop/apt/stable/pool/main/c/claude-desktop/claude-desktop_5.11492.5_amd64.deb";
-      sha256 = "sha256-uWIIsgfkULdA99vjBPYHf+2A5/PTfd1UWZHE6CAVZM8=";
+      url = "https://downloads.claude.ai/claude-desktop/apt/stable/pool/main/c/claude-desktop/claude-desktop_6.28899.6_amd64.deb";
+      sha256 = "sha256-fjgWAdhlcBSWQ9Uum4nCZXWrEvp4iqQf/dTMpbBjjPg=";
     };
   };
   computer-use-linux = {
     pname = "computer-use-linux";
-    version = "0.7.56";
+    version = "0.7.60";
     src = fetchurl {
-      url = "https://github.com/agent-sh/computer-use-linux/releases/download/v0.7.56/computer-use-linux-x86_64-unknown-linux-gnu";
-      sha256 = "sha256-PJfY+odkDppOs2EtrJXEfR04X+F6CcLlbTeUhqG5u0Q=";
+      url = "https://github.com/agent-sh/computer-use-linux/releases/download/v0.7.60/computer-use-linux-x86_64-unknown-linux-gnu";
+      sha256 = "sha256-Y/pTJvi8da9mGPVmGz5NBr0hmmLkW0kltokwlZjD438=";
     };
   };
   computer-use-linux-indicator = {
     pname = "computer-use-linux-indicator";
-    version = "0.7.56";
+    version = "0.7.60";
     src = fetchurl {
-      url = "https://github.com/agent-sh/computer-use-linux/releases/download/v0.7.56/computer-use-linux-indicator-x86_64-unknown-linux-gnu";
-      sha256 = "sha256-6pS62MVNqYnBkR9GXchhLhQA9gMRxIugwiOAseA1kS8=";
+      url = "https://github.com/agent-sh/computer-use-linux/releases/download/v0.7.60/computer-use-linux-indicator-x86_64-unknown-linux-gnu";
+      sha256 = "sha256-Nc0A2yUjUdLwnVxf5VwHMZgcIPjBIeuBTJDOBAUK3Lo=";
     };
   };
   dockur-windows = {
@@ -48,10 +48,10 @@
   };
   effectcraft = {
     pname = "effectcraft";
-    version = "0.24.1";
+    version = "0.25.1";
     src = fetchurl {
-      url = "https://github.com/storytold/effectcraft/releases/download/v0.24.1/effectcraft-0.24.1-linux-x86_64.tar.gz";
-      sha256 = "sha256-XOA5NpAUQif6kYboIwitY4pu9tn5dsmW5tA7W1G2Wns=";
+      url = "https://github.com/storytold/effectcraft/releases/download/v0.25.1/effectcraft-0.25.1-linux-x86_64.tar.gz";
+      sha256 = "sha256-byn/fgNZkJ/h2/b9PP2EMKA2I0m2EsXrLPyP7nueJ2A=";
     };
   };
   filmcraft = {
