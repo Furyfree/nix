@@ -203,9 +203,6 @@ in
     {
       "org/gnome/desktop/interface" = {
         gtk-enable-primary-paste = true;
-        icon-theme = "Papirus-Dark";
-        cursor-theme = "Bibata-Modern-Ice";
-        cursor-size = 24;
         # Apps list their buttons and fields for computer-use-linux.
         toolkit-accessibility = true;
       };
