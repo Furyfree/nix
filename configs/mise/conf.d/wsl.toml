@@ -1,43 +1,16 @@
-# NixOS in WSL on the Windows desktop; nixos/hosts/wsl/home.nix links this file.
+# NixOS in WSL on the Windows desktop, where development from Windows runs;
+# nixos/hosts/wsl/home.nix links this file.
 [tools]
 # Runs the npm tools below.
 node = "lts"
-
-# Language runtimes: current LTS families, each at its latest patch
+# Runtimes for school and projects; projects bring their own linters.
 dotnet = "10"
-go = "latest"
 java = "corretto-25"
-rust = { version = "stable", components = "rust-analyzer" }
 uv = "latest"
-
-# Go's language server and linters, which need Go.
-"go:golang.org/x/tools/gopls" = "latest"
-staticcheck = "latest"
-golangci-lint = "latest"
-
-# ACP adapters for Obsidian's Agent Client; OpenCode and Grok speak ACP natively.
-"npm:@agentclientprotocol/claude-agent-acp" = "latest"
-"npm:@agentclientprotocol/codex-acp" = "latest"
-
-# Agentic helpers
-"npm:@llamaindex/liteparse" = "latest"
-
-# Language helpers
-"npm:markdownlint-cli" = "latest"
-ruff = "latest"
-stylua = "latest"
-ty = "latest"
-lua-language-server = "latest"
-"npm:bash-language-server" = "latest"
-
-# Shell and configuration helpers
-shellcheck = "latest"
-shfmt = "latest"
-taplo = "latest"
-jactionlint = "latest"
+# Git's pager (configs/git/config).
 delta = "latest"
-# Deja autosuggestions; enable together with [plugins.deja] in sheldon/plugins.toml.
-# "github:Giammarco-Ferranti/deja" = "latest"
-
+# Agents; ai-workflow links their shared rules and skills.
 "npm:@openai/codex" = "latest"
 "npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = ["@anthropic-ai/claude-code"] }
+# The document-analysis skill's reader.
+"npm:@llamaindex/liteparse" = "latest"

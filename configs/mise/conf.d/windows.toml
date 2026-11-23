@@ -1,69 +1,38 @@
 # Windows, the desktop and the VM; windows/profiles/vm.psd1 links this file.
+# Agents run here too; development runs in NixOS in WSL. winget keeps 7-Zip,
+# since Mise's is the 32-bit 7za without RAR; FFmpeg, since Mise's is a conda
+# environment with Python; and ImageMagick, whose own build is there.
 [tools]
 # Runs the npm tools below.
 node = "lts"
-
-# Language runtimes: current LTS families, each at its latest patch
+# win-setup builds on Windows.
 dotnet = "10"
-go = "latest"
-java = "corretto-25"
-rust = { version = "stable", components = "rust-analyzer" }
-uv = "latest"
-
-# Go's language server and linters, which need Go.
-"go:golang.org/x/tools/gopls" = "latest"
-staticcheck = "latest"
-golangci-lint = "latest"
-
-# ACP adapters for Obsidian's Agent Client; OpenCode and Grok speak ACP natively.
-"npm:@agentclientprotocol/claude-agent-acp" = "latest"
-"npm:@agentclientprotocol/codex-acp" = "latest"
-
-# Agentic helpers
-"npm:@llamaindex/liteparse" = "latest"
-
-# Language helpers
-"npm:markdownlint-cli" = "latest"
-ruff = "latest"
-stylua = "latest"
-ty = "latest"
-lua-language-server = "latest"
-"npm:bash-language-server" = "latest"
-
-# Shell and configuration helpers
-shellcheck = "latest"
-shfmt = "latest"
-taplo = "latest"
-jactionlint = "latest"
+# Git's pager (configs/git/config).
 delta = "latest"
-# Deja autosuggestions; enable together with [plugins.deja] in sheldon/plugins.toml.
-# "github:Giammarco-Ferranti/deja" = "latest"
-
+# Agents; ai-workflow links their shared rules and skills.
 "npm:@openai/codex" = "latest"
 "npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = ["@anthropic-ai/claude-code"] }
-
+# The document-analysis skill's reader.
+"npm:@llamaindex/liteparse" = "latest"
+# nswitch sets apps' settings with it.
+yq = "latest"
+# The PowerShell profile's prompt, jumps, listings and tools.
 starship = "latest"
-fzf = "latest"
 zoxide = "latest"
-gh = "latest"
+fzf = "latest"
 bat = "latest"
 eza = "latest"
-yazi = "latest"
-fd = "latest"
-ripgrep = "latest"
+lazygit = "latest"
 fastfetch = "latest"
 tealdeer = "latest"
-just = "latest"
-lazygit = "latest"
-yq = "latest"
+neovim = "latest"
+# Neovim builds its tree-sitter parsers with it.
+tree-sitter = "latest"
+# For agents: GitHub, search and videos.
+gh = "latest"
+ripgrep = "latest"
+fd = "latest"
+yt-dlp = "latest"
 # pdftotext and the other Poppler tools, from conda-forge: Poppler makes no
 # Windows build.
 poppler = "latest"
-yt-dlp = "latest"
-typst = "latest"
-duf = "latest"
-# Builds with cargo, which links with the Visual Studio C++ Build Tools.
-tokei = "latest"
-gitleaks = "latest"
-neovim = "latest"
-tree-sitter = "latest"
