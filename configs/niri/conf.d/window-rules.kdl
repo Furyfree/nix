@@ -73,6 +73,22 @@ window-rule {
     }
 }
 
+// Brave's picture-in-picture window, such as Spotify's mini player, has the
+// page title without Brave's " - Brave Origin" suffix.
+window-rule {
+    match app-id=r#"^brave-origin$"#
+    exclude title=r#" - Brave Origin$"#
+    open-floating true
+    open-focused false
+    default-floating-position x=16 y=16 relative-to="bottom-right"
+    default-column-width {
+        proportion 0.2
+    }
+    default-window-height {
+        proportion 0.33
+    }
+}
+
 // These apps expose background alpha while keeping their content opaque.
 window-rule {
     match app-id=r#"^com\.mitchellh\.ghostty(\.presentation)?$"#
