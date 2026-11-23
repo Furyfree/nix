@@ -108,7 +108,7 @@ if ! has_source download.docker.com; then
 fi
 
 apt_install zsh git git-lfs build-essential ghostty brave-origin 1password 1password-cli \
-  docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin \
+  docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras uidmap \
   qemu-system-x86 ovmf swtpm swtpm-tools wireguard-tools
 
 if [[ ! -x $HOME/.local/bin/zed ]]; then
@@ -150,17 +150,16 @@ for group in windows-vm kvm; do
   fi
 done
 
-# --- Nice-to-haves ----------------------------------------------------------
+# This account's own Docker runs rootless, without root rights, and its
+# "rootless" CLI context makes it the default; `sudo docker` reaches the system
+# one, which runs the Windows VM. Ubuntu's AppArmor profile lets rootlesskit
+# create its user namespace.
+if [[ ! -e ${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user/docker.service ]]; then
+  log 'rootless Docker for this account'
+  dockerd-rootless-setuptool.sh install
+fi
 
-install_vscodium() {
-  if ! has_source download.vscodium.com; then
-    key vscodium-archive-keyring https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg \
-      1302DE60231889FE1EBACADC54678CF75A278D9C
-    source_file vscodium 'Types: deb' 'URIs: https://download.vscodium.com/debs' 'Suites: vscodium' \
-      'Components: main' 'Architectures: amd64' 'Signed-By: /usr/share/keyrings/vscodium-archive-keyring.gpg'
-  fi
-  apt_install codium
-}
+# --- Nice-to-haves ----------------------------------------------------------
 
 install_t3code() {
   command -v t3code >/dev/null && return
@@ -220,12 +219,7 @@ install_daily_apps() {
     # An empty spotify.list stops the package from adding the same source.
     sudo touch /etc/apt/sources.list.d/spotify.list
   fi
-  # The OBS Project's PPA carries only obs-studio.
-  if ! has_source obsproject/obs-studio; then
-    sudo add-apt-repository -y ppa:obsproject/obs-studio >/dev/null
-    refreshed=false
-  fi
-  apt_install claude-desktop spotify-client obs-studio mpv
+  apt_install claude-desktop spotify-client
 }
 
 install_flatpaks() {
@@ -234,7 +228,7 @@ install_flatpaks() {
   local app missing=()
   # Verified by their makers on Flathub
   for app in org.libreoffice.LibreOffice io.github.celluloid_player.Celluloid md.obsidian.Obsidian \
-    com.github.PintaProject.Pinta; do
+    com.github.PintaProject.Pinta com.obsproject.Studio; do
     flatpak info --user "$app" >/dev/null 2>&1 || missing+=("$app")
   done
   ((${#missing[@]})) || return 0
@@ -271,10 +265,9 @@ install_desktop() {
     bibata-cursor-theme papirus-icon-theme qt5ct qt6ct fonts-inter fonts-jetbrains-mono
 }
 
-nice_to_have 'VSCodium' install_vscodium
 nice_to_have 'T3 Code' install_t3code
 nice_to_have 'JetBrains Toolbox' install_toolbox
-nice_to_have 'Claude Desktop, Spotify, OBS and mpv' install_daily_apps
+nice_to_have 'Claude Desktop and Spotify' install_daily_apps
 nice_to_have 'Flatpaks' install_flatpaks
 nice_to_have 'the Niri desktop' install_desktop
 

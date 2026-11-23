@@ -1,18 +1,15 @@
 # Home Manager for every Linux machine, NixOS and Ubuntu: the Noctalia
-# desktop's settings, GTK and Qt, the removable-drive mounter, VSCodium's Linux
-# paths and the Linux Mise tools. The compositor's half comes from its own
-# module.
+# desktop's settings, GTK and Qt, the removable-drive mounter and the Linux
+# Mise tools. The compositor's half comes from its own module.
 { config, lib, ... }:
 
 let
   inherit (config.lib.workstation) link script;
 in
 {
-  # gh opening the browser in its own systemd unit, and VSCodium, which saves
-  # its settings itself.
+  # gh opening the browser in its own systemd unit.
   workstation.settingMerges = ''
     merge ${config.xdg.configHome}/gh/config.yml ${../configs/gh/linux.yml} yaml
-    merge ${config.xdg.configHome}/VSCodium/User/settings.json ${../configs/vscodium/settings.json} json
   '';
 
   xdg = {
@@ -46,8 +43,6 @@ in
         [
           "zsh/conf.d/noctalia.zsh"
           "noctalia/config.toml"
-          "noctalia/vscodium.toml"
-          "noctalia/templates/vscodium-output-path.sh"
           "noctalia/templates/strata.toml"
           "noctalia/assets/profile-picture.jpg"
           "noctalia/assets/profile-picture-circle.svg"
@@ -83,11 +78,7 @@ in
           icon_theme=Papirus-Dark
           style=Fusion
         '';
-      })
-      // lib.mapAttrs (_: name: { source = link "vscodium/${name}"; }) {
-        "VSCodium/product.json" = "product.json";
-        "VSCodium/User/keybindings.json" = "keybindings.json";
-      };
+      });
   };
 
   home = {

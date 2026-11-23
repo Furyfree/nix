@@ -49,7 +49,6 @@ in
     loupe
     gnome-calculator
     celluloid
-    mpv
     pinta
     libreoffice
     (accessible vscodium)

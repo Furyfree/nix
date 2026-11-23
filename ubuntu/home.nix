@@ -130,7 +130,6 @@ in
         (map (name: "applications/${name}.desktop") [
           "qt5ct"
           "qt6ct"
-          "mpv"
           "org.freedesktop.IBus.Setup"
           "gnome-language-selector"
           "dev.noctalia.Noctalia"
