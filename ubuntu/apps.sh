@@ -313,8 +313,10 @@ install_desktop() {
   apt_install --no-install-recommends niri xwayland-satellite gnome-keyring xdg-desktop-portal-gnome xdg-desktop-portal-gtk
   # Noctalia with its external-screen brightness helper, the removable-drive
   # mounter and the theme; qt5ct and qt6ct give Qt apps Noctalia's colours.
+  # gawk becomes awk, as on NixOS: the Papirus template's folder colours need
+  # its strtonum, which Ubuntu's mawk lacks.
   apt_install noctalia udiskie ddcutil bibata-cursor-theme papirus-icon-theme qt5ct qt6ct \
-    fonts-inter fonts-jetbrains-mono
+    fonts-inter fonts-jetbrains-mono gawk
   # The session bus on dbus-broker, which Ubuntu makes the default from 26.10
   # (LP: #2015538): dbus-daemon waits two minutes on a service that failed to
   # start, so logging in right after a logout left the GNOME portal, and the
