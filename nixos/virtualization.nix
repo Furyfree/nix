@@ -23,9 +23,11 @@ in
   ];
 
   # `docker` reaches each user's rootless Docker, which cannot give root; the
-  # system Docker runs the Windows VM and answers `sudo docker`.
+  # system Docker runs the Windows VM and answers `sudo docker`. Its socket
+  # starts it when first reached, not at boot.
   virtualisation.docker = {
     enable = true;
+    enableOnBoot = false;
     daemon.settings = localPorts // {
       log-driver = "local";
     };
