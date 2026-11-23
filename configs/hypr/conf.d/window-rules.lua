@@ -64,6 +64,21 @@ hl.window_rule({
     center = true,
 })
 
+hl.window_rule({
+    name = "brave-picture-in-picture",
+    -- Brave's picture-in-picture window, such as Spotify's mini player, has
+    -- the page title without Brave's " - Brave Origin" suffix.
+    match = {
+        class = "^brave-origin$",
+        initial_title = "negative:.* - Brave Origin$",
+    },
+    float = true,
+    pin = true,
+    no_initial_focus = true,
+    size = { "monitor_w*0.2", "monitor_h*0.33" },
+    move = { "monitor_w-window_w-16", "monitor_h-window_h-16" },
+})
+
 -- These classes expose background alpha while keeping their content opaque.
 -- Verified with hyprctl clients; the presentation profile has its own app ID.
 hl.window_rule({
