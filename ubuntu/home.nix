@@ -61,8 +61,10 @@ in
       ++ [ windows-vm ];
     stateVersion = "26.11";
     # Ptyxis uses only profiles in its list, which also holds those made in its
-    # own settings: add ours beside them, and make it the default until another
-    # is chosen there. Home Manager's dconf step drops its bus helper when done.
+    # own settings: add ours beside them and make it the default when it goes
+    # in. Ptyxis has made a default of its own by then, since bootstrap.sh runs
+    # in it; a default chosen later in its settings stays. Home Manager's dconf
+    # step drops its bus helper when done.
     activation.ptyxisProfile = lib.hm.dag.entryAfter [ "dconfSettings" ] ''
       ptyxis_dconf() {
         if [[ -v DBUS_SESSION_BUS_ADDRESS ]]; then
@@ -76,7 +78,10 @@ in
       case $uuids in
         *"'${ptyxisProfile}'"*) ;;
         "" | "@as []") run ptyxis_dconf write /org/gnome/Ptyxis/profile-uuids "['${ptyxisProfile}']" ;;
-        *) run ptyxis_dconf write /org/gnome/Ptyxis/profile-uuids "['${ptyxisProfile}', ''${uuids#[}" ;;
+        *)
+          run ptyxis_dconf write /org/gnome/Ptyxis/profile-uuids "['${ptyxisProfile}', ''${uuids#[}"
+          run ptyxis_dconf write /org/gnome/Ptyxis/default-profile-uuid "'${ptyxisProfile}'"
+          ;;
       esac
       case $(ptyxis_dconf read /org/gnome/Ptyxis/default-profile-uuid) in
         "" | "'''") run ptyxis_dconf write /org/gnome/Ptyxis/default-profile-uuid "'${ptyxisProfile}'" ;;
