@@ -27,7 +27,12 @@ purge=(
 base='^Purg (ubuntu-desktop-minimal|ubuntu-standard|ubuntu-minimal) '
 
 # A disk the TPM unlocks needs snapd, which unlocks it, and the pc-kernel snap,
-# which is its kernel; there every snap stays.
+# which is its kernel; there every snap stays. A snapd that does not answer
+# cannot tell, so stop rather than guess.
+if command -v snap >/dev/null && ! snap list >/dev/null 2>&1; then
+  echo 'debloat.sh: snapd does not answer; wait a minute and run it again' >&2
+  exit 1
+fi
 if snap list pc-kernel >/dev/null 2>&1; then
   remove_snaps=false
 else
