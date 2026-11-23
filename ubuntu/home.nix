@@ -31,6 +31,11 @@ let
   # Ptyxis names its profiles with random IDs on first start, so this one has a
   # fixed ID that carries Noctalia's palette (noctaliaTemplates.ptyxis).
   ptyxisProfile = "4b6a268a8d504a9ebb29e6f66ce9780d";
+  # A mail link as a new mail in Outlook on the web, in its own Brave window as
+  # the Outlook entry opens; Outlook reads the whole mailto: link from mailtouri.
+  outlookMail = pkgs.writeShellScript "outlook-mail" ''
+    exec launch webapp "https://outlook.office.com/mail/deeplink/compose?mailtouri=$(${lib.getExe pkgs.jq} -rn --arg link "$1" '$link | @uri')"
+  '';
 in
 {
   imports = [
@@ -149,6 +154,14 @@ in
         name = "Outlook";
         exec = "launch focus-webapp https://outlook.office.com/mail/";
         icon = "ms-outlook";
+      };
+      # Mail links; configs/mimeapps.list names it after NixOS's Fastmail.
+      outlook-mail = {
+        name = "Outlook mail";
+        exec = "${outlookMail} %u";
+        icon = "ms-outlook";
+        noDisplay = true;
+        mimeType = [ "x-scheme-handler/mailto" ];
       };
     };
     dataFile =
