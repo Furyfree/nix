@@ -168,6 +168,17 @@ for group in windows-vm kvm; do
   fi
 done
 
+# Docker runs the Windows VM and answers `sudo docker`; nothing adds this
+# account to the docker group, which would be root without a password. Its
+# socket starts it when first reached, not at boot, as in Docker's own
+# post-install steps.
+for unit in docker.service containerd.service; do
+  if systemctl is-enabled -q "$unit"; then
+    log "$unit: started when needed, not at boot"
+    sudo systemctl disable "$unit"
+  fi
+done
+
 # --- Nice-to-haves ----------------------------------------------------------
 
 install_vscode() {
