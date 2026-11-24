@@ -95,6 +95,9 @@ in
         # Reuse the pinned renderer and reload hook, not the config-rewriting apply hook.
         "noctalia/templates/ghostty".source =
           "${config.programs.noctalia.package}/share/noctalia/assets/templates/ghostty";
+        # The course work, which only NixOS has, after linux.nix's bookmarks.
+        "gtk-3.0/bookmarks".text =
+          lib.mkAfter "file://${config.home.homeDirectory}/Projects/dtu-bachelor dtu-bachelor";
       };
   };
 

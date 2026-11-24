@@ -58,13 +58,13 @@ in
         "Code/User/keybindings.json".source = link "vscode/keybindings.json";
         # File manager sidebar; bookmarks need absolute paths.
         "gtk-3.0/bookmarks".text =
-          lib.concatMapStrings (path: "file://${config.home.homeDirectory}/${path} ${baseNameOf path}\n")
+          lib.concatMapStringsSep "\n"
+            (path: "file://${config.home.homeDirectory}/${path} ${baseNameOf path}")
             [
               "Documents"
               "Downloads"
               "Projects"
               "Pictures"
-              "Projects/dtu-bachelor"
               "Projects/nix"
             ];
       }
