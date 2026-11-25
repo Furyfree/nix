@@ -2,10 +2,11 @@
 // ~/.config/niri/host.kdl on the host named desktop.
 
 // The MSI MPG322UX OLED (32") is the main display; the BenQ XL2720Z (27") is
-// to its right. Matched by make, model and serial as niri msg outputs shows
-// them, so swapping cables keeps the layout. The firmware, Limine and the
-// unlock prompt use the RTX 3080's first DisplayPort. Without a refresh rate,
-// Niri picks the highest.
+// to its right, near its bottom, so the pointer crosses low on the edge too.
+// Matched by make, model and serial as niri msg outputs shows them, so
+// swapping cables keeps the layout. The firmware, Limine and the unlock prompt
+// use the RTX 3080's first DisplayPort. Without a refresh rate, Niri picks the
+// highest.
 output "Microstep MPG322UX OLED 0x01010101" {
     mode "3840x2160"
     scale 1.25
@@ -15,7 +16,7 @@ output "Microstep MPG322UX OLED 0x01010101" {
 output "PNP(BNQ) BenQ XL2720Z SCE00737SL0" {
     mode "1920x1080"
     scale 1
-    position x=3072 y=0
+    position x=3072 y=540
 }
 
 // Five workspaces on each monitor always exist; the bar labels them by their
@@ -46,4 +47,13 @@ input {
 binds {
     Mod+Equal hotkey-overlay-title="Widen window" { set-column-width "+50"; }
     Mod+Shift+Equal hotkey-overlay-title="Taller window" { set-window-height "+50"; }
+}
+
+// Trial against NVIDIA's flicker at 4K 240 Hz, where DisplayPort 1.4 needs
+// DSC: https://forums.developer.nvidia.com/t/displayport-dsc-4k-240hz-flickering-artifacts/294490
+// Niri composites every frame instead of handing windows straight to the screen.
+// If it still flickers, set the MSI's mode to "3840x2160@119.999": 4K at
+// 120 Hz needs no DSC. Flicker that stays at 120 Hz is not this bug.
+debug {
+    disable-direct-scanout
 }

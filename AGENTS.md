@@ -82,7 +82,11 @@ GitHub issues, and a workaround links its issue.
 - `configs/`: native app preferences, linked live from the checkout; keep the
   checkout at `~/Projects/nix`. SSH hosts stay in private 1Password documents,
   never here. `configs/hypr/hosts/<host>.lua` and `configs/niri/hosts/<host>.kdl`
-  hold each host's monitors, workspaces and keys.
+  hold each host's monitors, workspaces and keys; the lock screen's layout
+  per monitor is in `configs/noctalia/config.toml`, so a monitor change
+  updates all three. Noctalia saves GUI changes, and its own lock screen
+  layout, to `~/.local/state/noctalia/settings.toml`, which overrides the
+  repo: when a repo setting seems ignored, look there first.
 - `bin/`: our own scripts, linked into `~/.local/bin`: `nix-workstation` (the
   `n*` aliases), `pull-projects`, `launch`, `agent-brave`, `follow-mini-player`
   for Niri, and `windows-vm`, which `windows-vm.nix` builds for NixOS and Ubuntu.
