@@ -12,6 +12,12 @@ output "Microstep MPG322UX OLED 0x01010101" {
     scale 1.25
     position x=0 y=0
     focus-at-startup
+    // Three new windows fit side by side before the view scrolls.
+    layout {
+        default-column-width {
+            proportion 0.33333
+        }
+    }
 }
 output "PNP(BNQ) BenQ XL2720Z SCE00737SL0" {
     mode "1920x1080"

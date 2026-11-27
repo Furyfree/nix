@@ -63,6 +63,20 @@ in
             ]
             ++ config.workstation.noctaliaPluginsOff
           ) noctalia.plugins.enabled;
+          # Each workspace on the bar's monitor as a box of its windows' app
+          # icons, in place of the plain numbers; clicking an icon brings that
+          # window into view, even one scrolled off screen.
+          bar.default.start = [ "taskbar" ];
+          widget.taskbar = {
+            group_by_workspace = true;
+            # Number workspaces by their place on the monitor, 1 to 5 on each,
+            # as Hyprland's names do; the host files' workspace names are internal.
+            label_source = "id";
+            # The number's dot inside each pill, not on its edge; bold, as the
+            # small number is hard to read thin.
+            workspace_label_placement = "inside";
+            font_weight = 700;
+          };
           theme.templates = {
             builtin_ids = lib.remove "hyprland" noctalia.theme.templates.builtin_ids;
           }
@@ -71,9 +85,6 @@ in
           };
           # Off in config.toml for Hyprland's crash (#6), which Niri does not have.
           idle.behavior.screen-off.enabled = true;
-          # Number workspaces by their place on the monitor, 1 to 5 on each, as
-          # Hyprland's names do; the host files' workspace names are internal.
-          widget.workspaces.label_source = "id";
         };
       }
       // lib.optionalAttrs (builtins.pathExists ../configs/${host}) {

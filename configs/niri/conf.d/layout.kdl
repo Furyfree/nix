@@ -11,4 +11,9 @@ layout {
     }
     // A lone column sits in the middle instead of at the left edge.
     always-center-single-column
+    // Tabbed columns make room for their tab bar, which would otherwise
+    // cover the neighbouring window across the narrow gaps.
+    tab-indicator {
+        place-within-column
+    }
 }

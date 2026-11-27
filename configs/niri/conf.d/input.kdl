@@ -19,8 +19,10 @@ input {
         dwt
     }
 
-    // Focus follows the pointer, and the pointer follows keyboard focus.
-    focus-follows-mouse
+    // Focus follows the pointer, and the pointer follows keyboard focus. The
+    // pointer skips a window that would scroll the view more than a tenth of
+    // the screen, so windows you can see stay put; click to bring it in.
+    focus-follows-mouse max-scroll-amount="10%"
     warp-mouse-to-focus
 }
 

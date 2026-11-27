@@ -48,6 +48,9 @@ binds {
     Mod+R hotkey-overlay-title="Cycle column width" { switch-preset-column-width; }
     Mod+C hotkey-overlay-title="Center column" { center-column; }
     Mod+F hotkey-overlay-title="Half/full column width" { maximize-column; }
+    Mod+Ctrl+F hotkey-overlay-title="Widen column into free space" { expand-column-to-available-width; }
+    Mod+Alt+C hotkey-overlay-title="Center visible columns" { center-visible-columns; }
+    Mod+T hotkey-overlay-title="Toggle tabs in column" { toggle-column-tabbed-display; }
     Mod+Shift+Return hotkey-overlay-title="Toggle fullscreen" { fullscreen-window; }
     // Danish Minus/Plus keys; Shift adjusts height. Hold to repeat.
     Mod+Minus hotkey-overlay-title="Narrow window" { set-column-width "-50"; }
