@@ -260,11 +260,17 @@ install_daily_apps() {
     # An empty spotify.list stops the package from adding the same source.
     sudo touch /etc/apt/sources.list.d/spotify.list
   fi
+  # Signal publishes one suite, xenial, for every Ubuntu release.
+  if ! has_source updates.signal.org; then
+    key signal-desktop-keyring https://updates.signal.org/desktop/apt/keys.asc DBA36B5181D0C816F630E889D980A17457F6FB06
+    source_file signal-desktop 'Types: deb' 'URIs: https://updates.signal.org/desktop/apt' 'Suites: xenial' \
+      'Components: main' 'Architectures: amd64' 'Signed-By: /usr/share/keyrings/signal-desktop-keyring.gpg'
+  fi
   # LibreOffice and Celluloid from Ubuntu, so they take the GTK theme, which a
   # Flatpak cannot see; LibreOffice draws with GTK through its GTK plugin. Base
   # and Math stay out, as NixOS hides them.
-  apt_install claude-desktop spotify-client libreoffice-writer libreoffice-calc libreoffice-impress \
-    libreoffice-draw libreoffice-gtk3 celluloid
+  apt_install claude-desktop spotify-client signal-desktop libreoffice-writer libreoffice-calc \
+    libreoffice-impress libreoffice-draw libreoffice-gtk3 celluloid
 }
 
 install_obs() {
