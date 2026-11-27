@@ -57,21 +57,26 @@ in
         target = "icons/hicolor/512x512/apps/webapp-${name}.png";
         source = ../configs/icons/webapp-${name}.png;
       });
+    # Brave names a web app's window after its URL, and StartupWMClass gives the
+    # bar its icon.
     desktopEntries = {
       chatgpt = {
         name = "ChatGPT";
         exec = "launch focus-webapp https://chatgpt.com/";
         icon = "webapp-chatgpt";
+        settings.StartupWMClass = "brave-chatgpt.com__-Default";
       };
       fotmob = {
         name = "FotMob";
         exec = "launch focus-webapp https://www.fotmob.com/";
         icon = "webapp-fotmob";
+        settings.StartupWMClass = "brave-www.fotmob.com__-Default";
       };
       google-maps = {
         name = "Google Maps";
         exec = "launch focus-webapp https://www.google.com/maps";
         icon = "webapp-google-maps";
+        settings.StartupWMClass = "brave-www.google.com__maps-Default";
       };
       # Watch, pause or help an agent in its hidden desktop.
       agent-workspace = {

@@ -129,6 +129,8 @@ in
           genericName = "Local AI chat";
           exec = "launch focus-webapp ${url}/";
           icon = "webapp-llama-cpp";
+          # Brave leaves the port out of the window's name.
+          settings.StartupWMClass = "brave-${host}__-Default";
           # The launcher scores each word on its own.
           settings.Keywords = "AI;LLM;chat;WebUI;llama ui;llama cpp;local;models";
         };
