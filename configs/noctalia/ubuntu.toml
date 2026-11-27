@@ -9,3 +9,29 @@ action = "lock_and_suspend"
 # password.
 [lockscreen]
 fingerprint = true
+
+# The laptop panel is 1536x960 logical at scale 1.25, where config.toml's
+# eDP-1 layout is the NixOS laptop's 1920x1080; the same layout, centered.
+[lockscreen_widgets.widget."lockscreen-login-box@eDP-1"]
+cx = 768.0
+cy = 685.0
+placement_width = 1536.0
+placement_height = 960.0
+
+[lockscreen_widgets.widget."minimal-date@eDP-1"]
+cx = 768.0
+cy = 180.0
+placement_width = 1536.0
+placement_height = 960.0
+
+[lockscreen_widgets.widget."minimal-clock@eDP-1"]
+cx = 768.0
+cy = 270.0
+placement_width = 1536.0
+placement_height = 960.0
+
+[lockscreen_widgets.widget."minimal-avatar@eDP-1"]
+cx = 768.0
+cy = 552.0
+placement_width = 1536.0
+placement_height = 960.0
