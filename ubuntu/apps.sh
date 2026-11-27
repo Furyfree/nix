@@ -112,9 +112,16 @@ dux_pin=$(printf '%s\n' \
 if [[ $(cat /etc/apt/preferences.d/duxlabs-dux-repo 2>/dev/null) != "$dux_pin" ]]; then
   printf '%s\n' "$dux_pin" | sudo tee /etc/apt/preferences.d/duxlabs-dux-repo >/dev/null
 fi
-if ! has_source duxlabs/dux-repo; then
-  sudo add-apt-repository -y ppa:duxlabs/dux-repo >/dev/null
-  refreshed=false
+if ! has_source duxlabs-archive-keyring; then
+  key duxlabs-archive-keyring \
+    'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x6354D7C7146C2DD8F98892895ABFA2A5F21E824E' \
+    6354D7C7146C2DD8F98892895ABFA2A5F21E824E
+  # add-apt-repository's file, whose key went unchecked; apt refuses two keys
+  # for one source.
+  sudo rm -f /etc/apt/sources.list.d/duxlabs-ubuntu-dux-repo-*
+  source_file duxlabs 'Types: deb' 'URIs: https://ppa.launchpadcontent.net/duxlabs/dux-repo/ubuntu' \
+    'Suites: resolute' 'Components: main' 'Architectures: amd64' \
+    'Signed-By: /usr/share/keyrings/duxlabs-archive-keyring.gpg'
 fi
 
 apt_install zsh git git-lfs build-essential ghostty brave-origin 1password 1password-cli \
