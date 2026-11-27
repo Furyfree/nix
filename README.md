@@ -60,7 +60,9 @@ restores the system, not files in your home folder.
 Every machine. In 1Password, sign in, then in Settings → Developer turn on the
 SSH agent and the CLI integration. The keys stay in 1Password; these public
 halves only tell SSH which key a host gets, and the profile's private document
-lists its hosts.
+lists its hosts. With more than one account in 1Password, `op` searches only
+one: add `--account` with the account that holds the item (`op account list`),
+or it fails and leaves an empty file.
 
 Personal machines:
 
@@ -72,20 +74,31 @@ op item get 3psgdyql5u5zlpamsfc4xr7cbu --fields "label=public key" >~/.ssh/perso
 op document get 3223bqk2tzqdut7gdhiqjyqj34 --out-file ~/.ssh/local.conf
 ```
 
-Work machines, with the work commit email. The work key also signs in to
-GitHub and signs commits there, so add it to the GitHub account as an
-authentication and a signing key:
+Work machines. The GitHub key signs in to GitHub and signs commits, with the
+GitHub commit email as on every machine; the work key reaches every other host,
+and repos on the work Git host commit with the work email and work key:
 
 ```bash
-op item get cwlhpt5lcyn3dsuyx4wyms2ama --fields "label=public key" >~/.ssh/work.pub
-git config --file ~/.config/git/local user.signingkey ~/.ssh/work.pub
-op document get npl7xfsvir6kbq7jvptugkczhm --out-file ~/.ssh/local.conf
-git config --file ~/.config/git/local user.email <work email>
+op item get n6imsp5vfs5nmlt5rmxgs6zdci --account <personal account> --fields "label=public key" >~/.ssh/github.pub
+git config --file ~/.config/git/local user.signingkey ~/.ssh/github.pub
+op item get cwlhpt5lcyn3dsuyx4wyms2ama --account <work account> --fields "label=public key" >~/.ssh/work.pub
+op document get npl7xfsvir6kbq7jvptugkczhm --account <work account> --out-file ~/.ssh/local.conf
+git config --file ~/.config/git/local 'includeIf.hasconfig:remote.*.url:git@<work git host>:*/**.path' work
+git config --file ~/.config/git/local 'includeIf.hasconfig:remote.*.url:https://<work git host>/**.path' work
+git config --file ~/.config/git/work user.email <work email>
+git config --file ~/.config/git/work user.signingkey ~/.ssh/work.pub
 ```
 
-Then `gh auth login`, and switch this checkout to SSH, since it was cloned
-over HTTPS:
-`git -C ~/Projects/nix remote set-url origin git@github.com:Furyfree/nix.git`
+Add the work key to the work Git host as a signing key.
+
+Then switch this checkout to SSH, since it was cloned over HTTPS, and accept
+GitHub's host key on the first fetch:
+
+```bash
+git -C ~/Projects/nix remote set-url origin git@github.com:Furyfree/nix.git
+git -C ~/Projects/nix fetch
+gh auth login   # SSH, and skip uploading a key: it is on GitHub already
+```
 
 ## Develop
 
