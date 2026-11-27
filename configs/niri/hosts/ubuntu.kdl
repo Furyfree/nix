@@ -41,6 +41,7 @@ binds {
     Mod+Shift+O hotkey-overlay-title="Focus or open Obsidian" { spawn "launch" "focus" "md.obsidian.Obsidian" "flatpak" "run" "md.obsidian.Obsidian"; }
     Mod+Shift+Z hotkey-overlay-title="Open Zed" { spawn "zed"; }
     Mod+Shift+T hotkey-overlay-title="Focus or open T3 Code" { spawn "launch" "focus" "com.t3tools.T3Code" "t3code"; }
+    Mod+Shift+G hotkey-overlay-title="Focus or open Signal" { spawn "launch" "focus" "signal" "signal-desktop"; }
     // The web apps from ubuntu/home.nix, through their launcher entries; Outlook
     // takes Fastmail's key, which this laptop has no app for.
     Mod+Shift+E hotkey-overlay-title="Focus or open Outlook" { spawn-sh "gio launch $HOME/.nix-profile/share/applications/outlook.desktop"; }
