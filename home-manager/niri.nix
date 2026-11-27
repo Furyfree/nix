@@ -57,11 +57,7 @@ in
         # there reaches Niri at the next switch.
         "noctalia/niri.toml".source = (pkgs.formats.toml { }).generate "noctalia-niri.toml" {
           plugins.enabled = lib.subtractLists (
-            [
-              "furyfree/key-promoter"
-              "profidev/hypr-screen-mirror"
-            ]
-            ++ config.workstation.noctaliaPluginsOff
+            [ "profidev/hypr-screen-mirror" ] ++ config.workstation.noctaliaPluginsOff
           ) noctalia.plugins.enabled;
           # Each workspace on the bar's monitor as a box of its windows' app
           # icons, in place of the plain numbers; clicking an icon brings that

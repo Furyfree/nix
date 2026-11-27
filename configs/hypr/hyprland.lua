@@ -1,8 +1,6 @@
 -- Load the Hyprland configuration modules from conf.d.
 
 -- Login sets the session environment: nixos/desktop.nix and nixos/hyprland.nix.
--- Key Promoter wraps hl.bind and hl.gesture, so it loads before both.
-pcall(require, "./conf.d/key-promoter.lua")
 require("./conf.d/window-actions.lua")
 require("./conf.d/input.lua")
 require("./conf.d/monitors.lua")

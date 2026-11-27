@@ -45,9 +45,6 @@ let
             source = link name;
           })
         // {
-          # Key Promoter snippet, as a live checkout link; hyprland.lua loads it first.
-          "hypr/conf.d/key-promoter.lua".source =
-            config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/noctalia-key-promoter/key-promoter/hypr/key-promoter.lua";
           # Noctalia reads this after config.toml. Its list replaces the earlier
           # one, so it is config.toml's without Niri's colour template; a change
           # there reaches Hyprland at the next rebuild.
