@@ -12,6 +12,8 @@ command mkdir -p -m 700 -- "${HISTFILE:h}" &&
 # SHARE_HISTORY writes commands as they are entered and imports other sessions.
 unsetopt INC_APPEND_HISTORY INC_APPEND_HISTORY_TIME
 setopt SHARE_HISTORY
+# Lock the shared file with the system's own file locking.
+setopt HIST_FCNTL_LOCK
 
 setopt HIST_IGNORE_ALL_DUPS
 setopt HIST_SAVE_NO_DUPS

@@ -4,5 +4,7 @@ if command -v starship >/dev/null 2>&1; then
     starship_source="$(command starship init zsh)" || return
     export STARSHIP_CONFIG="$XDG_CONFIG_HOME/starship.toml"
     eval "$starship_source"
+    # starship.toml has no right prompt; skip Starship's second run per prompt.
+    unset RPROMPT
   }
 fi

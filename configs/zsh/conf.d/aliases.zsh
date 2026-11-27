@@ -1,13 +1,3 @@
-if command -v eza >/dev/null 2>&1; then
-  alias ls='eza --icons=auto --grid --group-directories-first'
-  alias ll='eza -la --header --icons=auto --group-directories-first'
-  alias la='eza -a --icons=auto --grid --group-directories-first'
-  alias lt='eza --tree --icons=auto --group-directories-first'
-else
-  alias ll='ls -lah'
-  alias la='ls -a'
-fi
-
 if command -v nvim >/dev/null 2>&1; then
   alias n='nvim'
 fi
@@ -62,6 +52,7 @@ if command -v nix-workstation >/dev/null 2>&1; then
   alias ndesktop='nix-workstation desktop'
   alias mup='nix-workstation mise'
   alias vup='nix-workstation nvim'
+  alias zup='nix-workstation zsh'
   alias fup='nix-workstation firmware'
 fi
 

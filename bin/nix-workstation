@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Rebuild, update and maintain this workstation: NixOS on Linux, nix-darwin on
 # macOS, and Home Manager on its own on Linux without NixOS (Ubuntu). aliases.zsh adds nswitch, nupdate, npin, ninfo, nrollback, nclean,
-# nsearch, ndesktop, mup, vup and fup.
+# nsearch, ndesktop, mup, vup, zup and fup.
 set -euo pipefail
 
 # path: includes the ignored machine data in each system's local/.
@@ -134,6 +134,13 @@ parsers, and write configs/nvim/nvim-pack-lock.json; commit it. Neovim
 installs missing plugins at the lock file's versions when it starts.
 EOF
       ;;
+    zsh)
+      cat <<'EOF'
+usage: nix-workstation zsh   (alias: zup)
+
+Update zsh's plugins to their newest versions (sheldon lock --update).
+EOF
+      ;;
     firmware)
       cat <<'EOF'
 usage: nix-workstation firmware   (alias: fup)
@@ -158,6 +165,7 @@ Commands (alias):
   desktop (ndesktop) [NAME]    show or pick the compositor for the next boot
   mise (mup)                   upgrade Mise tools
   nvim (vup)                   update Neovim's plugins
+  zsh (zup)                    update zsh's plugins
   firmware (fup)               install firmware updates
 
 Run nix-workstation COMMAND --help for details.
@@ -471,6 +479,7 @@ case $command in
     (($# == 0)) || usage nvim
     nvim --headless "+lua vim.pack.update(nil, { force = true })" +qa
     ;;
+  zsh) (($# == 0)) || usage zsh; sheldon lock --update ;;
   *)
     if $darwin; then
       case $command in

@@ -11,6 +11,9 @@ github = "Aloxaf/fzf-tab"
 hooks.pre = '''
 if command -v fzf >/dev/null 2>&1; then
   zstyle ':completion:*' menu no
+  # Show a folder's contents while completing cd; < and > switch groups.
+  zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons=always -- $realpath'
+  zstyle ':fzf-tab:*' switch-group '<' '>'
 '''
 hooks.post = 'fi'
 
@@ -19,6 +22,14 @@ inline = 'source "$ZDOTDIR/conf.d/zoxide.zsh"'
 
 [plugins.zsh-autosuggestions]
 github = "zsh-users/zsh-autosuggestions"
+hooks.pre = '''
+# Wrap the line editor's widgets once, at the first prompt, instead of before
+# every prompt; nothing defines widgets after the plugins load.
+ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+# Suggest from history, else from completion. Set after atuin.zsh, whose init
+# would start one atuin search per suggestion instead.
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+'''
 
 [plugins.zsh-you-should-use]
 github = "MichaelAquilina/zsh-you-should-use"

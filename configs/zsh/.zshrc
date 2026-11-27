@@ -9,8 +9,10 @@ source "$ZDOTDIR/conf.d/history.zsh"
 source "$ZDOTDIR/conf.d/keybindings.zsh"
 source "$ZDOTDIR/conf.d/functions.zsh"
 source "$ZDOTDIR/conf.d/fzf.zsh"
+source "$ZDOTDIR/conf.d/atuin.zsh"
 source "$ZDOTDIR/conf.d/prompt.zsh"
 source "$ZDOTDIR/conf.d/plugins.zsh"
+source "$ZDOTDIR/conf.d/ls.zsh"
 source "$ZDOTDIR/conf.d/aliases.zsh"
 
 if [[ -r "$ZDOTDIR/conf.d/noctalia.zsh" ]]; then

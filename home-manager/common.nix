@@ -45,12 +45,14 @@ in
             "zsh/.zshenv"
             "zsh/.zshrc"
             "zsh/conf.d/aliases.zsh"
+            "zsh/conf.d/atuin.zsh"
             "zsh/conf.d/completion.zsh"
             "zsh/conf.d/env.zsh"
             "zsh/conf.d/functions.zsh"
             "zsh/conf.d/fzf.zsh"
             "zsh/conf.d/history.zsh"
             "zsh/conf.d/keybindings.zsh"
+            "zsh/conf.d/ls.zsh"
             "zsh/conf.d/mise.zsh"
             "zsh/conf.d/options.zsh"
             "zsh/conf.d/plugins.zsh"
@@ -84,6 +86,8 @@ in
 
     home.file = {
       ".zshenv".source = link "zsh/.zshenv";
+      # Atuin keeps its config next to its database in ~/.atuin.
+      ".atuin/config.toml".source = link "atuin/config.toml";
     }
     // lib.genAttrs [ "pull-projects" "nix-workstation" ] (name: {
       target = ".local/bin/${name}";

@@ -1,0 +1,8 @@
+# History stays on each machine: nothing syncs without `atuin login`.
+
+# Nix and Homebrew update Atuin; it need not ask its server for new versions.
+update_check = false
+
+# Atuin's online AI would otherwise take "?" typed on an empty line.
+[ai]
+enabled = false

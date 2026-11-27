@@ -25,6 +25,7 @@ with pkgs;
   starship
   fzf
   zoxide
+  atuin
   gh
   wl-clipboard
   sheldon

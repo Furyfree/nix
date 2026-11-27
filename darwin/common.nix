@@ -48,6 +48,7 @@ _:
       "sheldon"
       "fzf"
       "zoxide"
+      "atuin"
       "bat"
       "eza"
       "git-lfs"
