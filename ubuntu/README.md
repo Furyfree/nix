@@ -24,8 +24,9 @@ agents; nothing here touches them.
    wget -qO- https://raw.githubusercontent.com/Furyfree/nix/BRANCH/ubuntu/bootstrap.sh | bash -s -- BRANCH
    ```
 2. Reboot, for the debloat, zsh and the `windows-vm` and `kvm` groups. Then
-   `mise install`, and 1Password, the work machine's SSH keys, the switch to
-   SSH and `gh` as in [SSH keys](../README.md#ssh-keys).
+   `passwd`, so the installer's password meets the strength rules `apps.sh`
+   sets; `mise install`; and 1Password, the work machine's SSH keys, the
+   switch to SSH and `gh` as in [SSH keys](../README.md#ssh-keys).
 
 After that, `git pull`, then `nswitch`: Home Manager first, then `apps.sh`
 installs what is missing. NixOS updates `flake.lock`, `flatpak update` the

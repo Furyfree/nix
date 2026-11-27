@@ -125,7 +125,17 @@ if ! has_source duxlabs-archive-keyring; then
 fi
 
 apt_install zsh git git-lfs build-essential ghostty brave-origin 1password 1password-cli \
-  docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin wireguard-tools
+  docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin wireguard-tools \
+  libpam-pwquality
+
+# Password strength: at least 8 characters with a digit, a lower- and an
+# uppercase letter and a symbol. Ubuntu's pwquality PAM profile reads this file;
+# a password is checked only when it is set, so run passwd after a change.
+pwquality=$(printf '%s\n' 'minlen = 8' 'dcredit = -1' 'lcredit = -1' 'ucredit = -1' 'ocredit = -1')
+if [[ $(cat /etc/security/pwquality.conf.d/workstation.conf 2>/dev/null) != "$pwquality" ]]; then
+  sudo mkdir -p /etc/security/pwquality.conf.d
+  printf '%s\n' "$pwquality" | sudo tee /etc/security/pwquality.conf.d/workstation.conf >/dev/null
+fi
 
 if [[ ! -x $HOME/.local/bin/zed ]]; then
   log "Zed: its own install script (~/.local/zed.app, updates itself)"
