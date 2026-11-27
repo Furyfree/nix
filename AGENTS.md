@@ -88,8 +88,9 @@ GitHub issues, and a workaround links its issue.
   layout, to `~/.local/state/noctalia/settings.toml`, which overrides the
   repo: when a repo setting seems ignored, look there first.
 - `bin/`: our own scripts, linked into `~/.local/bin`: `nix-workstation` (the
-  `n*` aliases), `pull-projects`, `launch`, `agent-brave`, `follow-mini-player`
-  for Niri, and `windows-vm`, which `windows-vm.nix` builds for NixOS and Ubuntu.
+  `n*` aliases), `pull-projects`, `launch`, `fingerprint`, `agent-brave`,
+  `follow-mini-player` for Niri, `big-screen-first` for Niri on Ubuntu, and
+  `windows-vm`, which `windows-vm.nix` builds for NixOS and Ubuntu.
 - `justfile`: the local gates; its longer recipes run scripts in `scripts/`.
 
 ## Ways to hurt yourself

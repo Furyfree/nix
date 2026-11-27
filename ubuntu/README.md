@@ -39,3 +39,6 @@ Flatpaks and apt the rest.
   `configs/niri/hosts/ubuntu.kdl`.
 - VS Code's extensions and Noctalia's colors, and LibreOffice's application
   theming, as in NixOS' [Everyday apps](../nixos/README.md#everyday-apps).
+- Fingerprint: `fingerprint setup` enrolls and checks a finger, then asks
+  before letting sudo, polkit and logins take it; `fingerprint status` shows
+  where it is used.

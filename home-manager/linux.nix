@@ -110,6 +110,7 @@ in
   home = {
     file = {
       ".local/bin/launch".source = script "launch";
+      ".local/bin/fingerprint".source = script "fingerprint";
       # What xdg-open opens gets a scope of its own, as from Niri's launcher:
       # Ghostty runs as a service, and stopping it took a browser it had
       # started along.

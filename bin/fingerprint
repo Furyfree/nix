@@ -1,0 +1,182 @@
+#!/usr/bin/env bash
+# Enroll, show or remove this account's fingerprint, after Omarchy's
+# omarchy-setup-security-fingerprint. fprintd comes from apt on Ubuntu and from
+# services.fprintd on NixOS, which also adds it to PAM there. On Ubuntu, setup
+# turns on Ubuntu's own fprintd PAM profile, for sudo, polkit and logins, only
+# once a finger verifies, so a reader that cannot enroll never holds up a
+# login. Noctalia's lock screen asks fprintd itself; configs/noctalia/ubuntu.toml
+# turns that on.
+set -euo pipefail
+
+fprint=net.reactivated.Fprint
+
+usage() {
+  echo "usage: fingerprint setup [-f FINGER] | status | remove"
+  echo "FINGER is fprintd's name, such as right-index-finger (the default)."
+  exit 2
+}
+say() { echo -e "\e[32m$*\e[0m"; }
+die() {
+  echo -e "\e[31m$*\e[0m" >&2
+  exit 1
+}
+
+# fprintd's default reader as its D-Bus path; empty when it has none.
+reader() {
+  local out
+  out=$(busctl --system call "$fprint" /net/reactivated/Fprint/Manager "$fprint.Manager" GetDefaultDevice 2>/dev/null) || return 0
+  out=${out#o \"}
+  echo "${out%\"}"
+}
+
+reader_property() {
+  busctl --system get-property "$fprint" "$1" "$fprint.Device" "$2" 2>/dev/null | sed -n 's/^s "\(.*\)"$/\1/p'
+}
+
+# This account's enrolled fingers, one per line. An empty name means the
+# caller. fprintd 1.94.5 says "Failed to discover prints" when there are none.
+fingers() {
+  local out
+  if out=$(busctl --system --json=short call "$fprint" "$1" "$fprint.Device" ListEnrolledFingers s "" 2>&1); then
+    jq -r '.data[0][]' <<<"$out"
+  elif [[ $out != *"Failed to discover prints"* && $out != *"No fingerprints enrolled"* ]]; then
+    die "fprintd could not list the fingers: $out"
+  fi
+}
+
+# Ubuntu manages PAM with pam-auth-update; NixOS writes it from services.fprintd.
+ubuntu() { command -v pam-auth-update >/dev/null; }
+pam_uses_fingerprint() { grep -qs pam_fprintd.so /etc/pam.d/common-auth /etc/pam.d/sudo; }
+
+# fprintd's own lines that tell nothing; anything else, such as why a claim
+# failed, is shown.
+chatter() {
+  [[ $1 == "Using device "* || $1 == "Enrolling "* || $1 == "Listing enrolled fingers:" ||
+    $1 == " - #"* || $1 == "Verify started!" || $1 == "Verifying: "* ]]
+}
+
+# fprintd-enroll's and fprintd-verify's results as instructions.
+progress() {
+  local again=$1 line result
+  while IFS= read -r line; do
+    case $line in
+      "Enroll result: "*) result=${line#Enroll result: } ;;
+      "Verify result: "*) result=${line#Verify result: } ;;
+      *)
+        chatter "$line" || echo "  $line"
+        continue
+        ;;
+    esac
+    case ${result% (*} in
+      enroll-stage-passed) echo "  ✓ Step done. $again" ;;
+      enroll-completed) echo "  ✓ Enrolled." ;;
+      verify-match) echo "  ✓ Matched." ;;
+      verify-no-match) echo "  ✗ No match." ;;
+      *-swipe-too-short | *-too-fast) echo "  Too quick. $again" ;;
+      *-finger-not-centered) echo "  Not centered: use the middle of the sensor. $again" ;;
+      *-remove-and-retry) echo "  Lift your finger off the sensor, then try again." ;;
+      *-retry-scan) echo "  That one didn't read. $again" ;;
+      enroll-duplicate) echo "  ✗ That finger is already enrolled." ;;
+      enroll-data-full) echo "  ✗ The reader has no room for another fingerprint." ;;
+      *-disconnected) echo "  ✗ The reader was disconnected." ;;
+      *) echo "  ✗ Stopped (${result% (*})." ;;
+    esac
+  done
+}
+
+setup() {
+  local finger=right-index-finger device again start answer
+  while getopts f: option; do
+    case $option in
+      f) finger=$OPTARG ;;
+      *) usage ;;
+    esac
+  done
+
+  device=$(reader)
+  [[ -n $device ]] || die "fprintd finds no fingerprint reader."
+  case $(reader_property "$device" scan-type) in
+    swipe) start="Swipe your finger across the sensor." again="Swipe it again." ;;
+    *) start="Touch the sensor." again="Lift your finger and touch the sensor again." ;;
+  esac
+
+  if [[ $'\n'$(fingers "$device")$'\n' == *$'\n'"$finger"$'\n'* ]]; then
+    say "$finger is already enrolled."
+  else
+    # fprintd asks for the account's password before enrolling; sudo asks it
+    # here, before the first touch.
+    echo "Setting up $finger on the $(reader_property "$device" name)."
+    sudo -v || die "Enrolling needs your password."
+    echo -e "$start Keep going until it says Enrolled; a step can take a few touches.\n"
+    sudo fprintd-enroll -f "$finger" "$USER" | progress "$again" ||
+      die "\nEnrollment failed; run fingerprint setup again."
+  fi
+
+  echo -e "\nNow check it. $start"
+  fprintd-verify | progress "$again" ||
+    die "\nThe check failed; run fingerprint setup again, or remove and enroll anew."
+
+  if ! ubuntu; then
+    say "\nDone. NixOS's services.fprintd adds the fingerprint to sudo, polkit and logins."
+  elif pam_uses_fingerprint; then
+    say "\nDone. sudo, polkit and logins already take the fingerprint."
+  else
+    echo -e "\nUbuntu's fprintd profile lets sudo, polkit and logins take the fingerprint,"
+    echo "with the password as the fallback. It changes /etc/pam.d/common-auth, beside IT's profiles."
+    read -rp "Turn it on? [y/N] " answer
+    if [[ $answer == [yY]* ]]; then
+      sudo pam-auth-update --enable fprintd
+      say "Done. sudo, polkit and logins take the fingerprint."
+    else
+      say "Done. Only the lock screen and the login screen take the fingerprint."
+    fi
+  fi
+}
+
+status() {
+  local device fingers_list
+  device=$(reader)
+  if [[ -z $device ]]; then
+    echo "Reader:      none found by fprintd"
+    return
+  fi
+  fingers_list=$(fingers "$device" | paste -sd ' ')
+  echo "Reader:      $(reader_property "$device" name)"
+  echo "Enrolled:    ${fingers_list:-none}"
+  if pam_uses_fingerprint; then
+    echo "sudo/logins: fingerprint, then password"
+  else
+    echo "sudo/logins: password only"
+  fi
+  # Noctalia's only fingerprint key is its lock screen's.
+  if grep -qsE '^\s*fingerprint\s*=\s*true' ~/.config/noctalia/*.toml ~/.local/state/noctalia/settings.toml; then
+    echo "Lock screen: fingerprint or password"
+  else
+    echo "Lock screen: password only"
+  fi
+}
+
+remove() {
+  local device
+  device=$(reader)
+  sudo -v || die "Removing needs your password."
+  if ubuntu && pam_uses_fingerprint; then
+    sudo pam-auth-update --disable fprintd
+    say "sudo, polkit and logins take the password only."
+  fi
+  # Match-on-chip readers, such as this Goodix, keep the prints on the reader
+  # too; fprintd deletes them there while it can reach it.
+  if [[ -n $device ]]; then
+    sudo fprintd-delete "$USER" >/dev/null
+  else
+    echo "fprintd finds no reader, so prints stored on the reader itself stay there."
+  fi
+  say "Removed $USER's fingerprints."
+}
+
+case ${1-} in
+  setup) shift && setup "$@" ;;
+  status) status ;;
+  remove) remove ;;
+  *) usage ;;
+esac

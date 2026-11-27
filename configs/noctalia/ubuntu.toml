@@ -4,3 +4,8 @@
 # step locks and suspends instead.
 [idle.behavior.hibernate]
 action = "lock_and_suspend"
+
+# The lock screen takes a finger enrolled with bin/fingerprint beside the
+# password.
+[lockscreen]
+fingerprint = true

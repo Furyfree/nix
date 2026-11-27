@@ -70,7 +70,7 @@ on its own disk and joins the boot menu at the first `nswitch`.
    `~/Pictures/Wallpapers`; `nswitch` skips that when nothing else changed.
 7. `git clone git@github.com:Furyfree/ai-workflow.git ~/Projects/ai-workflow`,
    then install its agent rules and skills as its README says.
-8. `dtu-eduroam <1Password item>` for DTU Wi-Fi; laptop: `fprintd-enroll`.
+8. `dtu-eduroam <1Password item>` for DTU Wi-Fi; laptop: `fingerprint setup`.
 
 ## Accounts and apps
 

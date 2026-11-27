@@ -16,7 +16,7 @@
 
   networking.hostName = "laptop";
 
-  # Enroll with fprintd-enroll; password login stays available.
+  # Enroll with fingerprint setup; password login stays available.
   services.fprintd.enable = true;
 
   # A closed lid suspends, then hibernates after two hours, so a laptop in a
