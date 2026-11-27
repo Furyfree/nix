@@ -146,17 +146,20 @@ in
   };
 
   xdg = {
-    # Web apps in their own Brave window; Papirus has their icons.
+    # Web apps in their own Brave window; Papirus has their icons. Brave names
+    # a web app's window after its URL, and StartupWMClass gives the bar its icon.
     desktopEntries = {
       teams = {
         name = "Teams";
         exec = "launch focus-webapp https://teams.microsoft.com/";
         icon = "teams";
+        settings.StartupWMClass = "brave-teams.microsoft.com__-Default";
       };
       outlook = {
         name = "Outlook";
         exec = "launch focus-webapp https://outlook.office.com/mail/";
         icon = "ms-outlook";
+        settings.StartupWMClass = "brave-outlook.office.com__mail_-Default";
       };
       # Mail links; configs/mimeapps.list names it after NixOS's Fastmail.
       outlook-mail = {
