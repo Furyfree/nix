@@ -66,6 +66,9 @@ in
       ])
       ++ [ windows-vm ];
     stateVersion = "26.11";
+    # Keeps the big screen's workspaces first; configs/niri/hosts/ubuntu.kdl
+    # starts it.
+    file.".local/bin/big-screen-first".source = config.lib.workstation.script "big-screen-first";
     # Ptyxis uses only profiles in its list, which also holds those made in its
     # own settings: add ours beside them and make it the default when it goes
     # in. Ptyxis has made a default of its own by then, since bootstrap.sh runs

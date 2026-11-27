@@ -3,14 +3,36 @@
 // Its apps' keys are here, as NixOS's are in conf.d/nixos.kdl, since apt's
 // apps have their own command names.
 spawn-at-startup "noctalia"
+// Puts big-1 to big-5 first on the laptop panel when the Dell is unplugged.
+spawn-at-startup "big-screen-first"
 
-// Five workspaces always exist, on the first screen; see desktop.kdl for the
-// names.
-workspace "main-1"
-workspace "main-2"
-workspace "main-3"
-workspace "main-4"
-workspace "main-5"
+// The laptop panel sits left of the Dell P3222QE, bottom edges lined up: at
+// scale 1.25 the Dell is 3072x1728 logical and the panel 1536x960, so the
+// panel starts 1728 - 960 = 768 down. The Dell is matched by make, model and
+// serial as niri msg outputs shows them, so another port or dock keeps it.
+output "eDP-1" {
+    mode "1920x1200"
+    scale 1.25
+    position x=0 y=768
+}
+output "Dell Inc. DELL P3222QE 5007DH3" {
+    mode "3840x2160"
+    scale 1.25
+    position x=1536 y=0
+}
+
+// Five workspaces always exist on each screen; see desktop.kdl for the names.
+// Without the Dell, Niri puts its five on the laptop panel.
+workspace "main-1" { open-on-output "eDP-1"; }
+workspace "main-2" { open-on-output "eDP-1"; }
+workspace "main-3" { open-on-output "eDP-1"; }
+workspace "main-4" { open-on-output "eDP-1"; }
+workspace "main-5" { open-on-output "eDP-1"; }
+workspace "big-1" { open-on-output "Dell Inc. DELL P3222QE 5007DH3"; }
+workspace "big-2" { open-on-output "Dell Inc. DELL P3222QE 5007DH3"; }
+workspace "big-3" { open-on-output "Dell Inc. DELL P3222QE 5007DH3"; }
+workspace "big-4" { open-on-output "Dell Inc. DELL P3222QE 5007DH3"; }
+workspace "big-5" { open-on-output "Dell Inc. DELL P3222QE 5007DH3"; }
 
 binds {
     // A new window each time, as Strata opens on NixOS; Nautilus alone would

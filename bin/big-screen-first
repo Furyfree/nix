@@ -1,0 +1,51 @@
+#!/bin/sh
+# Niri puts a disconnected monitor's workspaces after those of the monitor that
+# takes them, and focuses that monitor's own. Keep the big screen's workspaces,
+# big-1 to big-5 in configs/niri/hosts/ubuntu.kdl, first and in order on
+# whichever monitor holds them, so the laptop's own follow them when the big
+# screen is unplugged. When they change monitor, focus goes back to the window,
+# or else the named workspace, that had it before.
+niri msg -j event-stream |
+  jq -n --unbuffered -r '
+    def big: .output != null and (.name // "" | test("^big-[0-9]+$"));
+    def home: first(.[] | select(.name == "big-1") | .output) // null;
+    foreach inputs as $event ({workspaces: [], window: null, focus: null};
+      .lines = []
+      | if $event.WindowsChanged then
+          .window = (first($event.WindowsChanged.windows[] | select(.is_focused) | .id) // null)
+        elif $event.WindowFocusChanged then
+          .window = $event.WindowFocusChanged.id
+        elif $event.WorkspaceActivated.focused then
+          $event.WorkspaceActivated.id as $id
+          | .focus = (first(.workspaces[] | select(.id == $id) | .name) // null)
+        elif $event.WorkspacesChanged then
+          $event.WorkspacesChanged.workspaces as $new
+          | (.workspaces | home) as $was
+          | ($new | home) as $now
+          | .lines = [
+              $new
+              | map(select(big))
+              | group_by(.output)[]
+              | sort_by(.name | ltrimstr("big-") | tonumber)
+              | select(any(to_entries[]; .value.idx != .key + 1))
+              | to_entries[]
+              | "move \(.value.name) \(.key + 1)"
+            ]
+          | if $was != null and $now != null and $was != $now then
+              .lines += [
+                if .window != null then "window \(.window)"
+                elif .focus != null then "workspace \(.focus)"
+                else empty end
+              ]
+            else . end
+          | .workspaces = $new
+          | .focus = (first($new[] | select(.is_focused) | .name) // null)
+        else . end;
+      .lines[])' |
+  while read -r what target index; do
+    case $what in
+      move) niri msg action move-workspace-to-index --reference "$target" "$index" ;;
+      window) niri msg action focus-window --id "$target" ;;
+      workspace) niri msg action focus-workspace "$target" ;;
+    esac
+  done
