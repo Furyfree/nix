@@ -306,6 +306,17 @@ install_flatpaks() {
 }
 
 install_desktop() {
+  # Noctalia's source also serves Umbriel, wlroots and wayland-protocols, which
+  # would replace Ubuntu's; only Noctalia comes from it. The pin goes in first,
+  # and again whenever it changes.
+  local pin
+  pin=$(printf '%s\n' \
+    '# Take only Noctalia, its data and its font from its own source.' \
+    'Package: noctalia noctalia-data fonts-noctalia-tabler' 'Pin: release o=Noctalia' 'Pin-Priority: 500' '' \
+    'Package: *' 'Pin: release o=Noctalia' 'Pin-Priority: -1')
+  if [[ $(cat /etc/apt/preferences.d/noctalia 2>/dev/null) != "$pin" ]]; then
+    printf '%s\n' "$pin" | sudo tee /etc/apt/preferences.d/noctalia >/dev/null
+  fi
   # Noctalia ships its key only in a keyring package; take the key alone, so
   # nothing else in the package runs as root.
   if ! has_source pkg.noctalia.dev; then
